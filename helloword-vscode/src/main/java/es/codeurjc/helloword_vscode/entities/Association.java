@@ -67,19 +67,19 @@ public class Association {
     }
 
     // Méthode pour obtenir les membres
-    public List<User> getMembers() {
+    public List<UtilisateurEntity> getMembers() {
         return roles.stream()
-                     .map(Role::getUser)
+                     .map(Role::getUtilisateurEntity)
                      .collect(Collectors.toList());
     }
 
     // Méthode pour définir les membres
-    public void setMembers(List<User> members) {
+    public void setMembers(List<UtilisateurEntity> members) {
         // Assurez-vous que chaque utilisateur a un rôle associé à cette association
         this.roles = members.stream()
-                            .map(user -> {
+                            .map(Utilisateurentity -> {
                                 Role role = new Role();
-                                role.setUser(user);
+                                role.setUtilisateurEntity(Utilisateurentity);
                                 role.setAssociation(this);
                                 return role;
                             })

@@ -18,8 +18,8 @@ public class Role {
     private String name;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idUser")
-    private User user;
+    @JoinColumn(name = "idUtilisateur")
+    private UtilisateurEntity Utilisateurentity;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "idAssociation")
@@ -29,9 +29,9 @@ public class Role {
     public Role() {}
 
     // Constructeur avec paramètres
-    public Role(String name, User user, Association association) {
+    public Role(String name, UtilisateurEntity Utilisateurentity, Association association) {
         this.name = name;
-        this.user = user;
+        this.Utilisateurentity = Utilisateurentity;
         this.association = association;
     }
 
@@ -52,12 +52,12 @@ public class Role {
         this.name = name;
     }
 
-    public User getUser() {
-        return user;
+    public UtilisateurEntity getUtilisateurEntity() {
+        return Utilisateurentity;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUtilisateurEntity(UtilisateurEntity Utilisateurentity) {
+        this.Utilisateurentity = Utilisateurentity;
     }
 
     public Association getAssociation() {

@@ -8,7 +8,7 @@ import jakarta.persistence.OneToMany;
 import java.util.List;
 
 @Entity
-public class User {
+public class UtilisateurEntity {
     @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	long id;
@@ -18,11 +18,13 @@ public class User {
     private boolean connected;
     private boolean admin;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "Utilisateurentity")
     private List<Role> roles;
 
     // Constructor
-    public User(String name, String surname, String pwd, boolean connected, boolean admin) {
+    public UtilisateurEntity() {}
+
+    public UtilisateurEntity(String name, String surname, String pwd, boolean connected, boolean admin) {
         this.name = name;
         this.surname = surname;
         this.pwd = pwd;

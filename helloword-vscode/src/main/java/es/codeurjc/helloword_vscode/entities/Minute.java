@@ -24,9 +24,9 @@ public class Minute {
     @JoinTable(
         name = "minute_participants",
         joinColumns = @JoinColumn(name = "minute_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        inverseJoinColumns = @JoinColumn(name = "Utilisateur_id")
     )
-    private List<User> participants;
+    private List<UtilisateurEntity> participants;
 
     private String content;
     private double duration;
@@ -36,7 +36,7 @@ public class Minute {
     private Association association;
 
     // Constructeur
-    public Minute(String date, List<User> participants, String content, double duration, Association association) {
+    public Minute(String date, List<UtilisateurEntity> participants, String content, double duration, Association association) {
         this.date = date;
         this.participants = participants;
         this.content = content;
@@ -64,11 +64,11 @@ public class Minute {
         this.date = date;
     }
 
-    public List<User> getParticipants() {
+    public List<UtilisateurEntity> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(List<UtilisateurEntity> participants) {
         this.participants = participants;
     }
 

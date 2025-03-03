@@ -5,6 +5,34 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <body>
-	<h1>Welcome page</h1>
+    <h1>Welcome page</h1>
+
+    <h2>Utilisateurs</h2>
+    <ul>
+        {{#Utilisateursentity}}
+        <li>{{name}} {{surname}}</li>   
+        {{/Utilisateursentity}}
+    </ul>
+
+    <h2>Minutes</h2>
+    <ul>
+        {{#minutes}}
+        <li>{{content}} ({{date}})</li>
+        {{/minutes}}
+    </ul>
+
+    <h2>Roles</h2>
+    <ul>
+        {{#roles}}
+        <li>{{name}}</li>
+        {{/roles}}
+    </ul>
+
+    <h2>Associations</h2>
+    <ul>
+        {{#associations}}
+        <li>{{name}}</li>
+        {{/associations}}
+    </ul>
 </body>
 </html>
