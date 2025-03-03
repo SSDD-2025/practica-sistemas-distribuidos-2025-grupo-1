@@ -1,17 +1,28 @@
-package es.codeurjc.helloword_vscode.entities.user;
+package es.codeurjc.helloword_vscode.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 
+@Entity
 public class User {
-    private int id;
+    @Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	long id;
     private String name;
     private String surname;
     private String pwd;
     private boolean connected;
     private boolean admin;
 
+    @OneToMany(mappedBy = "user")
+    private List<Role> roles;
+
     // Constructor
-    public User(int id, String name, String surname, String pwd, boolean connected, boolean admin) {
-        this.id = id;
+    public User(String name, String surname, String pwd, boolean connected, boolean admin) {
         this.name = name;
         this.surname = surname;
         this.pwd = pwd;
@@ -20,11 +31,11 @@ public class User {
     }
 
     // Getters and Setters
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

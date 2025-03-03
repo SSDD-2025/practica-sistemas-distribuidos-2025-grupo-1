@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-HellowordVscodeApplication<helloword-vscode>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "es.codeurjc.helloword_vscode.HellowordVscodeApplication",
+            "projectName": "helloword-vscode",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
