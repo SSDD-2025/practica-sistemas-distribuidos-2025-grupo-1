@@ -32,21 +32,21 @@ public class DataInitializer {
 
     @PostConstruct
     public void init() {
-        // Ajoutez des utilisateurs
-        UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("UtilisateurEntity 1", "Juan", "mdp", false, false);
-        UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("UtilisateurEntity 2", "Pedro", "pwd", false, false);
+        // Add users
+        UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Juan", "mdp", false, false);
+        UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pedro", "pwd", false, false);
         UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
 
-        // Ajoutez des associations
-        Association association = new Association("Association 1");
+        // Add associations
+        Association association = new Association("GreenPeace");
         associationRepository.save(association);
 
-        // Ajoutez des rôles
-        Role role = new Role("Role 1", Utilisateurentity1, association);
+        // Add roles
+        Role role = new Role("secretary", Utilisateurentity1, association);
         roleRepository.save(role);
 
-        // Ajoutez des minutes
-        Minute minute = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "Content", 60.0, association);
+        // Add minutes
+        Minute minute = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "New actions about climat", 60.0, association);
         minuteRepository.save(minute);
     }
 }

@@ -1,0 +1,15 @@
+<div class="navbar">
+    <a href="/logout"><button>Logout</button></a>
+    <a href="/profile"><button>Profile</button></a>
+    <a href="/users"><button>Users</button></a>
+    <a href="/associations"><button>Associations</button></a>
+    
+    <form action="/search" method="get">
+        <input type="text" name="searchId" placeholder="Enter ID" />
+        <select name="searchType">
+            <option value="user">User</option>
+            <option value="association">Association</option>
+        </select>
+        <button type="submit" class="search-button">Search</button>
+    </form>
+</div>

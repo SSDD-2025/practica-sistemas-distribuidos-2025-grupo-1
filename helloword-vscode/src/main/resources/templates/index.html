@@ -5,9 +5,11 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <body>
+    {{> header}}
+
     <h1>Welcome page</h1>
 
-    <h2>Utilisateurs</h2>
+    <h2>Members</h2>
     <ul>
         {{#Utilisateursentity}}
         <li>{{name}} {{surname}}</li>   

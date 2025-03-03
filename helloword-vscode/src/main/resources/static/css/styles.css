@@ -1,6 +1,49 @@
-body {
+/* body {
     background: green;
     color: white;
     padding: 1em;
     text-align: center;
+} */
+
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.navbar a button {
+    background-color: #f8f9fa;
+    border: none;
+    color: black;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.navbar a button:hover {
+    background-color: #ddd;
+}
+
+.navbar form {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.navbar input,
+.navbar select {
+    padding: 8px;
+    margin-right: 5px;
+}
+
+.search-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #218838;
 }
