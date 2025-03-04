@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    {{> header}}
+    <h2>Members</h2>
+    <ul>
+        {{#Utilisateursentity}}
+        <li>{{name}} {{surname}} {{id}}</li>   
+        {{/Utilisateursentity}}
+        {{#userfind}}
+            <li>{{name}} {{surname}} {{id}}</li>   
+        {{/userfind}}
+    </ul>
+</body>
+</html>
