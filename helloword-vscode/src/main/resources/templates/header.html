@@ -1,9 +1,17 @@
 <div class="navbar">
-    <a href="/logout"><button>Logout</button></a>
+    {{#isAuthenticated}}
+        <form action="/logout" method="post">
+            <input type="submit" value="Sign Out"/>
+        </form>
+    {{/isAuthenticated}}
+    {{^isAuthenticated}}
+        <a href="/login"><button>Login</button></a>
+    {{/isAuthenticated}}
+
     <a href="/profile"><button>Profile</button></a>
     <a href="/members"><button>Members</button></a>
     <a href="/"><button>Associations</button></a>
-    
+
     <form action="/search" method="get">
         <input type="text" name="searchId" placeholder="Enter ID" />
         <select name="searchType">

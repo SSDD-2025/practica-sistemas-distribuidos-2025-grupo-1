@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    {{> header}}
+    <div>
+        <form action="/login" method="post">
+            <label for="username">Username</label>
+            <input type="text" name="username" placeholder="username" />
+            <label for="password">Password</label>
+            <input type="password" name="password" placeholder="password" />
+            <button type="submit" class="connect">Sign In</button> 
+        </form>
+    </div>
+</body>
+</html>
