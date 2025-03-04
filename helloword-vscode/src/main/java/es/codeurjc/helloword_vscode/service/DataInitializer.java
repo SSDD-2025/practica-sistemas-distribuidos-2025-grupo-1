@@ -38,15 +38,23 @@ public class DataInitializer {
         UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
 
         // Add associations
-        Association association = new Association("GreenPeace");
-        associationRepository.save(association);
+        Association association1 = new Association("GreenPeace");
+        associationRepository.save(association1);
+        Association association2 = new Association("GreatSchool");
+        associationRepository.save(association2);
+        Association association3 = new Association("Help");
+        associationRepository.save(association3);
 
         // Add roles
-        Role role = new Role("secretary", Utilisateurentity1, association);
-        roleRepository.save(role);
+        Role role1 = new Role("secretary", Utilisateurentity1, association1);
+        roleRepository.save(role1);
+        Role role2 = new Role("president", Utilisateurentity2, association1);
+        roleRepository.save(role2);
 
         // Add minutes
-        Minute minute = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "New actions about climat", 60.0, association);
-        minuteRepository.save(minute);
+        Minute minute1 = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "New actions about climat", 60.0, association1);
+        minuteRepository.save(minute1);
+        Minute minute2 = new Minute("2024-11-03", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "Discussion on government measures", 30.0, association1);
+        minuteRepository.save(minute2);
     }
 }

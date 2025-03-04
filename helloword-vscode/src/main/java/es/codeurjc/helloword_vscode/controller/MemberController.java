@@ -23,15 +23,13 @@ public class MemberController {
     @Autowired
     private UtilisateurEntityRepository utilisateurEntityRepository;
 
+    @Autowired
+    private AssociationRepository associationRepository;
+
     @GetMapping("/members")
     public String showMembers(Model model) {
         model.addAttribute("Utilisateursentity", utilisateurEntityRepository.findAll());
         return "members";
-    }
-
-    @GetMapping("/add-user")
-    public String addUserForm() {
-        return "add-user";
     }
 
     @GetMapping("/search")
@@ -40,8 +38,13 @@ public class MemberController {
                            Model model) {
         if (id != null && "user".equals(searchType)) {
             utilisateurEntityRepository.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
+            return "members";
         }
-        return "members";
+        if (id != null && "association".equals(searchType)) {
+            associationRepository.findById(id).ifPresent(association -> model.addAttribute("assofind", association));
+            return "index";
+        }
+        return "index";
     } 
 }
 

@@ -35,16 +35,6 @@ public class AssoController {
         return "index";
     }
 
-    @GetMapping("/search/")
-    public String search(@RequestParam String searchId, @RequestParam String searchType, Model model) {
-        if ("user".equals(searchType)) {
-            return "redirect:/users/" + searchId;
-        } else if ("association".equals(searchType)) {
-            return "redirect:/associations/" + searchId;
-        }
-        return "redirect:/";
-    }
-
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
@@ -56,15 +46,6 @@ public class AssoController {
         return "profile";
     }
 
-    // @GetMapping("/members")
-    // public String users(Model model) {
-    //     model.addAttribute("Utilisateursentity", UtilisateurEntityRepository.findAll());
-    //     return "members";
-    // }
 
-    @GetMapping("/associations")
-    public String associations() {
-        return "index";
-    }
 }
 

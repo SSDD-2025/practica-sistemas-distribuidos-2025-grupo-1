@@ -33,8 +33,11 @@
     <h2>Associations</h2>
     <ul>
         {{#associations}}
-        <li>{{name}}</li>
+            <li>{{name}} {{id}}</li>
         {{/associations}}
+        {{#assofind}}
+            <li>{{name}}{{id}}</li>
+        {{/assofind}}
     </ul>
 </body>
 </html>
