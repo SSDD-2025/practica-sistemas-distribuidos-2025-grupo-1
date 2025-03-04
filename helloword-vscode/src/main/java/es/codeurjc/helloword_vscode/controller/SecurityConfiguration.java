@@ -1,5 +1,6 @@
 package es.codeurjc.helloword_vscode.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -15,6 +16,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+    // @Value("${security.user}")
+	// private String username;
+
+	// @Value("${security.encodedPassword}")
+	// private String encodedPassword;
+
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -32,12 +39,23 @@ public class SecurityConfiguration {
 
 	@Bean
 	public InMemoryUserDetailsManager userDetailsService() {
-		UserDetails user = User.builder()
-				.username("user")
-				.password(passwordEncoder().encode("pass"))
-				.roles("USER")
-				.build();
-		return new InMemoryUserDetailsManager(user);
+		// UserDetails user = User.builder()
+		// 		.username(username)
+		// 		.password(encodedPassword)
+		// 		.roles("USER")
+		// 		.build();
+		// return new InMemoryUserDetailsManager(user);
+        UserDetails user = User.builder()
+        .username("user")
+        .password(passwordEncoder().encode("pass"))
+        .roles("USER")
+        .build();
+        UserDetails admin = User.builder()
+                .username("admin")
+                .password(passwordEncoder().encode("adminpass"))
+                .roles("USER","ADMIN")
+                .build();
+        return new InMemoryUserDetailsManager(user, admin);
 	}
 
 	@Bean
@@ -46,9 +64,13 @@ public class SecurityConfiguration {
     
         http
             .authorizeHttpRequests(authorize -> authorize
+                // public page
                 .requestMatchers("/", "/css/**", "/members","/search/**").permitAll()
-                .requestMatchers("/profile").authenticated()
-                .anyRequest().authenticated()
+                // private page
+                // .requestMatchers("/profile").authenticated()
+                // .anyRequest().authenticated()
+                .requestMatchers("/profile").hasAnyRole("USER")
+				.requestMatchers("/admin").hasAnyRole("ADMIN")
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")

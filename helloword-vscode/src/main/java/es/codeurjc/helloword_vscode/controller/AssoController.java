@@ -13,6 +13,7 @@ import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 import es.codeurjc.helloword_vscode.repository.RoleRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.security.core.Authentication;
@@ -74,8 +75,15 @@ public class AssoController {
     }
 
     @GetMapping("/profile")
-    public String profile() {
+    public String profile(Model model, HttpServletRequest request) {
+        model.addAttribute("username", request.getUserPrincipal().getName());
+        model.addAttribute("admin", request.isUserInRole("ADMIN"));
         return "profile";
+    }
+
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin";
     }
 }
 

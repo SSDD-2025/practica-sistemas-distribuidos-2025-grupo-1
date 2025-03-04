@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile Page</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    {{> header}}
+    <h2>Info User</h2>
+    <p>Hello {{username}}.</p>
+    {{#admin}}
+	    <p>You're admin</p>
+	{{/admin}}
+</body>
+</html>
