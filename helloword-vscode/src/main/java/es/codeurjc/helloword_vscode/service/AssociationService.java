@@ -7,7 +7,6 @@ import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 
 @Service
 public class AssociationService {
-
     @Autowired
 	private AssociationRepository associationsRepository;
 }

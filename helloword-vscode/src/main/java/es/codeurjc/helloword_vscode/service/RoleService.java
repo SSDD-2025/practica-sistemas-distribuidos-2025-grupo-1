@@ -7,7 +7,6 @@ import es.codeurjc.helloword_vscode.repository.RoleRepository;
 
 @Service
 public class RoleService {
-
     @Autowired
 	private RoleRepository RolesRepository;
 }

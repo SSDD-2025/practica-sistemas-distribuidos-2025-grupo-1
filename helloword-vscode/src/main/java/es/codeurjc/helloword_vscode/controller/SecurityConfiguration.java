@@ -19,11 +19,6 @@ import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-    // @Value("${security.user}")
-	// private String username;
-
-	// @Value("${security.encodedPassword}")
-	// private String encodedPassword;
 
     @Autowired
     public UtilisateurEntityService userDetailService;
@@ -42,27 +37,6 @@ public class SecurityConfiguration {
 
 		return authProvider;
 	}
-
-	// @Bean
-	// public InMemoryUserDetailsManager userDetailsService() {
-	// 	// UserDetails user = User.builder()
-	// 	// 		.username(username)
-	// 	// 		.password(encodedPassword)
-	// 	// 		.roles("USER")
-	// 	// 		.build();
-	// 	// return new InMemoryUserDetailsManager(user);
-    //     UserDetails user = User.builder()
-    //     .username("user")
-    //     .password(passwordEncoder().encode("pass"))
-    //     .roles("USER")
-    //     .build();
-    //     UserDetails admin = User.builder()
-    //             .username("admin")
-    //             .password(passwordEncoder().encode("adminpass"))
-    //             .roles("USER","ADMIN")
-    //             .build();
-    //     return new InMemoryUserDetailsManager(user, admin);
-	// }
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
