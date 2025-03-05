@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.entities.Association;
 import es.codeurjc.helloword_vscode.entities.MemberType;
@@ -30,6 +31,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 
 import java.util.List;
+import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Controller
@@ -144,10 +147,37 @@ public class AssoController {
 
     @PostMapping("/association/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
-    public String deleteAssociation(@PathVariable Long id) {
-        associationRepository.deleteById(id);
+    @Transactional
+    public String deleteAssociation(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Optional<Association> optionalAssociation = associationRepository.findById(id);
+    
+        if (optionalAssociation.isPresent()) {
+            Association association = optionalAssociation.get();
+    
+            // Étape 1 : Supprimer les minutes associées à l'association
+            for (Minute minute : association.getMinutes()) {
+                minute.getParticipants().clear(); // Supprime les références des participants
+                minuteRepository.delete(minute); // Supprime la minute
+            }
+    
+            // Étape 2 : Supprimer les rôles associés à l'association
+            for (MemberType memberType : association.getMemberTypes()) {
+                memberType.setUtilisateurEntity(null); // Supprime la relation avec l'utilisateur
+                memberTypeRepository.delete(memberType);
+            }
+    
+            // Étape 3 : Supprimer l'association
+            associationRepository.delete(association);
+    
+            redirectAttributes.addFlashAttribute("success", "Association supprimée avec succès !");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Association non trouvée !");
+        }
+    
         return "redirect:/";
     }
+    
+
 
     @PostMapping("/association/create")
     @PreAuthorize("hasRole('ADMIN')")

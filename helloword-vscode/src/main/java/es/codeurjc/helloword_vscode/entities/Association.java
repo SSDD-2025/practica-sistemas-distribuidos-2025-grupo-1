@@ -12,6 +12,8 @@ import jakarta.persistence.OneToMany;
 
 import jakarta.persistence.FetchType;
 
+import jakarta.persistence.CascadeType;
+
 @Entity
 public class Association {
 
@@ -21,11 +23,11 @@ public class Association {
 
     private String name;
 
-    @OneToMany(mappedBy = "association")
+    @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberType> memberTypes;
-
-    @OneToMany(mappedBy = "association", fetch = FetchType.LAZY)
-    private List<Minute> minutes;
+    
+    @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Minute> minutes;    
 
     public Association() {}
 
