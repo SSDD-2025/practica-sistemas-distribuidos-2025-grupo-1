@@ -46,6 +46,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 // public page
                 .requestMatchers("/", "/css/**", "/members","/search/**").permitAll()
+                .requestMatchers("/association/**").permitAll()
                 // private page
                 // .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()

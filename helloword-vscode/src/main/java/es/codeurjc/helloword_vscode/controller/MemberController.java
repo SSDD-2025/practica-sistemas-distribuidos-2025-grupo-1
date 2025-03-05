@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
-import es.codeurjc.helloword_vscode.repository.RoleRepository;
+import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 import jakarta.servlet.http.HttpSession;
 

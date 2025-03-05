@@ -9,7 +9,7 @@ import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
-import es.codeurjc.helloword_vscode.repository.RoleRepository;
+import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -28,7 +28,7 @@ public class DataInitializer {
     private MinuteRepository minuteRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
+    private MemberTypeRepository roleRepository;
 
     @Autowired
     private AssociationRepository associationRepository;
@@ -56,6 +56,8 @@ public class DataInitializer {
         roleRepository.save(role1);
         MemberType role2 = new MemberType("president", Utilisateurentity2, association1);
         roleRepository.save(role2);
+        MemberType role3 = new MemberType("president", Utilisateurentity2, association2);
+        roleRepository.save(role3);
 
         // Add minutes
         Minute minute1 = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "New actions about climat", 60.0, association1);

@@ -1,5 +1,7 @@
 package es.codeurjc.helloword_vscode.controller;
 
+import java.security.Principal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,12 +9,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.codeurjc.helloword_vscode.entities.Association;
+import es.codeurjc.helloword_vscode.entities.Minute;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
-import es.codeurjc.helloword_vscode.repository.RoleRepository;
+import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -20,6 +25,8 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
+
+import java.util.List;
 
 
 @Controller
@@ -32,7 +39,7 @@ public class AssoController {
     private MinuteRepository minuteRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
+    private MemberTypeRepository memberTypeRepository;
 
     @Autowired
     private AssociationRepository associationRepository;
@@ -56,7 +63,7 @@ public class AssoController {
     @GetMapping("/")
     public String getPosts(Model model) {
         model.addAttribute("minutes", minuteRepository.findAll());
-        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("roles", memberTypeRepository.findAll());
         model.addAttribute("associations", associationRepository.findAll());
         return "index";
     }
@@ -91,6 +98,28 @@ public class AssoController {
     @GetMapping("/admin")
     public String admin() {
         return "admin";
+    }
+
+    @GetMapping("/association/{id}")
+    public String associationId(@PathVariable long id, Model model, Principal principal){
+        Association association = associationRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
+    
+        List<Minute> minutes = association.getMinutes();
+        minutes.size();
+
+        model.addAttribute("association", association);
+        model.addAttribute("members", association.getMembers());
+        model.addAttribute("minutes", association.getMinutes());
+        
+        if (principal != null) {
+            String username = principal.getName();
+            UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElse(null);
+            boolean isMember = association.getMembers().contains(user);
+            model.addAttribute("isMember", isMember);
+        }
+        
+        return "association_detail";
     }
 }
 

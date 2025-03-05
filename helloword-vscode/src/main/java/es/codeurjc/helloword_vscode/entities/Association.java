@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
+import jakarta.persistence.FetchType;
+
 @Entity
 public class Association {
 
@@ -22,7 +24,7 @@ public class Association {
     @OneToMany(mappedBy = "association")
     private List<MemberType> memberTypes;
 
-    @OneToMany(mappedBy = "association")
+    @OneToMany(mappedBy = "association", fetch = FetchType.LAZY)
     private List<Minute> minutes;
 
     public Association() {}

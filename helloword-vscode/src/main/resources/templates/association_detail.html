@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Association Details</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    {{> header}}
+    <h2>{{association.name}}</h2>
+    
+    <h3>Membres :</h3>
+    <ul>
+        {{#members}}
+            <li>{{name}}</li>
+        {{/members}}
+    </ul>
+
+    <h3>Comptes-rendus de réunion :</h3>
+    <ul>
+        {{#minutes}}
+            <li>{{date}} - {{content}} (Durée : {{duration}} min)</li>
+        {{/minutes}}
+    </ul>
+
+    {{^isMember}}
+    <form action="/associations/{{association.id}}/join" method="post">
+        <button type="submit">Rejoindre</button>
+    </form>
+    {{/isMember}}
+
+    {{#isAdmin}}
+    <form action="/associations/{{association.id}}/delete" method="post">
+        <button type="submit">Supprimer</button>
+    </form>
+    {{/isAdmin}} 
+    <!-- <h2>Vous êtes sur la page détaillée de l'association</h2>
+    <h2>Association Details</h2>
+    <p>Nom: {{association.name}}</p>
+    <p>ID: {{association.id}}</p> -->
+</body>
+</html>
