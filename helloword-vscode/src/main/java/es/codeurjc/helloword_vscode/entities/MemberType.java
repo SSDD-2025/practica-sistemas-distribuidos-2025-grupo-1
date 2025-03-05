@@ -8,34 +8,39 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.CascadeType;
 
-@Entity
+@Entity // Marks the class as a JPA entity, to be mapped to a table in the database
 public class MemberType {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id // Specifies the primary key field
+    @GeneratedValue(strategy = GenerationType.AUTO) // Auto-generates the id value
     private long id;
 
+    // The name of the member type (e.g., "President", "Secretary")
     private String name;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idUtilisateur")
-    private UtilisateurEntity Utilisateurentity;
+    // Many-to-one relationship with UtilisateurEntity (user entity)
+    // This means a member type is associated with one user, but multiple member types can exist for different users
+    @ManyToOne(cascade = CascadeType.REMOVE) // Cascade remove action ensures that when a member type is removed, the associated user is also deleted if no longer in use
+    @JoinColumn(name = "idUtilisateur") // Foreign key linking to the 'UtilisateurEntity' table
+    private UtilisateurEntity utilisateurEntity;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "idAssociation")
+    // Many-to-one relationship with Association entity
+    // This means a member type is linked to one association, but an association can have many member types
+    @ManyToOne(cascade = CascadeType.REMOVE) // Cascade remove action ensures that when a member type is removed, the association's relation is also updated
+    @JoinColumn(name = "idAssociation") // Foreign key linking to the 'Association' table
     private Association association;
 
-    // Constructeur par défaut
+    // Default constructor required by JPA for entity initialization
     public MemberType() {}
 
-    // Constructeur avec paramètres
-    public MemberType(String name, UtilisateurEntity Utilisateurentity, Association association) {
+    // Constructor to initialize a member type with its name, associated user, and association
+    public MemberType(String name, UtilisateurEntity utilisateurEntity, Association association) {
         this.name = name;
-        this.Utilisateurentity = Utilisateurentity;
+        this.utilisateurEntity = utilisateurEntity;
         this.association = association;
     }
 
-    // Getters et Setters
+    // Getters and Setters
     public long getId() {
         return id;
     }
@@ -52,14 +57,16 @@ public class MemberType {
         this.name = name;
     }
 
+    // Getter and Setter for the associated user
     public UtilisateurEntity getUtilisateurEntity() {
-        return Utilisateurentity;
+        return utilisateurEntity;
     }
 
-    public void setUtilisateurEntity(UtilisateurEntity Utilisateurentity) {
-        this.Utilisateurentity = Utilisateurentity;
+    public void setUtilisateurEntity(UtilisateurEntity utilisateurEntity) {
+        this.utilisateurEntity = utilisateurEntity;
     }
 
+    // Getter and Setter for the associated association
     public Association getAssociation() {
         return association;
     }
