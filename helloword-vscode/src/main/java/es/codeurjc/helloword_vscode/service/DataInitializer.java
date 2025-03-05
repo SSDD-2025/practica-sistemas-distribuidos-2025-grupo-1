@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.entities.Association;
 import es.codeurjc.helloword_vscode.entities.Minute;
-import es.codeurjc.helloword_vscode.entities.Role;
+import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
@@ -14,6 +14,9 @@ import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 @Service
 public class DataInitializer {
@@ -30,11 +33,14 @@ public class DataInitializer {
     @Autowired
     private AssociationRepository associationRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostConstruct
     public void init() {
         // Add users
-        UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Juan", "mdp", false, false);
-        UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pedro", "pwd", false, false);
+        UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
+        UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
         UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
 
         // Add associations
@@ -46,9 +52,9 @@ public class DataInitializer {
         associationRepository.save(association3);
 
         // Add roles
-        Role role1 = new Role("secretary", Utilisateurentity1, association1);
+        MemberType role1 = new MemberType("secretary", Utilisateurentity1, association1);
         roleRepository.save(role1);
-        Role role2 = new Role("president", Utilisateurentity2, association1);
+        MemberType role2 = new MemberType("president", Utilisateurentity2, association1);
         roleRepository.save(role2);
 
         // Add minutes

@@ -1,5 +1,6 @@
 package es.codeurjc.helloword_vscode.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -21,6 +24,9 @@ public class SecurityConfiguration {
 
 	// @Value("${security.encodedPassword}")
 	// private String encodedPassword;
+
+    @Autowired
+    public UtilisateurEntityService userDetailService;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -31,32 +37,32 @@ public class SecurityConfiguration {
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
 
-		authProvider.setUserDetailsService(userDetailsService());
+		authProvider.setUserDetailsService(userDetailService);
 		authProvider.setPasswordEncoder(passwordEncoder());
 
 		return authProvider;
 	}
 
-	@Bean
-	public InMemoryUserDetailsManager userDetailsService() {
-		// UserDetails user = User.builder()
-		// 		.username(username)
-		// 		.password(encodedPassword)
-		// 		.roles("USER")
-		// 		.build();
-		// return new InMemoryUserDetailsManager(user);
-        UserDetails user = User.builder()
-        .username("user")
-        .password(passwordEncoder().encode("pass"))
-        .roles("USER")
-        .build();
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("adminpass"))
-                .roles("USER","ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user, admin);
-	}
+	// @Bean
+	// public InMemoryUserDetailsManager userDetailsService() {
+	// 	// UserDetails user = User.builder()
+	// 	// 		.username(username)
+	// 	// 		.password(encodedPassword)
+	// 	// 		.roles("USER")
+	// 	// 		.build();
+	// 	// return new InMemoryUserDetailsManager(user);
+    //     UserDetails user = User.builder()
+    //     .username("user")
+    //     .password(passwordEncoder().encode("pass"))
+    //     .roles("USER")
+    //     .build();
+    //     UserDetails admin = User.builder()
+    //             .username("admin")
+    //             .password(passwordEncoder().encode("adminpass"))
+    //             .roles("USER","ADMIN")
+    //             .build();
+    //     return new InMemoryUserDetailsManager(user, admin);
+	// }
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -91,7 +97,7 @@ public class SecurityConfiguration {
                 .expiredUrl("/login?expired")  // Redirige vers /login si la session expire
             );
     
-        // Désactivation temporaire de CSRF (peut être activé si nécessaire)
+        // Disable CSRF at the moment
         http.csrf(csrf -> csrf.disable());
     
         return http.build();

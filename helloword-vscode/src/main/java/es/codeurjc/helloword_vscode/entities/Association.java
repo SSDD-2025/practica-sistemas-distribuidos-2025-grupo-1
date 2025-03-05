@@ -20,7 +20,7 @@ public class Association {
     private String name;
 
     @OneToMany(mappedBy = "association")
-    private List<Role> roles;
+    private List<MemberType> memberTypes;
 
     @OneToMany(mappedBy = "association")
     private List<Minute> minutes;
@@ -30,7 +30,7 @@ public class Association {
     // Constructor
     public Association(String name) {
         this.name = name;
-        this.roles = new ArrayList<>();
+        this.memberTypes = new ArrayList<>();
     }
 
     // Getters and Setters
@@ -50,12 +50,12 @@ public class Association {
         this.name = name;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public List<MemberType> getMemberTypes() {
+        return memberTypes;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setMemberTypes(List<MemberType> memberTypes) {
+        this.memberTypes = memberTypes;
     }
 
     public List<Minute> getMinutes() {
@@ -68,20 +68,20 @@ public class Association {
 
     // Méthode pour obtenir les membres
     public List<UtilisateurEntity> getMembers() {
-        return roles.stream()
-                     .map(Role::getUtilisateurEntity)
+        return memberTypes.stream()
+                     .map(MemberType::getUtilisateurEntity)
                      .collect(Collectors.toList());
     }
 
     // Méthode pour définir les membres
     public void setMembers(List<UtilisateurEntity> members) {
         // Assurez-vous que chaque utilisateur a un rôle associé à cette association
-        this.roles = members.stream()
+        this.memberTypes = members.stream()
                             .map(Utilisateurentity -> {
-                                Role role = new Role();
-                                role.setUtilisateurEntity(Utilisateurentity);
-                                role.setAssociation(this);
-                                return role;
+                                MemberType memberType = new MemberType();
+                                memberType.setUtilisateurEntity(Utilisateurentity);
+                                memberType.setAssociation(this);
+                                return memberType;
                             })
                             .collect(Collectors.toList());
     }

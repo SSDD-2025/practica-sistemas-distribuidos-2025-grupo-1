@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.CascadeType;
 
 @Entity
-public class Role {
+public class MemberType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,10 +26,10 @@ public class Role {
     private Association association;
 
     // Constructeur par défaut
-    public Role() {}
+    public MemberType() {}
 
     // Constructeur avec paramètres
-    public Role(String name, UtilisateurEntity Utilisateurentity, Association association) {
+    public MemberType(String name, UtilisateurEntity Utilisateurentity, Association association) {
         this.name = name;
         this.Utilisateurentity = Utilisateurentity;
         this.association = association;

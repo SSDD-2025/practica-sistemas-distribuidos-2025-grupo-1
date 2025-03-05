@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 import es.codeurjc.helloword_vscode.repository.RoleRepository;
@@ -19,6 +20,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
+
 
 @Controller
 public class AssoController {
@@ -34,6 +36,9 @@ public class AssoController {
 
     @Autowired
     private AssociationRepository associationRepository;
+
+    @Autowired
+    private UtilisateurEntityRepository utilisateurEntityRepository;
 
     @ModelAttribute
     public void addAttributes(Model model) {
@@ -76,7 +81,9 @@ public class AssoController {
 
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
-        model.addAttribute("username", request.getUserPrincipal().getName());
+        String name = request.getUserPrincipal().getName();
+		UtilisateurEntity utilisateurEntity = utilisateurEntityRepository.findByName(name).orElseThrow();
+        model.addAttribute("username", utilisateurEntity.getName());
         model.addAttribute("admin", request.isUserInRole("ADMIN"));
         return "profile";
     }

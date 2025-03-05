@@ -1,11 +1,17 @@
 package es.codeurjc.helloword_vscode.entities;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
 
 @Entity
 public class UtilisateurEntity {
@@ -15,21 +21,21 @@ public class UtilisateurEntity {
     private String name;
     private String surname;
     private String pwd;
-    private boolean connected;
-    private boolean admin;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+	private List<String> roles;
 
     @OneToMany(mappedBy = "Utilisateurentity")
-    private List<Role> roles;
+    private List<MemberType> memberTypes;
 
     // Constructor
     public UtilisateurEntity() {}
 
-    public UtilisateurEntity(String name, String surname, String pwd, boolean connected, boolean admin) {
+    public UtilisateurEntity(String name, String surname, String pwd, String... roles) {
         this.name = name;
         this.surname = surname;
         this.pwd = pwd;
-        this.connected = connected;
-        this.admin = admin;
+        this.roles = List.of(roles);
     }
 
     // Getters and Setters
@@ -65,19 +71,11 @@ public class UtilisateurEntity {
         this.pwd = pwd;
     }
 
-    public boolean isConnected() {
-        return connected;
-    }
+	public List<String> getRoles() {
+		return roles;
+	}
 
-    public void setConnected(boolean connected) {
-        this.connected = connected;
-    }
-
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
-    }
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
+	}
 }
