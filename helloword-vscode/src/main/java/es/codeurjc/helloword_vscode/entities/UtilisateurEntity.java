@@ -8,29 +8,37 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 
-@Entity
+@Entity // Marks the class as a JPA entity, to be mapped to a table in the database
 public class UtilisateurEntity {
-    @Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	long id;
+
+    @Id // Specifies the primary key field for the UtilisateurEntity
+    @GeneratedValue(strategy = GenerationType.AUTO) // Automatically generates the value for the id field
+    long id;
+
+    // Name and surname of the user
     private String name;
     private String surname;
+    
+    // User's password (it might be hashed for security purposes)
     private String pwd;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-	private List<String> roles;
+    // List of roles assigned to the user, using an element collection (e.g., "Admin", "Member", etc.)
+    @ElementCollection(fetch = FetchType.EAGER) // Elements are eagerly fetched when the entity is loaded
+    private List<String> roles;
 
-    @OneToMany(mappedBy = "Utilisateurentity")
+    // One-to-many relationship with the MemberType entity
+    // This indicates that a user can have multiple member types (roles) in different associations
+    @OneToMany(mappedBy = "Utilisateurentity") 
     private List<MemberType> memberTypes;
 
-    // Constructor
+    // Default constructor required by JPA for entity initialization
     public UtilisateurEntity() {}
 
+    // Constructor to initialize a user entity with specific values for name, surname, password, and roles
     public UtilisateurEntity(String name, String surname, String pwd, String... roles) {
         this.name = name;
         this.surname = surname;
@@ -38,7 +46,7 @@ public class UtilisateurEntity {
         this.roles = List.of(roles);
     }
 
-    // Getters and Setters
+    // Getters and Setters for all attributes
     public long getId() {
         return id;
     }
@@ -71,11 +79,12 @@ public class UtilisateurEntity {
         this.pwd = pwd;
     }
 
-	public List<String> getRoles() {
-		return roles;
-	}
+    // Getter and Setter for the roles assigned to the user
+    public List<String> getRoles() {
+        return roles;
+    }
 
-	public void setRoles(List<String> roles) {
-		this.roles = roles;
-	}
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
 }
