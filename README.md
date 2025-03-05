@@ -4,8 +4,8 @@
 
 | Name | Email | GitHub |
 |------|-------|--------|
-| [Elisa Donet] | [e.donet.2024@alumnos.urjc.es] | [dntelisa] |
-| [Matheo Renault] | [m.renault.2024@alumnos.urjc.es] | [Rath0me] |
+| Elisa Donet | e.donet.2024@alumnos.urjc.es | dntelisa |
+| Matheo Renault | m.renault.2024@alumnos.urjc.es | Rath0me |
 
 
 ## Project Coordination
