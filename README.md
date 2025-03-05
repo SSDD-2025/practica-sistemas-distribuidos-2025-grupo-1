@@ -43,7 +43,7 @@ Relationships:
 - 
 
 #### [Mathéo RENAULT]
--
+- 
 - 
 - 
 
@@ -104,7 +104,7 @@ Relationships:
 //Img UML 
 
 ### Class Diagram
-//Img 
+![class_diagram](image.png)
 
 ---
 
