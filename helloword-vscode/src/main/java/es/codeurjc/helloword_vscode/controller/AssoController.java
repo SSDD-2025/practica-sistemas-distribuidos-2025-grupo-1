@@ -1,45 +1,30 @@
 package es.codeurjc.helloword_vscode.controller;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import es.codeurjc.helloword_vscode.entities.Association;
-import es.codeurjc.helloword_vscode.entities.MemberType;
-import es.codeurjc.helloword_vscode.entities.Minute;
-import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
-import es.codeurjc.helloword_vscode.repository.AssociationRepository;
-import es.codeurjc.helloword_vscode.repository.MinuteRepository;
-import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+import es.codeurjc.helloword_vscode.entities.*;
+import es.codeurjc.helloword_vscode.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.ui.Model;
-
-import java.util.List;
-import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @Controller
 public class AssoController {
 
+    // Repositories for database interaction
     @Autowired
-    private UtilisateurEntityRepository UtilisateurEntityRepository;
+    private UtilisateurEntityRepository utilisateurEntityRepository;
 
     @Autowired
     private MinuteRepository minuteRepository;
@@ -50,9 +35,7 @@ public class AssoController {
     @Autowired
     private AssociationRepository associationRepository;
 
-    @Autowired
-    private UtilisateurEntityRepository utilisateurEntityRepository;
-
+    // Adds authentication attributes to all templates
     @ModelAttribute
     public void addAttributes(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -66,6 +49,7 @@ public class AssoController {
         }
     }
 
+    // Home page: Displays associations, roles, and minutes
     @GetMapping("/")
     public String getPosts(Model model, HttpServletRequest request) {
         model.addAttribute("minutes", minuteRepository.findAll());
@@ -75,51 +59,52 @@ public class AssoController {
         return "index";
     }
 
+    // Login page
     @GetMapping("/login")
-    public String login(/*HttpSession session*/) {
-        //session.invalidate();
+    public String login() {
         return "login";
     }
 
+    // Login error page
     @GetMapping("/loginerror")
-    public String loginerror(/*HttpSession session*/) {
-        //session.invalidate();
+    public String loginerror() {
         return "loginerror";
     }
 
+    // Private page (for authenticated users)
     @GetMapping("/private")
-    public String privatrePageString(/*HttpSession session*/) {
-        //session.invalidate();
+    public String privatePage() {
         return "private";
     }
 
+    // User profile page
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
         String name = request.getUserPrincipal().getName();
-		UtilisateurEntity utilisateurEntity = utilisateurEntityRepository.findByName(name).orElseThrow();
+        UtilisateurEntity utilisateurEntity = utilisateurEntityRepository.findByName(name).orElseThrow();
         model.addAttribute("username", utilisateurEntity.getName());
         model.addAttribute("admin", request.isUserInRole("ADMIN"));
         return "profile";
     }
 
+    // Admin dashboard page
     @GetMapping("/admin")
     public String admin() {
         return "admin";
     }
 
+    // Displays details of a specific association
     @GetMapping("/association/{id}")
-    public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request){
+    public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         Association association = associationRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
+            .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
     
-        List<Minute> minutes = association.getMinutes();
-        minutes.size();
-
         model.addAttribute("association", association);
         model.addAttribute("members", association.getMembers());
         model.addAttribute("minutes", association.getMinutes());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
 
+        // Check if the user is a member of the association
         if (principal != null) {
             String username = principal.getName();
             UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElse(null);
@@ -130,6 +115,7 @@ public class AssoController {
         return "association_detail";
     }
 
+    // Allows a user to join an association
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
@@ -145,6 +131,7 @@ public class AssoController {
         return "redirect:/associations/" + id;
     }
 
+    // Deletes an association (only for admins)
     @PostMapping("/association/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
@@ -154,31 +141,30 @@ public class AssoController {
         if (optionalAssociation.isPresent()) {
             Association association = optionalAssociation.get();
     
-            // Étape 1 : Supprimer les minutes associées à l'association
+            // Step 1: Delete associated minutes
             for (Minute minute : association.getMinutes()) {
-                minute.getParticipants().clear(); // Supprime les références des participants
-                minuteRepository.delete(minute); // Supprime la minute
+                minute.getParticipants().clear(); // Remove participant references
+                minuteRepository.delete(minute); // Delete the minute
             }
     
-            // Étape 2 : Supprimer les rôles associés à l'association
+            // Step 2: Delete member roles in the association
             for (MemberType memberType : association.getMemberTypes()) {
-                memberType.setUtilisateurEntity(null); // Supprime la relation avec l'utilisateur
+                memberType.setUtilisateurEntity(null); // Remove user reference
                 memberTypeRepository.delete(memberType);
             }
     
-            // Étape 3 : Supprimer l'association
+            // Step 3: Delete the association itself
             associationRepository.delete(association);
     
-            redirectAttributes.addFlashAttribute("success", "Association supprimée avec succès !");
+            redirectAttributes.addFlashAttribute("success", "Association successfully deleted!");
         } else {
-            redirectAttributes.addFlashAttribute("error", "Association non trouvée !");
+            redirectAttributes.addFlashAttribute("error", "Association not found!");
         }
     
         return "redirect:/";
     }
-    
 
-
+    // Creates a new association (only for admins)
     @PostMapping("/association/create")
     @PreAuthorize("hasRole('ADMIN')")
     public String createAssociation(@RequestParam String name) {
@@ -187,4 +173,3 @@ public class AssoController {
         return "redirect:/";
     }
 }
-
