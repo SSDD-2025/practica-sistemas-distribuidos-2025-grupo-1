@@ -10,9 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import es.codeurjc.helloword_vscode.entities.Association;
+import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.Minute;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
@@ -22,6 +24,7 @@ import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
@@ -61,10 +64,11 @@ public class AssoController {
     }
 
     @GetMapping("/")
-    public String getPosts(Model model) {
+    public String getPosts(Model model, HttpServletRequest request) {
         model.addAttribute("minutes", minuteRepository.findAll());
         model.addAttribute("roles", memberTypeRepository.findAll());
         model.addAttribute("associations", associationRepository.findAll());
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return "index";
     }
 
@@ -101,7 +105,7 @@ public class AssoController {
     }
 
     @GetMapping("/association/{id}")
-    public String associationId(@PathVariable long id, Model model, Principal principal){
+    public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request){
         Association association = associationRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
     
@@ -111,7 +115,8 @@ public class AssoController {
         model.addAttribute("association", association);
         model.addAttribute("members", association.getMembers());
         model.addAttribute("minutes", association.getMinutes());
-        
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+
         if (principal != null) {
             String username = principal.getName();
             UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElse(null);
@@ -120,6 +125,36 @@ public class AssoController {
         }
         
         return "association_detail";
+    }
+
+    @PostMapping("/association/{id}/join")
+    public String joinAssociation(@PathVariable Long id, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName();
+            UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElseThrow();
+            Association association = associationRepository.findById(id).orElseThrow();
+            
+            if (!association.getMembers().contains(user)) {
+                MemberType memberType = new MemberType("member", user, association);
+                memberTypeRepository.save(memberType);
+            }
+        }
+        return "redirect:/associations/" + id;
+    }
+
+    @PostMapping("/association/{id}/delete")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteAssociation(@PathVariable Long id) {
+        associationRepository.deleteById(id);
+        return "redirect:/";
+    }
+
+    @PostMapping("/association/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createAssociation(@RequestParam String name) {
+        Association association = new Association(name);
+        associationRepository.save(association);
+        return "redirect:/";
     }
 }
 

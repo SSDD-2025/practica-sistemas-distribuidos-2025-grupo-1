@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                 // .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()
                 .requestMatchers("/profile").hasAnyRole("USER")
-				.requestMatchers("/admin").hasAnyRole("ADMIN")
+				.requestMatchers("/admin","/association/create").hasAnyRole("ADMIN")
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")
