@@ -37,12 +37,12 @@ Relationships:
 ## Development Contributions
 
 ### Tasks Completed by Each Developer
-#### [Elisa DONET]
+#### Elisa DONET
 - 
 - 
 - 
 
-#### [Mathéo RENAULT]
+#### Mathéo RENAULT
 - 
 - 
 - 
