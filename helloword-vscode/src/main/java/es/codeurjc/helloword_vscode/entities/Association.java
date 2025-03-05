@@ -9,9 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
 import jakarta.persistence.FetchType;
-
 import jakarta.persistence.CascadeType;
 
 @Entity
@@ -23,15 +21,17 @@ public class Association {
 
     private String name;
 
+    // One-to-many relationship with MemberType (roles within the association)
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberType> memberTypes;
     
+    // One-to-many relationship with Minute (meeting records)
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
 
     public Association() {}
 
-    // Constructor
+    // Constructor to initialize the association with a name
     public Association(String name) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
@@ -70,24 +70,22 @@ public class Association {
         this.minutes = minutes;
     }
 
-    // Méthode pour obtenir les membres
+    // Retrieves a list of users who are members of the association
     public List<UtilisateurEntity> getMembers() {
         return memberTypes.stream()
                      .map(MemberType::getUtilisateurEntity)
                      .collect(Collectors.toList());
     }
 
-    // Méthode pour définir les membres
+    // Assigns a list of users as members by creating corresponding MemberType entities
     public void setMembers(List<UtilisateurEntity> members) {
-        // Assurez-vous que chaque utilisateur a un rôle associé à cette association
         this.memberTypes = members.stream()
-                            .map(Utilisateurentity -> {
+                            .map(utilisateurEntity -> {
                                 MemberType memberType = new MemberType();
-                                memberType.setUtilisateurEntity(Utilisateurentity);
+                                memberType.setUtilisateurEntity(utilisateurEntity);
                                 memberType.setAssociation(this);
                                 return memberType;
                             })
                             .collect(Collectors.toList());
     }
 }
-
