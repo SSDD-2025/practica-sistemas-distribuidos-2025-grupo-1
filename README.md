@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# Web Application: Application Management
+# Web Application: [Your App Name]
 
 ## Development Team
 
@@ -10,7 +9,7 @@
 
 
 ## Project Coordination
-- **Trello Board**: [[Trello Link]](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)
+- **Trello Board**: [[Public Trello Link]](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)
 
 ## Key Features
 ### Entities
@@ -111,6 +110,3 @@ Relationships:
 
 
 
-=======
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/D1C1HU9V)
->>>>>>> parent of a1891e9 (Update README.md)
