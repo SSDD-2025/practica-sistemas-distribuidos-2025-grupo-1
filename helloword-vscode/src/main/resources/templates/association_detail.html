@@ -7,8 +7,14 @@
 <body>
     {{> header}}
     <h2>{{association.name}}</h2>
-    
-    <h3>Membres :</h3>
+    {{#association.imgAsso}}
+        <img src="/images/{{association.imgAsso}}" alt="Association Image"></img>
+        <p>{{association.imgAsso}}</p>
+    {{/association.imgAsso}}
+    {{^association.imgAsso}}
+        <img src="/images/no_img.png" alt="Pas d'image"></img>
+    {{/association.imgAsso}}
+    <h3>Membres :</h3>  
     <ul>
         {{#members}}
             <li>{{name}}</li>

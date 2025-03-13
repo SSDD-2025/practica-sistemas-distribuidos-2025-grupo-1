@@ -145,3 +145,11 @@ button.delete:hover {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+
+img {
+    /* Picture size */
+    max-width: 150px;
+    max-width: 150px;
+    min-width: 150px;
+    min-width: 150px;
+}

@@ -23,21 +23,38 @@ public class Association {
 
     private String name;
 
+    // Stock image path
+    private String imgAsso;
+
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberType> memberTypes;
     
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
 
+    // Constructor
     public Association() {}
 
-    // Constructor
+    public Association(String name, String imgAsso) {
+        this.name = name;
+        this.memberTypes = new ArrayList<>();
+        this.imgAsso = imgAsso;
+    }
+
     public Association(String name) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
     // Getters and Setters
+    public String getImgAsso() {
+        return imgAsso;
+    }
+
+    public void setImgAsso(String imgAsso) {
+        this.imgAsso = imgAsso;
+    } 
+
     public long getId() {
         return id;
     }
