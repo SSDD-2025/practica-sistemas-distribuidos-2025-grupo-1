@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,13 +46,14 @@ public class SecurityConfiguration {
         http
             .authorizeHttpRequests(authorize -> authorize
                 // public page
-                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**").permitAll()
+                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/repository/**", "/service/**").permitAll()
                 .requestMatchers("/association/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/association/*/image").permitAll()
                 // private page
                 // .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()
                 .requestMatchers("/profile").hasAnyRole("USER")
-				.requestMatchers("/admin","/association/create").hasAnyRole("ADMIN")
+				.requestMatchers("/admin","/association/create", "/new_asso.html").hasAnyRole("ADMIN")
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")

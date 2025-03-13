@@ -44,11 +44,11 @@ public class DataInitializer {
         UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
 
         // Add associations
-        Association association1 = new Association("GreenPeace");
+        Association association1 = new Association("GreenPeace", "greenPeaceLogo.png");
         associationRepository.save(association1); //helloword-vscode\src\main\java\es\codeurjc\helloword_vscode\service\DataInitializer.java
-        Association association2 = new Association("GreatSchool", "greenPeaceLogo.png");
+        Association association2 = new Association("GreatSchool");
         associationRepository.save(association2);
-        Association association3 = new Association("Help", "greenPeaceLogo.png");
+        Association association3 = new Association("Help");
         associationRepository.save(association3);
 
         // Add roles

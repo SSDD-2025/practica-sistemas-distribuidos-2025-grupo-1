@@ -8,9 +8,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
-
+import jakarta.persistence.Lob;
 import jakarta.persistence.FetchType;
+import java.sql.Blob;
 
 import jakarta.persistence.CascadeType;
 
@@ -26,6 +28,9 @@ public class Association {
     // Stock image path
     private String imgAsso;
 
+    @Lob
+    private Blob imageFile;
+
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberType> memberTypes;
     
@@ -38,7 +43,6 @@ public class Association {
     public Association(String name, String imgAsso) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
-        this.imgAsso = imgAsso;
     }
 
     public Association(String name) {
@@ -47,13 +51,21 @@ public class Association {
     }
 
     // Getters and Setters
-    public String getImgAsso() {
-        return imgAsso;
-    }
+    // public String getImgAsso() {
+    //     return imgAsso;
+    // }
 
-    public void setImgAsso(String imgAsso) {
-        this.imgAsso = imgAsso;
-    } 
+    // public void setImgAsso(String imgAsso) {
+    //     this.imgAsso = imgAsso;
+    // } 
+
+    public Blob getImageFile() {
+		return imageFile;
+	}
+
+	public void setImageFile(Blob imageFile) {
+		this.imageFile = imageFile;
+	}
 
     public long getId() {
         return id;

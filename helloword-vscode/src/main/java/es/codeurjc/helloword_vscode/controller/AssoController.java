@@ -1,10 +1,16 @@
 package es.codeurjc.helloword_vscode.controller;
 
 import java.security.Principal;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.sql.Blob;
+import org.springframework.http.HttpHeaders;
 
+import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,10 +18,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.entities.*;
 import es.codeurjc.helloword_vscode.repository.*;
+import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +42,9 @@ public class AssoController {
 
     @Autowired
     private AssociationRepository associationRepository;
+
+    @Autowired
+	private AssociationService associationService;
 
     // Adds authentication attributes to all templates
     @ModelAttribute
@@ -98,11 +109,13 @@ public class AssoController {
     public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         Association association = associationRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
-    
+            Optional<Association> asso = associationService.findById(id);
         model.addAttribute("association", association);
         model.addAttribute("members", association.getMembers());
         model.addAttribute("minutes", association.getMinutes());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+        model.addAttribute("hasImage", asso.get().getImageFile() != null);
+
 
         // Check if the user is a member of the association
         if (principal != null) {
@@ -167,9 +180,22 @@ public class AssoController {
     // Creates a new association (only for admins)
     @PostMapping("/association/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public String createAssociation(@RequestParam String name) {
-        Association association = new Association(name);
-        associationRepository.save(association);
+    public String createAssociation(Model model, Association association, MultipartFile image) throws Exception {
+        associationService.save(association, image);
         return "redirect:/";
+    }
+
+    // Download Image
+    @GetMapping("/association/{id}/image")
+    public ResponseEntity<Object> downloadImage(@PathVariable long id) throws SQLException {
+        Optional<Association> op = associationService.findById(id);
+        if (op.isPresent() && op.get().getImageFile() != null) {
+            Blob image = op.get().getImageFile();
+            Resource file = new InputStreamResource(image.getBinaryStream());
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, "image/png")
+            .contentLength(image.length()).body(file);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
