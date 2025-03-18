@@ -30,9 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Controller
 public class AssoController {
 
-    // Repositories for database interaction
+    // Repositories for database interaction 
+    // Il va tout falloir changer en service
     @Autowired
     private UtilisateurEntityRepository utilisateurEntityRepository;
+
+    @Autowired
+    private UtilisateurEntityService utilisateurEntityService;
 
     @Autowired
     private MinuteRepository minuteRepository;
@@ -98,11 +102,17 @@ public class AssoController {
         return "profile";
     }
 
-    // Admin dashboard page
-    @GetMapping("/admin")
-    public String admin() {
-        return "admin";
-    }
+        // Displays details of a specific user
+        @GetMapping("/user/{id}")
+        public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
+            Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
+            if (utilisateurEntity.isPresent()) {
+                model.addAttribute("utilisateur", utilisateurEntity.get());
+                return "user_detail";
+            } else {
+                return "user_not_found";
+            }   
+        }
 
     // Displays details of a specific association
     @GetMapping("/association/{id}")
