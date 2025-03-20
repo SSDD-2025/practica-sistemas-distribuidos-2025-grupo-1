@@ -50,4 +50,12 @@ public class AssociationService {
 		return associationRepository.findAll();
 	}
 
+	public void deleteById(long id) {
+		try {
+			associationRepository.deleteById(id);
+	    } catch (Exception e) {
+			System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
+		};		
+	}
+
 }

@@ -17,11 +17,11 @@ public class MemberType {
 
     private String name;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "idUtilisateur")
     private UtilisateurEntity Utilisateurentity;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "idAssociation")
     private Association association;
 

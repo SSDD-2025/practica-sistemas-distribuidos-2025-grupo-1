@@ -9,10 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
 
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-
 @Entity
 public class UtilisateurEntity {
     @Id

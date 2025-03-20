@@ -30,20 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Controller
 public class AssoController {
 
-    // Repositories for database interaction 
-    // Il va tout falloir changer en service
+    // Service for database interaction 
 
     @Autowired
     private UtilisateurEntityService utilisateurEntityService;
-
-    @Autowired
-    private MinuteRepository minuteRepository;
-
-    @Autowired
-    private MemberTypeRepository memberTypeRepository;
-
-    @Autowired
-    private AssociationRepository associationRepository;
 
     @Autowired
 	private AssociationService associationService;
@@ -68,7 +58,7 @@ public class AssoController {
         }
     }
 
-    // Home page: Displays associations, roles, and minutes
+    // Home page: Displays associations
     @GetMapping("/")
     public String getPosts(Model model, HttpServletRequest request) {
         model.addAttribute("associations", associationService.findAll());
@@ -130,7 +120,7 @@ public class AssoController {
         // Check if the user is a member of the association
         if (principal != null) {
             String username = principal.getName();
-            Optional<UtilisateurEntity> user = utilisateurEntityService.findById(id);
+            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
             boolean isMember = asso.get().getMembers().contains(user.get());
             model.addAttribute("isMember", isMember);
         }
@@ -141,7 +131,6 @@ public class AssoController {
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
-            String username = principal.getName();
             Optional<UtilisateurEntity> user = utilisateurEntityService.findById(id);
             Optional<Association> association = associationService.findById(id);
             
@@ -154,37 +143,52 @@ public class AssoController {
     }
 
     // Deletes an association (only for admins)
+    // @PostMapping("/association/{id}/delete")
+    // @PreAuthorize("hasRole('ADMIN')")
+    // @Transactional
+    // public String deleteAssociation(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    //     Optional<Association> optionalAssociation = associationService.findById(id);
+    
+    //     if (optionalAssociation.isPresent()) {
+    //         Association association = optionalAssociation.get();
+    
+    //         // Step 1: Delete associated minutes
+    //         for (Minute minute : association.getMinutes()) {
+    //             minute.getParticipants().clear(); // Remove participant references
+    //             minuteRepository.delete(minute); // Delete the minute
+    //         }
+    
+    //         // Step 2: Delete member roles in the association
+    //         for (MemberType memberType : association.getMemberTypes()) {
+    //             memberType.setUtilisateurEntity(null); // Remove user reference
+    //             memberTypeRepository.delete(memberType);
+    //         }
+    
+    //         // Step 3: Delete the association itself
+    //         associationRepository.delete(association);
+    
+    //         redirectAttributes.addFlashAttribute("success", "Association successfully deleted!");
+    //     } else {
+    //         redirectAttributes.addFlashAttribute("error", "Association not found!");
+    //     }
+    
+    //     return "redirect:/";
+    // }
+
     @PostMapping("/association/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
-    public String deleteAssociation(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Optional<Association> optionalAssociation = associationService.findById(id);
-    
-        if (optionalAssociation.isPresent()) {
-            Association association = optionalAssociation.get();
-    
-            // Step 1: Delete associated minutes
-            for (Minute minute : association.getMinutes()) {
-                minute.getParticipants().clear(); // Remove participant references
-                minuteRepository.delete(minute); // Delete the minute
-            }
-    
-            // Step 2: Delete member roles in the association
-            for (MemberType memberType : association.getMemberTypes()) {
-                memberType.setUtilisateurEntity(null); // Remove user reference
-                memberTypeRepository.delete(memberType);
-            }
-    
-            // Step 3: Delete the association itself
-            associationRepository.delete(association);
-    
-            redirectAttributes.addFlashAttribute("success", "Association successfully deleted!");
-        } else {
-            redirectAttributes.addFlashAttribute("error", "Association not found!");
-        }
-    
-        return "redirect:/";
-    }
+	public String deleteAssociation(@PathVariable long id, Authentication auth) {
+        System.out.println("Utilisateur connecté : " + auth.getName());
+        System.out.println("Rôles : " + auth.getAuthorities());
+
+		Optional<Association> association = associationService.findById(id);
+		if (association.isPresent()) {
+			associationService.deleteById(id);
+			return "redirect:/";
+		} else {
+			return "redirect:/";
+		}
+	}
 
     // Creates a new association (only for admins)
     @PostMapping("/association/create")

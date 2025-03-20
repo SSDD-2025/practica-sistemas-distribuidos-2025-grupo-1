@@ -16,7 +16,6 @@ import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Service
 public class DataInitializer {
