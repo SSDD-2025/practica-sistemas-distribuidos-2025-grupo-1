@@ -13,10 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.codeurjc.helloword_vscode.repository.AssociationRepository;
-import es.codeurjc.helloword_vscode.repository.MinuteRepository;
-import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.http.HttpSession;
 
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
@@ -25,12 +23,12 @@ import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 public class MemberController {
 
     @Autowired
-    private UtilisateurEntityRepository utilisateurEntityRepository;
+    private AssociationService associationService;
 
     @Autowired
-    private AssociationRepository associationRepository;
+    private UtilisateurEntityService utilisateurEntityService;
 
-        @ModelAttribute
+    @ModelAttribute
     public void addAttributes(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName());
@@ -45,7 +43,7 @@ public class MemberController {
     
     @GetMapping("/members")
     public String showMembers(Model model) {
-        model.addAttribute("Utilisateursentity", utilisateurEntityRepository.findAll());
+        model.addAttribute("Utilisateursentity", utilisateurEntityService.findAll());
         return "members";
     }
 
@@ -54,11 +52,11 @@ public class MemberController {
                            @RequestParam(name = "searchType", required = false) String searchType, 
                            Model model) {
         if (id != null && "user".equals(searchType)) {
-            utilisateurEntityRepository.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
+            utilisateurEntityService.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
             return "members";
         }
         if (id != null && "association".equals(searchType)) {
-            associationRepository.findById(id).ifPresent(association -> model.addAttribute("assofind", association));
+            associationService.findById(id).ifPresent(association -> model.addAttribute("assofind", association));
             return "index";
         }
         return "index";

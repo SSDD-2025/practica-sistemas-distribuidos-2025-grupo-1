@@ -32,8 +32,6 @@ public class AssoController {
 
     // Repositories for database interaction 
     // Il va tout falloir changer en service
-    @Autowired
-    private UtilisateurEntityRepository utilisateurEntityRepository;
 
     @Autowired
     private UtilisateurEntityService utilisateurEntityService;
@@ -49,6 +47,12 @@ public class AssoController {
 
     @Autowired
 	private AssociationService associationService;
+
+    @Autowired
+	private MinuteService minuteService;
+
+    @Autowired
+	private MemberTypeService memberTypeService;
 
     // Adds authentication attributes to all templates
     @ModelAttribute
@@ -67,9 +71,7 @@ public class AssoController {
     // Home page: Displays associations, roles, and minutes
     @GetMapping("/")
     public String getPosts(Model model, HttpServletRequest request) {
-        model.addAttribute("minutes", minuteRepository.findAll());
-        model.addAttribute("roles", memberTypeRepository.findAll());
-        model.addAttribute("associations", associationRepository.findAll());
+        model.addAttribute("associations", associationService.findAll());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return "index";
     }
@@ -96,8 +98,8 @@ public class AssoController {
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
         String name = request.getUserPrincipal().getName();
-        UtilisateurEntity utilisateurEntity = utilisateurEntityRepository.findByName(name).orElseThrow();
-        model.addAttribute("username", utilisateurEntity.getName());
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(name);
+        model.addAttribute("username", utilisateurEntity.get().getName());
         model.addAttribute("admin", request.isUserInRole("ADMIN"));
         return "profile";
     }
@@ -117,12 +119,10 @@ public class AssoController {
     // Displays details of a specific association
     @GetMapping("/association/{id}")
     public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
-        Association association = associationRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Invalid association Id:" + id));
-            Optional<Association> asso = associationService.findById(id);
-        model.addAttribute("association", association);
-        model.addAttribute("members", association.getMembers());
-        model.addAttribute("minutes", association.getMinutes());
+        Optional<Association> asso = associationService.findById(id);
+        model.addAttribute("association", asso.get());
+        model.addAttribute("members", asso.get().getMembers());
+        model.addAttribute("minutes", asso.get().getMinutes());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         model.addAttribute("hasImage", asso.get().getImageFile() != null);
 
@@ -130,11 +130,10 @@ public class AssoController {
         // Check if the user is a member of the association
         if (principal != null) {
             String username = principal.getName();
-            UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElse(null);
-            boolean isMember = association.getMembers().contains(user);
+            Optional<UtilisateurEntity> user = utilisateurEntityService.findById(id);
+            boolean isMember = asso.get().getMembers().contains(user.get());
             model.addAttribute("isMember", isMember);
         }
-        
         return "association_detail";
     }
 
@@ -143,12 +142,12 @@ public class AssoController {
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
-            UtilisateurEntity user = utilisateurEntityRepository.findByName(username).orElseThrow();
-            Association association = associationRepository.findById(id).orElseThrow();
+            Optional<UtilisateurEntity> user = utilisateurEntityService.findById(id);
+            Optional<Association> association = associationService.findById(id);
             
-            if (!association.getMembers().contains(user)) {
-                MemberType memberType = new MemberType("member", user, association);
-                memberTypeRepository.save(memberType);
+            if (!association.get().getMembers().contains(user.get())) {
+                MemberType memberType = new MemberType("member", user.get(), association.get());
+                memberTypeService.save(memberType);
             }
         }
         return "redirect:/associations/" + id;
@@ -159,7 +158,7 @@ public class AssoController {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public String deleteAssociation(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Optional<Association> optionalAssociation = associationRepository.findById(id);
+        Optional<Association> optionalAssociation = associationService.findById(id);
     
         if (optionalAssociation.isPresent()) {
             Association association = optionalAssociation.get();

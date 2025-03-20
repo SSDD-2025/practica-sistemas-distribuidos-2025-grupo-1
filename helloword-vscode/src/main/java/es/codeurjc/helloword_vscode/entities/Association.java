@@ -10,8 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Lob;
-import jakarta.persistence.FetchType;
 import java.sql.Blob;
 
 import jakarta.persistence.CascadeType;
@@ -24,9 +22,6 @@ public class Association {
     private long id;
 
     private String name;
-
-    // Stock image path
-    private String imgAsso;
 
     @Lob
     private Blob imageFile;
@@ -51,13 +46,6 @@ public class Association {
     }
 
     // Getters and Setters
-    // public String getImgAsso() {
-    //     return imgAsso;
-    // }
-
-    // public void setImgAsso(String imgAsso) {
-    //     this.imgAsso = imgAsso;
-    // } 
 
     public Blob getImageFile() {
 		return imageFile;

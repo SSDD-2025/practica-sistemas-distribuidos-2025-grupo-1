@@ -46,4 +46,8 @@ public class AssociationService {
         return association.getMinutes();
     }
 
+	public List<Association> findAll() {
+		return associationRepository.findAll();
+	}
+
 }

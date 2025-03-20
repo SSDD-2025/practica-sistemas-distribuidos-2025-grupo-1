@@ -22,9 +22,12 @@ public class UtilisateurEntityService implements UserDetailsService {
     @Autowired
 	private UtilisateurEntityRepository utilisateursEntityRepository;
 
+	public Optional<UtilisateurEntity> findByName(String name) {
+		return utilisateursEntityRepository.findByName(name);
+	}
+
     @Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
 		UtilisateurEntity utilisateur = utilisateursEntityRepository.findByName(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -41,4 +44,9 @@ public class UtilisateurEntityService implements UserDetailsService {
 	public Optional<UtilisateurEntity> findById(long id) {
 		return utilisateursEntityRepository.findById(id);
 	}
+
+	public List<UtilisateurEntity> findAll() {
+		return utilisateursEntityRepository.findAll();
+	}
+
 }
