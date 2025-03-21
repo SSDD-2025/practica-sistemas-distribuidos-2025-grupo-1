@@ -8,5 +8,19 @@
     {{> header}}
     <h2>Info User</h2>
         <p>{{utilisateur.name}} {{utilisateur.surname}}</p>
+    <!-- <h3>Associations</h3>
+    <ul>
+        {{#associations}}
+            <li><a href="/association/{{id}}">{{name}}</a></li>
+        {{/associations}}
+    </ul> -->
+    <ul>
+        <h3>Associations and Member type</h3>
+        {{#associationRoles}}
+            <li>
+                <a href="/association/{{association.id}}">{{association.name}}</a> - <strong>Member Type:</strong> {{memberType}}
+            </li>
+        {{/associationRoles}}
+    </ul>
 </body>
 </html>

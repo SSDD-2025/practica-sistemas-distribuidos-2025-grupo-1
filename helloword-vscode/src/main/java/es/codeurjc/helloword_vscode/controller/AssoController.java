@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.sql.Blob;
 import org.springframework.http.HttpHeaders;
 
@@ -99,7 +100,13 @@ public class AssoController {
         public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
             Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
             if (utilisateurEntity.isPresent()) {
-                model.addAttribute("utilisateur", utilisateurEntity.get());
+                UtilisateurEntity utilisateur = utilisateurEntity.get();
+                model.addAttribute("utilisateur", utilisateur);
+                //model.addAttribute("associations", utilisateur.getAssociations());
+                List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
+                .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
+                .collect(Collectors.toList());
+                model.addAttribute("associationRoles", roles);
                 return "user_detail";
             } else {
                 return "user_not_found";
@@ -141,39 +148,6 @@ public class AssoController {
         }
         return "redirect:/associations/" + id;
     }
-
-    // Deletes an association (only for admins)
-    // @PostMapping("/association/{id}/delete")
-    // @PreAuthorize("hasRole('ADMIN')")
-    // @Transactional
-    // public String deleteAssociation(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-    //     Optional<Association> optionalAssociation = associationService.findById(id);
-    
-    //     if (optionalAssociation.isPresent()) {
-    //         Association association = optionalAssociation.get();
-    
-    //         // Step 1: Delete associated minutes
-    //         for (Minute minute : association.getMinutes()) {
-    //             minute.getParticipants().clear(); // Remove participant references
-    //             minuteRepository.delete(minute); // Delete the minute
-    //         }
-    
-    //         // Step 2: Delete member roles in the association
-    //         for (MemberType memberType : association.getMemberTypes()) {
-    //             memberType.setUtilisateurEntity(null); // Remove user reference
-    //             memberTypeRepository.delete(memberType);
-    //         }
-    
-    //         // Step 3: Delete the association itself
-    //         associationRepository.delete(association);
-    
-    //         redirectAttributes.addFlashAttribute("success", "Association successfully deleted!");
-    //     } else {
-    //         redirectAttributes.addFlashAttribute("error", "Association not found!");
-    //     }
-    
-    //     return "redirect:/";
-    // }
 
     @PostMapping("/association/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
