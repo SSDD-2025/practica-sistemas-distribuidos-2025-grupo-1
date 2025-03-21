@@ -40,7 +40,8 @@ public class DataInitializer {
         // Add users
         UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
         UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
-        UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
+        UtilisateurEntity Utilisateurentity3 = new UtilisateurEntity("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
+        UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2, Utilisateurentity3));
 
         // Add associations
         Association association1 = new Association("GreenPeace");

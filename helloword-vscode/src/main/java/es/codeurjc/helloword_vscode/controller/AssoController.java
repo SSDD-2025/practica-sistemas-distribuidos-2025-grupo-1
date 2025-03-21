@@ -107,6 +107,8 @@ public class AssoController {
                 .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
                 .collect(Collectors.toList());
                 model.addAttribute("associationRoles", roles);
+                List<Minute> userMinutes = utilisateur.getMinutes();
+                model.addAttribute("userMinutes", userMinutes);
                 return "user_detail";
             } else {
                 return "user_not_found";

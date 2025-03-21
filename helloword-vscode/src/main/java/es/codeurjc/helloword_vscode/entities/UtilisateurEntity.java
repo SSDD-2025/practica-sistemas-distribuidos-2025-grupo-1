@@ -92,4 +92,11 @@ public class UtilisateurEntity {
         return memberTypes;
     }
     
+    public List<Minute> getMinutes() {
+        return memberTypes.stream()
+            .flatMap(mt -> mt.getAssociation().getMinutes().stream())
+            .filter(minute -> minute.getParticipants().contains(this))
+            .collect(Collectors.toList());
+    }
+    
 }
