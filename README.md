@@ -37,29 +37,29 @@ Relationships:
 ## Development Contributions
 
 ### Tasks Completed by Each Developer
-#### [Elisa DONET]
-- 
-- 
-- 
+#### Elisa DONET
+- User identification
+- How the navigation bar works
+- HTML and CSS
 
-#### [Mathéo RENAULT]
--
-- 
-- 
+#### Mathéo RENAULT
+- Creation of entities
+- Comments
+- Diagramm
 
 ### 5 Most Important Commits
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Create repository, service and style sheet
+2. Add data on db and display on home page
+3. List asso + members + search user by with nav bar
+4. Role in DB
+5. Add new association
 
-### 5 Key Files + Participation
-1. 
-2. 
-3. 
-4. 
-5. 
+### 5 Key Files
+1. AssoController.java
+2. SecurityConfiguration.java
+3. Association.java
+4. UtilisateurEntity.java
+5. Index.html
 
 ## Screenshots & Navigation Flow
 
