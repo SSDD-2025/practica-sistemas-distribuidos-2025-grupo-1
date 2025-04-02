@@ -9,11 +9,8 @@
     <h2>Members</h2>
     <ul>
         {{#Utilisateursentity}}
-            <li>{{name}} {{surname}} {{id}}</li>   
+            <a href="/user/{{id}}"><li>{{name}} {{surname}} {{id}}</li></a>  
         {{/Utilisateursentity}}
-        {{#userfind}}
-            <li>{{name}} {{surname}} {{id}}</li>   
-        {{/userfind}}
     </ul>
 </body>
 </html>

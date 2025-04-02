@@ -6,30 +6,6 @@
 </head>
 <body>
     {{> header}}
-
-    <!-- <h1>Welcome page</h1>
-
-    <h2>Members</h2>
-    <ul>
-        {{#Utilisateursentity}}
-        <li>{{name}} {{surname}}</li>   
-        {{/Utilisateursentity}}
-    </ul>
-
-    <h2>Minutes</h2>
-    <ul>
-        {{#minutes}}
-        <li>{{content}} ({{date}})</li>
-        {{/minutes}}
-    </ul>
-
-    <h2>Roles</h2>
-    <ul>
-        {{#roles}}
-        <li>{{name}}</li>
-        {{/roles}}
-    </ul> -->
-
     <h2>Associations</h2>
     <ul>
         {{#associations}}
@@ -40,11 +16,7 @@
         {{/assofind}}
     </ul>
     {{#isAdmin}}
-    <h3>Créer une nouvelle association</h3>
-    <form action="/association/create" method="post">
-        <input type="text" name="name" placeholder="Nom de l'association" required>
-        <button type="submit">Créer</button>
-    </form>
+        <a href="new_asso.html">Create association</a>
     {{/isAdmin}}
 </body>
 </html>

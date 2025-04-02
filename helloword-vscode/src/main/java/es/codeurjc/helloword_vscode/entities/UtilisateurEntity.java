@@ -8,10 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.List;
-
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
+import java.util.stream.Collectors;
+import java.util.Map;
 
 @Entity
 public class UtilisateurEntity {
@@ -78,4 +76,27 @@ public class UtilisateurEntity {
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
 	}
+
+    public List<Association> getAssociations() {
+        return memberTypes.stream()
+                          .map(MemberType::getAssociation)
+                          .collect(Collectors.toList());
+    }
+
+    public Map<Association, String> getAssociationsWithRoles() {
+        return memberTypes.stream()
+                          .collect(Collectors.toMap(MemberType::getAssociation, MemberType::getName));
+    }
+
+    public List<MemberType> getMemberTypes() {
+        return memberTypes;
+    }
+    
+    public List<Minute> getMinutes() {
+        return memberTypes.stream()
+            .flatMap(mt -> mt.getAssociation().getMinutes().stream())
+            .filter(minute -> minute.getParticipants().contains(this))
+            .collect(Collectors.toList());
+    }
+    
 }

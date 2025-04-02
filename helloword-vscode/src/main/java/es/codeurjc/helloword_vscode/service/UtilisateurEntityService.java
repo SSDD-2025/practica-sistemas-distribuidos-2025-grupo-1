@@ -2,6 +2,7 @@ package es.codeurjc.helloword_vscode.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.helloword_vscode.entities.Association;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
@@ -18,12 +20,15 @@ import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 public class UtilisateurEntityService implements UserDetailsService {
 
     @Autowired
-	private UtilisateurEntityRepository UtilisateursEntityRepository;
+	private UtilisateurEntityRepository utilisateursEntityRepository;
+
+	public Optional<UtilisateurEntity> findByName(String name) {
+		return utilisateursEntityRepository.findByName(name);
+	}
 
     @Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-		UtilisateurEntity utilisateur = UtilisateursEntityRepository.findByName(username)
+		UtilisateurEntity utilisateur = utilisateursEntityRepository.findByName(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 		List<GrantedAuthority> roles = new ArrayList<>();
@@ -35,4 +40,13 @@ public class UtilisateurEntityService implements UserDetailsService {
 				utilisateur.getPwd(), roles);
 
 	}
+
+	public Optional<UtilisateurEntity> findById(long id) {
+		return utilisateursEntityRepository.findById(id);
+	}
+
+	public List<UtilisateurEntity> findAll() {
+		return utilisateursEntityRepository.findAll();
+	}
+
 }

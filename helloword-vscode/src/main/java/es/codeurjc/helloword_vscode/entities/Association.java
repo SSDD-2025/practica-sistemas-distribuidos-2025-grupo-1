@@ -8,9 +8,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
-
-import jakarta.persistence.FetchType;
+import java.sql.Blob;
 
 import jakarta.persistence.CascadeType;
 
@@ -23,21 +23,38 @@ public class Association {
 
     private String name;
 
+    @Lob
+    private Blob imageFile;
+
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberType> memberTypes;
     
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
 
+    // Constructor
     public Association() {}
 
-    // Constructor
+    public Association(String name, String imgAsso) {
+        this.name = name;
+        this.memberTypes = new ArrayList<>();
+    }
+
     public Association(String name) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
     // Getters and Setters
+
+    public Blob getImageFile() {
+		return imageFile;
+	}
+
+	public void setImageFile(Blob imageFile) {
+		this.imageFile = imageFile;
+	}
+
     public long getId() {
         return id;
     }

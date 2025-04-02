@@ -7,30 +7,35 @@
 <body>
     {{> header}}
     <h2>{{association.name}}</h2>
-    
-    <h3>Membres :</h3>
+    {{#hasImage}}
+        <img src="/association/{{association.id}}/image" alt="Association Image"></img>
+    {{/hasImage}}
+    {{^hasImage}}
+        <img src="/images/no_img.png" alt="Pas d'image"></img>
+    {{/hasImage}}
+    <h3>Members :</h3>  
     <ul>
         {{#members}}
             <li>{{name}}</li>
         {{/members}}
     </ul>
 
-    <h3>Comptes-rendus de réunion :</h3>
+    <h3>Minutes :</h3>
     <ul>
         {{#minutes}}
-            <li>{{date}} - {{content}} (Durée : {{duration}} min)</li>
+            <li>{{date}} - {{content}} (Duration : {{duration}} min)</li>
         {{/minutes}}
     </ul>
 
     {{^isMember}}
     <form action="/associations/{{association.id}}/join" method="post">
-        <button type="submit">Rejoindre</button>
+        <button type="submit">Join</button>
     </form>
     {{/isMember}}
 
     {{#isAdmin}}
     <form action="/association/{{association.id}}/delete" method="post">
-        <button type="submit">Supprimer</button>
+        <button type="submit">Delete</button>
     </form>
     {{/isAdmin}} 
 </body>

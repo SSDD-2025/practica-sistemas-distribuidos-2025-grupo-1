@@ -32,7 +32,7 @@ public class Minute {
     private double duration;
 
     @ManyToOne
-    @JoinColumn(name = "idAssociation")
+    @JoinColumn(name = "id_association", nullable = false)
     private Association association;
 
     // Constructeur

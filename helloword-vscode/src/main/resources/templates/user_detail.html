@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Detail</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    {{> header}}
+    <h2>Info User</h2>
+        <p>{{utilisateur.name}} {{utilisateur.surname}}</p>
+    <!-- <h3>Associations</h3>
+    <ul>
+        {{#associations}}
+            <li><a href="/association/{{id}}">{{name}}</a></li>
+        {{/associations}}
+    </ul> -->
+    <ul>
+        <h3>Associations and member type :</h3>
+        {{#associationRoles}}
+            <li>
+                <a href="/association/{{association.id}}">{{association.name}}</a> - <strong>Member Type:</strong> {{memberType}}
+            </li>
+        {{/associationRoles}}
+        {{^associationRoles}}
+            <li>Not part of an association.</li>
+        {{/associationRoles}}
+    </ul>
+    <h3>Minutes of meetings attended by this user :</h3>
+    <ul>
+        {{#userMinutes}}
+            <li>{{date}} - {{content}} ({{duration}} minutes)</li>
+        {{/userMinutes}}
+        {{^userMinutes}}
+            <li>No participation in a meeting.</li>
+        {{/userMinutes}}
+    </ul>
+</body>
+</html>

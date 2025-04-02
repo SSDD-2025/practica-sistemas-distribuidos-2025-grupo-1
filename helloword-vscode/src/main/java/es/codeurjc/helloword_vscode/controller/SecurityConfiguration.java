@@ -1,17 +1,14 @@
 package es.codeurjc.helloword_vscode.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
@@ -45,13 +42,13 @@ public class SecurityConfiguration {
         http
             .authorizeHttpRequests(authorize -> authorize
                 // public page
-                .requestMatchers("/", "/css/**", "/members","/search/**").permitAll()
-                .requestMatchers("/association/**").permitAll()
+                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/repository/**", "/service/**").permitAll()
+                .requestMatchers("/association/**", "/user/**" ).permitAll()
                 // private page
                 // .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()
                 .requestMatchers("/profile").hasAnyRole("USER")
-				.requestMatchers("/admin","/association/create").hasAnyRole("ADMIN")
+				.requestMatchers("/admin","/association/create", "/new_asso.html", "/association/**/delete").hasAnyRole("ADMIN")
             )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")

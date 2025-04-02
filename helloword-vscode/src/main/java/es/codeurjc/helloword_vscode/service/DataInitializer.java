@@ -16,7 +16,6 @@ import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Service
 public class DataInitializer {
@@ -41,11 +40,12 @@ public class DataInitializer {
         // Add users
         UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
         UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
-        UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2));
+        UtilisateurEntity Utilisateurentity3 = new UtilisateurEntity("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
+        UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2, Utilisateurentity3));
 
         // Add associations
         Association association1 = new Association("GreenPeace");
-        associationRepository.save(association1);
+        associationRepository.save(association1); 
         Association association2 = new Association("GreatSchool");
         associationRepository.save(association2);
         Association association3 = new Association("Help");
