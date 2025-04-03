@@ -1,23 +1,33 @@
 {{>header}}
 
+<h2>Association "{{association.name}}"</h2>
+
 <form action="/editasso" method="post" enctype="multipart/form-data">
-        <h2>Association "{{association.name}}"</h2>
-        <input type="hidden" name="id" value="{{association.id}}"/>
-        <div>
-            <label>Association: </label>
-            <input name="name" value="{{association.name}}" placeholder="name"/>
-        </div>
+    <input type="hidden" name="id" value="{{association.id}}"/>
 
-        <div>
-            <label>New image (optional) :</label>
-            <input type="file" name="image" accept="image/*"/>
-          </div>
+    <div>
+        <label>Association: </label>
+        <input name="name" value="{{association.name}}" placeholder="name"/>
+    </div>
 
-        <p>
-            <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>
-            <input type="submit" value="Save"/>
-        </p>
+    <div>
+        <label>New image (optional):</label>
+        <input type="file" name="image" accept="image/*"/>
+    </div>
+
+    <p>
+        <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>
+        <input type="submit" value="Save"/>
+    </p>
+</form>
+
+{{#association.imageFile}}
+    <hr>
+    <p>Actual Image: </p>
+    <img src="/association/{{association.id}}/image" alt="Association image" width="150"/><br><br>
+    <form action="/association/{{association.id}}/deleteImage" method="post">
+        <button type="submit">Delete image</button>
     </form>
-  
-  
+{{/association.imageFile}}
+
 {{>footer}}

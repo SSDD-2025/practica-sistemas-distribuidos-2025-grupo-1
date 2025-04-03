@@ -154,7 +154,7 @@ public class AssoController {
                 memberTypeService.save(memberType);
             }
         }
-        return "redirect:/associations/" + id;
+        return "redirect:/association/" + id;
     }
 
     @PostMapping("/association/{id}/delete")
@@ -233,5 +233,17 @@ public class AssoController {
             return "redirect:/";
         }
     }
+
+    @PostMapping("/association/{id}/deleteImage")
+    public String deleteAssociationImage(@PathVariable long id) {
+        Optional<Association> optAsso = associationService.findById(id);
+        if (optAsso.isPresent()) {
+            Association asso = optAsso.get();
+            asso.setImageFile(null);
+            associationService.save(asso);
+        }
+        return "redirect:/editasso/"+id;
+    }
+
     
 }
