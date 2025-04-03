@@ -28,9 +28,19 @@
     </ul>
 
     {{^isMember}}
+    {{#isAuthenticated}}
     <form action="/associations/{{association.id}}/join" method="post">
         <button type="submit">Join</button>
     </form>
+    {{/isAuthenticated}}
+    {{/isMember}}
+
+    {{^isMember}}
+    {{#isAuthenticated}}
+    <form action="/associations/{{association.id}}/create_minute" method="post">
+        <button type="submit">Create Minutes</button>
+    </form>
+    {{/isAuthenticated}}
     {{/isMember}}
 
     {{#isAdmin}}
