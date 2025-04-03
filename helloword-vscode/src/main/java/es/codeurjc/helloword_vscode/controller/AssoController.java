@@ -296,6 +296,7 @@ public class AssoController {
         Optional<Association> association = associationService.findById(id);
         model.addAttribute("association", association.get());
         model.addAttribute("members", association.get().getMembers());
+        model.addAttribute("today", LocalDate.now());
         return"new_minute";
 	}
 

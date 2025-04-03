@@ -6,7 +6,7 @@
 	{{>header}}
 	<form action="/association/{{association.id}}/new_minute" method="post">
 		<p>Date : </p>	
-		<input type='date' name='date' required/>
+		<input type='date' name='date' max="{{today}}" required/>
 		<br>
 		<label for="participantsIds">Choose participants:</label>
 		<select multiple name="participantsIds" id="participantsIds" required>
