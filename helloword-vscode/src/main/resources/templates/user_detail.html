@@ -2,18 +2,11 @@
 <html>
 <head>
     <title>User Detail</title>
-    <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <body>
     {{> header}}
     <h2>Info User</h2>
         <p>{{utilisateur.name}} {{utilisateur.surname}}</p>
-    <!-- <h3>Associations</h3>
-    <ul>
-        {{#associations}}
-            <li><a href="/association/{{id}}">{{name}}</a></li>
-        {{/associations}}
-    </ul> -->
     <ul>
         <h3>Associations and member type :</h3>
         {{#associationRoles}}

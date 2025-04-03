@@ -1,10 +1,14 @@
 package es.codeurjc.helloword_vscode.controller;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.sql.rowset.serial.SerialBlob;
+
 import java.sql.Blob;
 import org.springframework.http.HttpHeaders;
 
@@ -27,6 +31,8 @@ import es.codeurjc.helloword_vscode.repository.*;
 import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.sql.rowset.serial.SerialException;
 
 @Controller
 public class AssoController {
@@ -187,4 +193,45 @@ public class AssoController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    
+	@GetMapping("/editasso/{id}")
+	public String editAsso(Model model, @PathVariable long id) {
+
+		Optional<Association> association = associationService.findById(id);
+		if (association.isPresent()) {
+			model.addAttribute("association", association.get());
+			return "editAssoPage";
+		} else {
+			return "redirect:/";
+		}
+	}
+    
+    @PostMapping("/editasso")
+    public String editAssoProcess(@RequestParam Long id,
+                                  @RequestParam String name,
+                                  @RequestParam(required = false) MultipartFile image,
+                                  Model model) {
+        Optional<Association> optAsso = associationService.findById(id);
+        if (optAsso.isPresent()) {
+            Association asso = optAsso.get();
+            asso.setName(name);
+    
+            if (image != null && !image.isEmpty()) {
+                try {
+                    byte[] bytes = image.getBytes();
+                    Blob blob = new SerialBlob(bytes);
+                    asso.setImageFile(blob);
+                } catch (SQLException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+    
+            associationService.save(asso);
+            return "redirect:/association/" + id;
+        } else {
+            return "redirect:/";
+        }
+    }
+    
 }

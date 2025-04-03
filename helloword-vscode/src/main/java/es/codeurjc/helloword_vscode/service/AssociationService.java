@@ -24,7 +24,7 @@ public class AssociationService {
     @Autowired
 	private AssociationRepository associationRepository;
 
-    	public void save(Association association) {
+    public void save(Association association) {
 		associationRepository.save(association);
 	}
 
