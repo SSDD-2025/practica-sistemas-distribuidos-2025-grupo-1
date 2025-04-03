@@ -50,7 +50,8 @@ public class SecurityConfiguration {
                 "/association/*/delete",
                 "/association/*/deleteImage",
                 "/editasso",
-                "/editasso/**"
+                "/editasso/**",
+                "/createasso"
             ).hasRole("ADMIN")
             .anyRequest().authenticated()
         )    

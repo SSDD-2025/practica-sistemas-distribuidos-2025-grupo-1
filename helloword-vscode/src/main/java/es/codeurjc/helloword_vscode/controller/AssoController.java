@@ -267,4 +267,9 @@ public class AssoController {
         
 	}
 
+    @GetMapping("/createasso")
+    public String createAsso(){
+        return "new_asso";
+    }
+
 }
