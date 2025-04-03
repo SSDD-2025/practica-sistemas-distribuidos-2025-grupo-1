@@ -21,7 +21,7 @@ public class MinuteService {
 	}
 
 	public void save (Minute minute) throws IOException{
-		this.save(minute);
+		minuteRepository.save(minute);
 	}
 
 }

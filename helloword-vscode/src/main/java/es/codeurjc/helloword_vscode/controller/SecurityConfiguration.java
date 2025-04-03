@@ -41,8 +41,8 @@ public class SecurityConfiguration {
     
         http
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/", "/css/**", "/images/**", "/association/*/image").permitAll()
-            .requestMatchers("/association/**", "/user/**", "/members").permitAll()
+            .requestMatchers("/", "/css/**", "/images/**", "/association/*/image", "/association/*/createMinute").permitAll()
+            .requestMatchers("/association/**", "/user/**", "/members", "/association/*/new_minute").permitAll()
             .requestMatchers("/profile").hasAnyRole("USER")
             .requestMatchers(
                 "/admin",

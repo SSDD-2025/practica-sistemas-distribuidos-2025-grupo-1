@@ -3,7 +3,10 @@ package es.codeurjc.helloword_vscode.controller;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +36,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.rowset.serial.SerialException;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
+
 
 @Controller
 public class AssoController {
@@ -249,22 +257,46 @@ public class AssoController {
     
 
     @PostMapping("/association/{id}/new_minute")
-    @PreAuthorize("hasRole('USER')")
-	public String createMinute(@PathVariable long id, String date, List<UtilisateurEntity> participants, String content, double duration) throws Exception {
+	public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
         Optional<Association> association = associationService.findById(id);
 
         if (association.isPresent()) {
+            try {
+                LocalDate submittedDate = LocalDate.parse(date); 
+                if (submittedDate.isAfter(LocalDate.now())) {
+                    model.addAttribute("error", "The date can not be in the futur");
+                    model.addAttribute("association", association.get());
+                    model.addAttribute("members", association.get().getMembers());
+                    return "new_minute";
+                }
 			Minute minute = new Minute();
             minute.setDate(date);
+            List<UtilisateurEntity> participants = participantsIds.stream()
+            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
             minute.setParticipants(participants);
             minute.setContent(content);
             minute.setDuration(duration);
+            minute.setAssociation(association.get());
             minuteService.save(minute);
-			return "redirect:/";
-		} else {
+			return "redirect:/association/" + id;
+		         } catch (DateTimeParseException e) {
+            model.addAttribute("error", "Format de date invalide.");
+            return "new_minute";
+        } }
+        else {
 			return "redirect:/";
 		}
         
+	}
+
+    @PostMapping("/association/{id}/createMinute")
+	public String createMinute(Model model, @PathVariable long id) {
+        Optional<Association> association = associationService.findById(id);
+        model.addAttribute("association", association.get());
+        model.addAttribute("members", association.get().getMembers());
+        return"new_minute";
 	}
 
     @GetMapping("/createasso")
