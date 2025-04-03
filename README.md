@@ -95,7 +95,8 @@ Relationships:
    ```sh
    mvn clean install
    ```
-5. Run the application:
+5. Create database associations in MySQL Workbench
+6. Run the application:
    ```sh
    mvn spring-boot:run
    ```
