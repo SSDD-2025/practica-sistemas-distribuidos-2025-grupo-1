@@ -196,6 +196,7 @@ public class AssoController {
 
     
 	@GetMapping("/editasso/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
 	public String editAsso(Model model, @PathVariable long id) {
 
 		Optional<Association> association = associationService.findById(id);
