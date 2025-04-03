@@ -246,4 +246,24 @@ public class AssoController {
     }
 
     
+
+    @PostMapping("/association/{id}/new_minute")
+    @PreAuthorize("hasRole('USER')")
+	public String createMinute(@PathVariable long id, String date, List<UtilisateurEntity> participants, String content, double duration) throws Exception {
+        Optional<Association> association = associationService.findById(id);
+
+        if (association.isPresent()) {
+			Minute minute = new Minute();
+            minute.setDate(date);
+            minute.setParticipants(participants);
+            minute.setContent(content);
+            minute.setDuration(duration);
+            minuteService.save(minute);
+			return "redirect:/";
+		} else {
+			return "redirect:/";
+		}
+        
+	}
+
 }

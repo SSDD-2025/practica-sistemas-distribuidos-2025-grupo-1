@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# Web Application: Application Management
+# Web Application: [Your App Name]
 
 ## Development Team
 
@@ -10,7 +9,7 @@
 
 
 ## Project Coordination
-- **Trello Board**: [[Trello Link]](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)
+- **Trello Board**: [[Public Trello Link]](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)
 
 ## Key Features
 ### Entities
@@ -38,29 +37,29 @@ Relationships:
 ## Development Contributions
 
 ### Tasks Completed by Each Developer
-#### [Elisa DONET]
-- 
-- 
-- 
+#### Elisa DONET
+- User identification
+- How the navigation bar works
+- HTML and CSS
 
-#### [Mathéo RENAULT]
--
-- 
-- 
+#### Mathéo RENAULT
+- Creation of entities
+- Comments
+- Diagramm
 
 ### 5 Most Important Commits
-1. 
-2. 
-3. 
-4. 
-5. 
+1. Create repository, service and style sheet
+2. Add data on db and display on home page
+3. List asso + members + search user by with nav bar
+4. Role in DB
+5. Add new association
 
-### 5 Key Files + Participation
-1. 
-2. 
-3. 
-4. 
-5. 
+### 5 Key Files
+1. AssoController.java
+2. SecurityConfiguration.java
+3. Association.java
+4. UtilisateurEntity.java
+5. Index.html
 
 ## Screenshots & Navigation Flow
 
@@ -112,6 +111,3 @@ Relationships:
 
 
 
-=======
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/D1C1HU9V)
->>>>>>> parent of a1891e9 (Update README.md)
