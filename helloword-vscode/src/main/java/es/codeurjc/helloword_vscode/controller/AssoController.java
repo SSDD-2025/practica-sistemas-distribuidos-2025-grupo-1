@@ -305,4 +305,12 @@ public class AssoController {
         return "new_asso";
     }
 
+    @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
+    public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        List<UtilisateurEntity> utilisateurs = minute.getParticipants();
+        minuteService.delete(minute, assoId, utilisateurs);
+        return "redirect:/association/" + assoId;
+    }
+    
 }

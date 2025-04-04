@@ -23,7 +23,14 @@
     <h3>Minutes :</h3>
     <ul>
         {{#minutes}}
-            <li>{{date}} - {{content}} (Duration : {{duration}} min)</li>
+            <li>
+                {{date}} - {{content}} (Duration : {{duration}} min) - {{id}}
+                {{#isAdmin}}
+                <form action="/minute/{{id}}/asso/{{association.id}}/delete" method="post">
+                    <button type="submit">Delete</button>
+                </form>
+                {{/isAdmin}}
+            </li>
         {{/minutes}}
     </ul>
 
