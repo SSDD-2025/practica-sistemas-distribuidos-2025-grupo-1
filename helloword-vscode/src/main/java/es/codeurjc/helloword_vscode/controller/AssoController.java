@@ -5,6 +5,7 @@ import java.security.Principal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import java.sql.Blob;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.core.io.Resource;
+import org.h2.command.dml.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -39,11 +41,16 @@ import javax.sql.rowset.serial.SerialException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Arrays;
 
 
 
 @Controller
 public class AssoController {
+
+    private final UtilisateurEntityRepository utilisateurEntityRepository;
 
     // Service for database interaction 
 
@@ -58,6 +65,10 @@ public class AssoController {
 
     @Autowired
 	private MemberTypeService memberTypeService;
+
+    AssoController(UtilisateurEntityRepository utilisateurEntityRepository) {
+        this.utilisateurEntityRepository = utilisateurEntityRepository;
+    }
 
     // Adds authentication attributes to all templates
     @ModelAttribute
@@ -312,5 +323,60 @@ public class AssoController {
         minuteService.delete(minute, assoId, utilisateurs);
         return "redirect:/association/" + assoId;
     }
-    
+
+    @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
+		Optional<Association> association = associationService.findById(assoId);
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        model.addAttribute("association", association.get());
+        model.addAttribute("minute", minute);
+        model.addAttribute("today", LocalDate.now());
+        model.addAttribute("members", association.get().getMembers());
+        model.addAttribute("participants", minute.getParticipants());
+
+        //Créer une liste avec les membres de l'asso qui n'ont pas participés à la réunion
+        Collection<UtilisateurEntity> members = association.get().getMembers();;
+        Collection<UtilisateurEntity> participants = minute.getParticipants();
+        Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();
+        memberNoPart.addAll(members);
+        memberNoPart.removeAll(participants);
+        model.addAttribute("noPart", memberNoPart);
+
+		if (association.isPresent()) {
+			return "editMinutePage";
+		} else {
+			return "redirect:/";
+		}
+	}
+
+    @PostMapping("/editminute")
+    public String editMinuteProcess(@RequestParam long minuteId, 
+                                    @RequestParam long assoId,
+                                    @RequestParam String date,
+                                    @RequestParam(required = false) List<Long> participantsIds, 
+                                    @RequestParam String content, 
+                                    @RequestParam double duration, 
+                                    Model model,
+                                    RedirectAttributes redirectAttributes
+                                    ) throws IOException {
+        if (participantsIds == null || participantsIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "You need to select at least one participant");
+            return "redirect:/minute/" + minuteId + "/asso/" + assoId + "/edit";
+        }
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        Optional<Association> association = associationService.findById(assoId);
+        minute.setDate(date);
+        List<UtilisateurEntity> participants = participantsIds.stream()
+        .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+        minute.setParticipants(participants);
+        minute.setContent(content);
+        minute.setDuration(duration);
+        minute.setAssociation(association.get());
+        minuteService.save(minute);
+        return "redirect:/association/" + assoId;
+    }
+
 }

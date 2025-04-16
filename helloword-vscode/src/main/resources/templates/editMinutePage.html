@@ -1,0 +1,47 @@
+{{>header}}
+<form action="/editminute" method="post" onsubmit="return checkParticipantsSelected();">
+    <input type="hidden" name="minuteId" value="{{minute.id}}"/>
+    <input type="hidden" name="assoId" value="{{association.id}}"/>
+    <div>
+        <label>Date: </label>
+        <input type='date' name='date' value="{{minute.date}}" max="{{today}}"/>
+    </div>
+    <label for="participantsIds">Choose participants:</label>
+
+    <!-- Case cochée pour les participants à la réunion -->
+    {{#minute.participants}}
+        <input type="checkbox" name="participantsIds" value="{{id}}" checked>{{name}} {{surname}}
+    {{/minute.participants}}
+
+    <!-- Case non cochée pour les membres qui ne participent pas à la réunion -->
+    {{#noPart}}
+        <input type="checkbox" name="participantsIds" value="{{id}}">{{name}} {{surname}}
+    {{/noPart}}
+
+    <script>
+        function checkParticipantsSelected() {
+            const checkboxes = document.querySelectorAll('input[name="participantsIds"]:checked');
+            if (checkboxes.length === 0) {
+                alert("Select at least one participant");
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+    {{#error}}
+    <p style="color:red">{{error}}</p>
+    {{/error}}
+
+
+    <p>Content :</p>	
+        <input type='text' name='content' value="{{minute.content}}"/>
+    <p>Duration : </p>
+        <input type="number" name="duration" id="duration" value="{{minute.duration}}" min="0" max="180" step="0.01"/>
+
+    <p>
+        <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>
+        <input type="submit" value="Save"/>
+    </p>
+
+{{>footer}}
