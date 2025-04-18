@@ -43,7 +43,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 // public page
                 .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/repository/**", "/service/**").permitAll()
-                .requestMatchers("/association/**", "/user/**", "/new_minute.html" ).permitAll()
+                .requestMatchers("/association/**", "/user/**", "/new_minute.html", "/new_member.html" ).permitAll()
                 // private page
                 // .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()

@@ -2,6 +2,7 @@ package es.codeurjc.helloword_vscode.controller;
 
 import org.hibernate.mapping.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,13 +11,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
+import es.codeurjc.helloword_vscode.service.MemberTypeService;
 import jakarta.servlet.http.HttpSession;
-
+import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 
 @Controller
@@ -24,6 +28,9 @@ public class MemberController {
 
     @Autowired
     private AssociationService associationService;
+
+    @Autowired
+    private MemberTypeService memberTypeService;
 
     @Autowired
     private UtilisateurEntityService utilisateurEntityService;
@@ -61,5 +68,13 @@ public class MemberController {
         }
         return "index";
     } 
+
+
+    // Creates a new member
+    @PostMapping("/login/create")
+    public String createMember(MemberType member) throws Exception {
+        memberTypeService.save(member);
+        return "redirect:/";
+    }
 }
 
