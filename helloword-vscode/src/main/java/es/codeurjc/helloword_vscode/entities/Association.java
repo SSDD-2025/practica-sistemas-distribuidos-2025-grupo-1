@@ -87,6 +87,7 @@ public class Association {
         this.minutes = minutes;
     }
 
+
     // Méthode pour obtenir les membres
     public List<UtilisateurEntity> getMembers() {
         return memberTypes.stream()

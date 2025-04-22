@@ -40,16 +40,21 @@ public class SecurityConfiguration {
         http.authenticationProvider(authenticationProvider());
     
         http
-            .authorizeHttpRequests(authorize -> authorize
-                // public page
-                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/repository/**", "/service/**").permitAll()
-                .requestMatchers("/association/**", "/user/**","/editasso/**", "/editasso" ).permitAll()
-                // private page
-                // .requestMatchers("/profile").authenticated()
-                // .anyRequest().authenticated()
-                .requestMatchers("/profile").hasAnyRole("USER")
-				.requestMatchers("/admin","/association/create", "/new_asso.html", "/association/**/delete").hasAnyRole("ADMIN")
-            )
+        .authorizeHttpRequests(authorize -> authorize
+            .requestMatchers("/", "/css/**", "/images/**", "/association/*/image", "/association/*/createMinute").permitAll()
+            .requestMatchers("/association/**", "/user/**", "/members", "/association/*/new_minute").permitAll()
+            .requestMatchers("/profile").hasAnyRole("USER")
+            .requestMatchers(
+                "/admin",
+                "/association/create",
+                "/association/*/delete",
+                "/association/*/deleteImage",
+                "/editasso",
+                "/editasso/**",
+                "/createasso"
+            ).hasRole("ADMIN")
+            .anyRequest().authenticated()
+        )    
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .failureUrl("/loginerror")

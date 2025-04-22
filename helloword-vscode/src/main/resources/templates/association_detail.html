@@ -23,22 +23,39 @@
     <h3>Minutes :</h3>
     <ul>
         {{#minutes}}
-            <li>{{date}} - {{content}} (Duration : {{duration}} min)</li>
+            <li>
+                {{date}} - {{content}} (Duration : {{duration}} min) - {{id}}
+                {{#isAdmin}}
+                <form action="/minute/{{id}}/asso/{{association.id}}/delete" method="post">
+                    <button type="submit">Delete</button>
+                </form>
+                <button onclick="location.href='/minute/{{id}}/asso/{{association.id}}/edit'">Edit</button>
+                {{/isAdmin}}
+            </li>
         {{/minutes}}
     </ul>
 
     {{^isMember}}
+    {{#isAuthenticated}}
     <form action="/associations/{{association.id}}/join" method="post">
         <button type="submit">Join</button>
     </form>
+    {{/isAuthenticated}}
+    {{/isMember}}
+
+    {{#isMember}}
+    {{#isAuthenticated}}
+    <form action="/association/{{association.id}}/createMinute" method="post">
+        <button type="submit">Create Minute</button>
+    </form>
+    {{/isAuthenticated}}
     {{/isMember}}
 
     {{#isAdmin}}
     <form action="/association/{{association.id}}/delete" method="post">
         <button type="submit">Delete</button>
     </form>
-    {{/isAdmin}} 
-
     <button onclick="location.href='/editasso/{{association.id}}'">Edit</button>
+    {{/isAdmin}} 
 </body>
 </html>
