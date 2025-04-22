@@ -1,6 +1,7 @@
 package es.codeurjc.helloword_vscode.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.entities.Association;
@@ -13,7 +14,21 @@ import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import jakarta.annotation.PostConstruct;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+import javax.sql.rowset.serial.SerialBlob;
+
+import java.io.IOException;
+import java.sql.Blob;
+import java.sql.SQLException;
+import java.util.Base64;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
+
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -35,8 +50,31 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private Blob getRandomImageBlob() {
+    try {
+        // List of file names
+        String[] imageFiles = {"image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg",
+         "image5.jpg", "image6.jpg", "image7.jpg", "image8.jpg"};
+
+        // Choose ramdom image
+        String fileName = imageFiles[new Random().nextInt(imageFiles.length)];
+
+        // Load file
+        ClassPathResource imgFile = new ClassPathResource("static/images/asso/" + fileName);
+
+        // Read in byte
+            byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
+
+            // Create blob
+            return new SerialBlob(bytes);
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @PostConstruct
-    public void init() {
+    public void init() throws SQLException{
         // Add users
         UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
         UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
@@ -64,5 +102,58 @@ public class DataInitializer {
         minuteRepository.save(minute1);
         Minute minute2 = new Minute("2024-11-03", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "Discussion on government measures", 30.0, association1);
         minuteRepository.save(minute2);
-    }
+
+        // Generate new data random
+        List<UtilisateurEntity> utilisateurs = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            String role = (i % 5 == 0) ? "USER,ADMIN" : "USER";
+            UtilisateurEntity user = new UtilisateurEntity(
+                "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), role.split(",")
+            );
+            utilisateurs.add(user);
+        }
+        UtilisateurEntityRepository.saveAll(utilisateurs);
+
+        List<String> names = List.of("Love Earth", "Give Smile", "Construct Avenir", "Culture Club", "Nature Warrior", "Book Lovers");
+        List<Association> associations = new ArrayList<>();
+        for (String name : names) {
+            Association asso = new Association(name);
+            asso.setImageFile(getRandomImageBlob());
+            associations.add(asso);
+        }
+        
+        associationRepository.saveAll(associations);
+
+        List<MemberType> roles = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            UtilisateurEntity user = utilisateurs.get(i);
+            Association asso = associations.get(i % associations.size());
+            String roleName = switch (i % 3) {
+                case 0 -> "president";
+                case 1 -> "secretary";
+                default -> "member";
+            };
+            roles.add(new MemberType(roleName, user, asso));
+        }
+        roleRepository.saveAll(roles);
+
+        List<Minute> minutes = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Association asso = associations.get(i % associations.size());
+            List<UtilisateurEntity> participants = Arrays.asList(
+                utilisateurs.get(i % utilisateurs.size()),
+                utilisateurs.get((i + 1) % utilisateurs.size())
+            );
+            minutes.add(new Minute(
+                "2024-0" + ((i % 9) + 1) + "-0" + ((i % 27) + 1),
+                participants,
+                "Minute n°" + (i + 1),
+                30.0 + i,
+                asso
+            ));
+        }
+        minuteRepository.saveAll(minutes);
+
+        }
+
 }
