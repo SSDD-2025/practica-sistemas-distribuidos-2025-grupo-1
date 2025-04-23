@@ -99,7 +99,7 @@ public class MemberController {
     public String editProfile(Model model, Principal principal) {
         UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
         model.addAttribute("user", user);
-        return "/edit_profile.html";
+        return "edit_profile";
     }
 
     @PostMapping("/profile/update")
