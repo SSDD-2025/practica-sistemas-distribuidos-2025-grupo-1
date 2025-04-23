@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.entities.Association;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 @Service
@@ -21,6 +22,11 @@ public class UtilisateurEntityService implements UserDetailsService {
 
     @Autowired
 	private UtilisateurEntityRepository utilisateursEntityRepository;
+
+
+    public void save(UtilisateurEntity utilisateurEntity) {
+		utilisateursEntityRepository.save(utilisateurEntity);
+	}
 
 	public Optional<UtilisateurEntity> findByName(String name) {
 		return utilisateursEntityRepository.findByName(name);

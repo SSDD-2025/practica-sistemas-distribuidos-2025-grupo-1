@@ -43,11 +43,13 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 // public page
                 .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/repository/**", "/service/**").permitAll()
-                .requestMatchers("/association/**", "/user/**", "/new_minute.html", "/new_member.html" ).permitAll()
+                .requestMatchers("/association/**", "/user/**", "/new_minute.html", "/new_member.html", "/login/create", "/login.html" ).permitAll()
                 // private page
-                // .requestMatchers("/profile").authenticated()
+                .requestMatchers("/profile").authenticated()
                 // .anyRequest().authenticated()
-                .requestMatchers("/profile").hasAnyRole("USER")
+                .requestMatchers("/profile", "/profile/delete", "/profile/edit", "/edit_profile.html").hasAnyRole("USER")
+                .requestMatchers("/profile/edit", "/edit_profile.html").authenticated()
+                .requestMatchers("/profile/delete", "/confirm_delete.html").authenticated()
 				.requestMatchers("/admin","/association/create", "/new_asso.html", "/association/**/delete").hasAnyRole("ADMIN")
             )
             .formLogin(formLogin -> formLogin
