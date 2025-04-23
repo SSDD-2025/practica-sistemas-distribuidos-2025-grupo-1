@@ -84,7 +84,15 @@ public class MemberController {
     } 
 
     @PostMapping("/login/create")
-    public String createUser(@RequestParam String name, @RequestParam String surname, @RequestParam String pwd) {
+    public String createUser(@RequestParam String name, 
+                            @RequestParam String surname, 
+                            @RequestParam String pwd,
+                            Model model) {
+        Optional<UtilisateurEntity> existingUser = utilisateursEntityService.findByName(name);
+        if (existingUser.isPresent()) {
+            model.addAttribute("error", "This username already exists");
+            return "new_member";
+        }
         UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(pwd), "USER");
         utilisateursEntityRepository.save(user);
         return "redirect:/";
@@ -106,11 +114,20 @@ public class MemberController {
     public String updateProfile(Principal principal,
                                 @RequestParam String name,
                                 @RequestParam String surname,
-                                @RequestParam(required=false) String pwd) {
+                                @RequestParam(required=false) String pwd,
+                                Model model) {
         String username = principal.getName();
         Optional<UtilisateurEntity> userOpt = utilisateursEntityService.findByName(username);
         if (userOpt.isPresent()) {
             UtilisateurEntity user = userOpt.get();
+
+            // Verify if an other user have already this name
+            Optional<UtilisateurEntity> existing = utilisateursEntityService.findByName(name);
+            if (existing.isPresent() && existing.get().getId() != user.getId()) {
+                model.addAttribute("error", "This username already exists");
+                model.addAttribute("user", user);
+                return "edit_profile";
+            }
             user.setName(name);
             user.setSurname(surname);
     
