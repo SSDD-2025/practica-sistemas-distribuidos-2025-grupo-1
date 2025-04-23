@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;

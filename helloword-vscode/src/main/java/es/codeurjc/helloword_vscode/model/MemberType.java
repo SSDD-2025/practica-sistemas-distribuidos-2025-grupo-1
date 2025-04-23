@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -6,7 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.CascadeType;
 
 @Entity
 public class MemberType {

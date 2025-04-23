@@ -85,9 +85,9 @@ public class SecurityConfiguration {
                 .permitAll()
             )
             .sessionManagement(session -> session
-                .sessionFixation().newSession()  // Crée une nouvelle session après connexion
-                .maximumSessions(1)  // Autorise seulement une session par utilisateur
-                .expiredUrl("/login?expired")  // Redirige vers /login si la session expire
+                .sessionFixation().newSession()  // Create new session after login
+                .maximumSessions(1)  // Authorize only one session per user
+                .expiredUrl("/login?expired")  // Redirect on login if the session died
             );
     
         // Disable CSRF at the moment

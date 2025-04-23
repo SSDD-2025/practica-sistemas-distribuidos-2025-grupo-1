@@ -1,8 +1,9 @@
 package es.codeurjc.helloword_vscode.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import es.codeurjc.helloword_vscode.entities.MemberType;
-import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
+
+import es.codeurjc.helloword_vscode.model.MemberType;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 
 import java.util.List;
 

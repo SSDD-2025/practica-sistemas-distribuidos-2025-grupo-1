@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +16,6 @@ import java.sql.Blob;
 import org.springframework.http.HttpHeaders;
 
 import org.springframework.core.io.Resource;
-import org.h2.command.dml.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -31,26 +29,20 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import es.codeurjc.helloword_vscode.entities.*;
-import es.codeurjc.helloword_vscode.repository.*;
+import es.codeurjc.helloword_vscode.model.Association;
+import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
+import es.codeurjc.helloword_vscode.model.MemberType;
+import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.rowset.serial.SerialException;
-
-import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Arrays;
 
 
 
 @Controller
 public class AssoController {
-
-    private final UtilisateurEntityRepository utilisateurEntityRepository;
 
     // Service for database interaction 
 
@@ -65,10 +57,6 @@ public class AssoController {
 
     @Autowired
 	private MemberTypeService memberTypeService;
-
-    AssoController(UtilisateurEntityRepository utilisateurEntityRepository) {
-        this.utilisateurEntityRepository = utilisateurEntityRepository;
-    }
 
     // Adds authentication attributes to all templates
     @ModelAttribute
@@ -104,12 +92,6 @@ public class AssoController {
         return "loginerror";
     }
 
-    // Private page (for authenticated users)
-    @GetMapping("/private")
-    public String privatePage() {
-        return "private";
-    }
-
     // User profile page
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
@@ -120,25 +102,25 @@ public class AssoController {
         return "profile";
     }
 
-        // Displays details of a specific user
-        @GetMapping("/user/{id}")
-        public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
-            Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
-            if (utilisateurEntity.isPresent()) {
-                UtilisateurEntity utilisateur = utilisateurEntity.get();
-                model.addAttribute("utilisateur", utilisateur);
-                //model.addAttribute("associations", utilisateur.getAssociations());
-                List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
-                .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
-                .collect(Collectors.toList());
-                model.addAttribute("associationRoles", roles);
-                List<Minute> userMinutes = utilisateur.getMinutes();
-                model.addAttribute("userMinutes", userMinutes);
-                return "user_detail";
-            } else {
-                return "user_not_found";
-            }   
-        }
+    // Displays details of a specific user
+    @GetMapping("/user/{id}")
+    public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
+        if (utilisateurEntity.isPresent()) {
+            UtilisateurEntity utilisateur = utilisateurEntity.get();
+            model.addAttribute("utilisateur", utilisateur);
+            //model.addAttribute("associations", utilisateur.getAssociations());
+            List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
+            .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
+            .collect(Collectors.toList());
+            model.addAttribute("associationRoles", roles);
+            List<Minute> userMinutes = utilisateur.getMinutes();
+            model.addAttribute("userMinutes", userMinutes);
+            return "user_detail";
+        } else {
+            return "user_not_found";
+        }   
+    }
 
     // Displays details of a specific association
     @GetMapping("/association/{id}")
@@ -342,7 +324,7 @@ public class AssoController {
         model.addAttribute("members", association.get().getMembers());
         model.addAttribute("participants", minute.getParticipants());
 
-        //Créer une liste avec les membres de l'asso qui n'ont pas participés à la réunion
+        //Create a list of all members association who doesn't attend to the meeting
         Collection<UtilisateurEntity> members = association.get().getMembers();;
         Collection<UtilisateurEntity> participants = minute.getParticipants();
         Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();

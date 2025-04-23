@@ -1,6 +1,5 @@
 package es.codeurjc.helloword_vscode.controller;
 
-import org.hibernate.mapping.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -13,18 +12,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
-import es.codeurjc.helloword_vscode.service.MemberTypeService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import es.codeurjc.helloword_vscode.entities.MemberType;
-import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import java.security.Principal;
@@ -36,9 +30,6 @@ public class MemberController {
 
     @Autowired
     private AssociationService associationService;
-
-    @Autowired
-    private MemberTypeService memberTypeService;
 
     @Autowired
     private UtilisateurEntityService utilisateursEntityService;

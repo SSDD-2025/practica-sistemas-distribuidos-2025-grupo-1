@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import java.util.List;
 

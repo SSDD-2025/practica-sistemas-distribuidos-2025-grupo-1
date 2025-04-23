@@ -13,10 +13,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.codeurjc.helloword_vscode.entities.Association;
-import es.codeurjc.helloword_vscode.entities.MemberType;
-import es.codeurjc.helloword_vscode.entities.Minute;
-import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Association;
+import es.codeurjc.helloword_vscode.model.MemberType;
+import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
@@ -73,20 +73,20 @@ public class UtilisateurEntityService implements UserDetailsService {
 		if (optUser.isPresent()) {
 			UtilisateurEntity user = optUser.get();
 
-			// 1. Supprimer les rôles dans les associations
+			// 1. Delete member type in association
 			List<MemberType> memberTypes = memberTypeRepository.findByUtilisateurEntity(user);
 			for (MemberType memberType : memberTypes) {
 				memberTypeRepository.delete(memberType);
 			}
 
-			// 2. Supprimer la participation aux réunions
+			// 2. Delete participation to meetings
 			List<Minute> minutes = minuteRepository.findAllByParticipantsContains(user);
 			for (Minute minute : minutes) {
 				minute.getParticipants().remove(user);
 				minuteRepository.save(minute); // important !
 			}
 
-			// 3. Supprimer l'utilisateur
+			// 3. Delete user
 			utilisateursEntityRepository.delete(user);
 		}
 	}

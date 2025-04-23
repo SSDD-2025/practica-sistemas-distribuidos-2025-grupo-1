@@ -4,12 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
-import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 
-import es.codeurjc.helloword_vscode.entities.*;
-
-import org.springframework.transaction.annotation.Transactional;
+import es.codeurjc.helloword_vscode.model.MemberType;
 
 @Service
 public class MemberTypeService {

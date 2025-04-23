@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,16 +88,16 @@ public class Association {
     }
 
 
-    // Méthode pour obtenir les membres
+    // Method to get members
     public List<UtilisateurEntity> getMembers() {
         return memberTypes.stream()
                      .map(MemberType::getUtilisateurEntity)
                      .collect(Collectors.toList());
     }
 
-    // Méthode pour définir les membres
+    // Method to define members
     public void setMembers(List<UtilisateurEntity> members) {
-        // Assurez-vous que chaque utilisateur a un rôle associé à cette association
+        // Assure that all users has a role in their association
         this.memberTypes = members.stream()
                             .map(Utilisateurentity -> {
                                 MemberType memberType = new MemberType();
