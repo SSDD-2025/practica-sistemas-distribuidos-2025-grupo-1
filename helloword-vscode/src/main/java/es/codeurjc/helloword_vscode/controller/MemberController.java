@@ -106,13 +106,24 @@ public class MemberController {
     public String updateProfile(Principal principal,
                                 @RequestParam String name,
                                 @RequestParam String surname,
-                                @RequestParam String pwd) {
-        UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
-        user.setName(name);
-        user.setSurname(surname);
-        user.setPwd(passwordEncoder.encode(pwd));
-        utilisateursEntityRepository.save(user);
-        return "redirect:/logout";
+                                @RequestParam(required=false) String pwd) {
+        String username = principal.getName();
+        Optional<UtilisateurEntity> userOpt = utilisateursEntityService.findByName(username);
+        if (userOpt.isPresent()) {
+            UtilisateurEntity user = userOpt.get();
+            user.setName(name);
+            user.setSurname(surname);
+    
+            // Change password only if there is a new valors
+            if (pwd != null && !pwd.isBlank()) {
+                user.setPwd(passwordEncoder.encode(pwd));
+            }
+    
+            utilisateursEntityService.save(user);
+    
+            return "redirect:/logout"; 
+        }
+        return "redirect:/login";
     }
 
 
