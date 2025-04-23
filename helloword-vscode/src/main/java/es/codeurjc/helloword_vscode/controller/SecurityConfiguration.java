@@ -40,21 +40,27 @@ public class SecurityConfiguration {
         http.authenticationProvider(authenticationProvider());
     
         http
-        .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/", "/css/**", "/images/**", "/association/*/image", "/association/*/createMinute").permitAll()
-            .requestMatchers("/association/**", "/user/**", "/members", "/association/*/new_minute", "/new_member.html").permitAll()
-            .requestMatchers("/profile").hasAnyRole("USER")
-            .requestMatchers(
-                "/admin",
-                "/association/create",
-                "/association/*/delete",
-                "/association/*/deleteImage",
-                "/editasso",
-                "/editasso/**",
-                "/createasso"
-            ).hasRole("ADMIN")
-            .anyRequest().authenticated()
-        )    
+            .authorizeHttpRequests(authorize -> authorize
+                // public page
+                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/association/*/createMinute").permitAll()
+                .requestMatchers("/association/**", "/user/**", "/new_minute.html", "/new_member.html", "/association/*/image",
+                "/association/*/new_minute",
+                "/login/create",
+                "/login.html"  ).permitAll()
+
+                .requestMatchers("/profile", "/profile/edit", "/edit_profile.html", "/profile/delete").hasAnyRole("USER")
+                .requestMatchers("/profile/delete", "/confirm_delete.html", "/profile/edit", "/edit_profile.html").authenticated()
+                .requestMatchers(
+                    "/admin",
+                    "/association/create",
+                    "/association/*/delete",
+                    "/association/*/deleteImage",
+                    "/editasso",
+                    "/editasso/**",
+                    "/createasso"
+                ).hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
             .formLogin(formLogin -> formLogin
                 .loginPage("/login")
                 .failureUrl("/loginerror")

@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,10 @@ import es.codeurjc.helloword_vscode.service.MemberTypeService;
 import jakarta.servlet.http.HttpSession;
 import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+
+import java.security.Principal;
+
 
 @Controller
 public class MemberController {
@@ -33,7 +38,13 @@ public class MemberController {
     private MemberTypeService memberTypeService;
 
     @Autowired
-    private UtilisateurEntityService utilisateurEntityService;
+    private UtilisateurEntityService utilisateursEntityService;
+    
+    @Autowired
+    private UtilisateurEntityRepository utilisateursEntityRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @ModelAttribute
     public void addAttributes(Model model) {
@@ -50,7 +61,7 @@ public class MemberController {
     
     @GetMapping("/members")
     public String showMembers(Model model) {
-        model.addAttribute("Utilisateursentity", utilisateurEntityService.findAll());
+        model.addAttribute("Utilisateursentity", utilisateursEntityService.findAll());
         return "members";
     }
 
@@ -59,7 +70,7 @@ public class MemberController {
                            @RequestParam(name = "searchType", required = false) String searchType, 
                            Model model) {
         if (id != null && "user".equals(searchType)) {
-            utilisateurEntityService.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
+            utilisateursEntityService.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
             return "members";
         }
         if (id != null && "association".equals(searchType)) {
@@ -71,10 +82,52 @@ public class MemberController {
 
 
     // Creates a new member
-    @PostMapping("/login/create")
+    /*@PostMapping("/login/create")
     public String createMember(MemberType member) throws Exception {
         memberTypeService.save(member);
         return "redirect:/";
+    }*/
+
+    @PostMapping("/login/create")
+    public String createUser(@RequestParam String name, @RequestParam String surname, @RequestParam String pwd) {
+        UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(pwd), "USER");
+        utilisateursEntityRepository.save(user);
+        return "redirect:/";
     }
+
+    @GetMapping("/profile/edit")
+    public String editProfile(Model model, Principal principal) {
+        UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
+        model.addAttribute("user", user);
+        return "/edit_profile.html";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(Principal principal,
+                                @RequestParam String name,
+                                @RequestParam String surname,
+                                @RequestParam String pwd) {
+        UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
+        user.setName(name);
+        user.setSurname(surname);
+        user.setPwd(passwordEncoder.encode(pwd));
+        utilisateursEntityRepository.save(user);
+        return "redirect:/profile";
+    }
+
+
+    @GetMapping("/profile/delete")
+    public String deleteConfirmation() {
+        return "/confirm_delete.html";
+    }
+
+    /*@PostMapping("/profile/delete/confirm")
+    public String confirmDelete(Principal principal) {
+        UtilisateurEntity user = utilisateursEntityService.findByName(principal.getName()).orElseThrow();
+        utilisateursEntityService.delete(user);
+        return "redirect:/login";
+    }*/
+
+
 }
 
