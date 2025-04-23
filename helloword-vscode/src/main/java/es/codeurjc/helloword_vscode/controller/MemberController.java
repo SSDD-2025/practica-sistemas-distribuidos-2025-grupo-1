@@ -112,7 +112,7 @@ public class MemberController {
         user.setSurname(surname);
         user.setPwd(passwordEncoder.encode(pwd));
         utilisateursEntityRepository.save(user);
-        return "redirect:/profile";
+        return "redirect:/logout";
     }
 
 
