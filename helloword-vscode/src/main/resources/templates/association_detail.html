@@ -29,7 +29,7 @@
                 <form action="/minute/{{id}}/asso/{{association.id}}/delete" method="post">
                     <button type="submit">Delete</button>
                 </form>
-                <button onclick="location.href='/minute/{{id}}/asso/{{association.id}}/edit'">Edit</button>
+                {{#isMember}}<button onclick="location.href='/minute/{{id}}/asso/{{association.id}}/edit'">Edit</button>{{/isMember}}
                 {{/isAdmin}}
             </li>
         {{/minutes}}

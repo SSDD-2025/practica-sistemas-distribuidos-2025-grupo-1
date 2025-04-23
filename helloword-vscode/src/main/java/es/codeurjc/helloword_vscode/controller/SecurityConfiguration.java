@@ -42,10 +42,12 @@ public class SecurityConfiguration {
         http
             .authorizeHttpRequests(authorize -> authorize
                 // public page
-                .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/association/*/createMinute").permitAll()
+                .requestMatchers(  "/members","/search/**", "/images/**").permitAll()
                 .requestMatchers(
-                    "/association/**", 
-                    "/user/**", 
+                    "/css/**",
+                    "/",
+                    "/association/*", 
+                    "/user/*", 
                     "/new_minute.html", 
                     "/profile/create", 
                     "/association/*/image",
@@ -53,8 +55,8 @@ public class SecurityConfiguration {
                     "/login/create",
                     "/login.html"  ).permitAll()
 
-                .requestMatchers("/profile", "/profile/edit", "/edit_profile.html", "/profile/delete").hasAnyRole("USER")
-                .requestMatchers("/profile/delete", "/confirm_delete.html", "/profile/edit", "/edit_profile.html").authenticated()
+                .requestMatchers("/profile", "/profile/edit", "/edit_profile.html", "/profile/delete", "/association/*/createMinute").hasAnyRole("USER")
+                .requestMatchers("/profile/delete", "/confirm_delete.html", "/profile/edit", "/edit_profile.html", "/association/*/createMinute").authenticated()
                 .requestMatchers(
                     "/admin",
                     "/association/create",

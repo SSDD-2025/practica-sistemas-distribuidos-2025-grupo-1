@@ -144,21 +144,28 @@ public class AssoController {
     @GetMapping("/association/{id}")
     public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         Optional<Association> asso = associationService.findById(id);
-        model.addAttribute("association", asso.get());
-        model.addAttribute("members", asso.get().getMembers());
-        model.addAttribute("minutes", asso.get().getMinutes());
-        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
-        model.addAttribute("hasImage", asso.get().getImageFile() != null);
+        if (asso.isPresent()) {
+            model.addAttribute("association", asso.get());
+            model.addAttribute("members", asso.get().getMembers());
+            model.addAttribute("minutes", asso.get().getMinutes());
+            model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+            model.addAttribute("hasImage", asso.get().getImageFile() != null);
 
-
-        // Check if the user is a member of the association
-        if (principal != null) {
-            String username = principal.getName();
-            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
-            boolean isMember = asso.get().getMembers().contains(user.get());
-            model.addAttribute("isMember", isMember);
+            // Check if the user is a member of the association
+            if (principal != null) {
+                String username = principal.getName();
+                Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
+                if (user.isPresent()) {
+                    boolean isMember = asso.get().getMembers().contains(user.get());
+                    model.addAttribute("isMember", isMember);
+                } else {
+                    model.addAttribute("isMember", false);
+                }
+            }            
+            return "association_detail";
+        } else {
+            return "asso_not_found";
         }
-        return "association_detail";
     }
 
     // Allows a user to join an association
