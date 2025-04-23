@@ -95,6 +95,11 @@ public class MemberController {
         return "redirect:/";
     }
 
+    @GetMapping("/profile/create")
+    public String createPage() {
+        return "new_member";
+    }
+
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal principal) {
         UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
@@ -118,7 +123,7 @@ public class MemberController {
 
     @GetMapping("/profile/delete")
     public String deleteConfirmation() {
-        return "/confirm_delete.html";
+        return "confirm_delete";
     }
 
     /*@PostMapping("/profile/delete/confirm")

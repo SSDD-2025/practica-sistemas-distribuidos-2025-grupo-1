@@ -43,10 +43,15 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 // public page
                 .requestMatchers("/", "/css/**", "/members","/search/**", "/images/**", "/association/*/createMinute").permitAll()
-                .requestMatchers("/association/**", "/user/**", "/new_minute.html", "/new_member.html", "/association/*/image",
-                "/association/*/new_minute",
-                "/login/create",
-                "/login.html"  ).permitAll()
+                .requestMatchers(
+                    "/association/**", 
+                    "/user/**", 
+                    "/new_minute.html", 
+                    "/profile/create", 
+                    "/association/*/image",
+                    "/association/*/new_minute",
+                    "/login/create",
+                    "/login.html"  ).permitAll()
 
                 .requestMatchers("/profile", "/profile/edit", "/edit_profile.html", "/profile/delete").hasAnyRole("USER")
                 .requestMatchers("/profile/delete", "/confirm_delete.html", "/profile/edit", "/edit_profile.html").authenticated()
