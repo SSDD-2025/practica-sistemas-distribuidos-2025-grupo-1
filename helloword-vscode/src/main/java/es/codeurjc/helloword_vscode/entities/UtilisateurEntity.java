@@ -23,7 +23,7 @@ public class UtilisateurEntity {
     @ElementCollection(fetch = FetchType.EAGER)
 	private List<String> roles;
 
-    @OneToMany(mappedBy = "Utilisateurentity")
+    @OneToMany(mappedBy = "utilisateurEntity")
     private List<MemberType> memberTypes;
 
     // Constructor

@@ -20,12 +20,15 @@ import org.springframework.web.multipart.MultipartFile;
 import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MemberTypeService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import es.codeurjc.helloword_vscode.entities.MemberType;
 import es.codeurjc.helloword_vscode.entities.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import java.security.Principal;
+import java.util.Optional;
 
 
 @Controller
@@ -80,14 +83,6 @@ public class MemberController {
         return "index";
     } 
 
-
-    // Creates a new member
-    /*@PostMapping("/login/create")
-    public String createMember(MemberType member) throws Exception {
-        memberTypeService.save(member);
-        return "redirect:/";
-    }*/
-
     @PostMapping("/login/create")
     public String createUser(@RequestParam String name, @RequestParam String surname, @RequestParam String pwd) {
         UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(pwd), "USER");
@@ -122,17 +117,44 @@ public class MemberController {
 
 
     @GetMapping("/profile/delete")
+    @PreAuthorize("isAuthenticated()")
     public String deleteConfirmation() {
         return "confirm_delete";
     }
 
-    /*@PostMapping("/profile/delete/confirm")
-    public String confirmDelete(Principal principal) {
-        UtilisateurEntity user = utilisateursEntityService.findByName(principal.getName()).orElseThrow();
-        utilisateursEntityService.delete(user);
-        return "redirect:/login";
-    }*/
+    @PostMapping("/profile/delete/confirm")
+    @PreAuthorize("isAuthenticated()")
+    public String deleteOwnAccount(Principal principal, HttpServletRequest request) {
+        String username = principal.getName();
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateursEntityService.findByName(username);
 
+        if (utilisateurEntity.isPresent()) {
+            utilisateursEntityService.deleteById(utilisateurEntity.get().getId());
+
+            // Logout after delete
+            try {
+                request.logout();
+            } catch (ServletException e) {
+                e.printStackTrace();
+            }
+
+            return "redirect:/";
+        } else {
+            return "redirect:/";
+        }
+    }
+
+
+    @PostMapping("/profile/{id}/delete")
+	public String deleteMember(@PathVariable long id) {
+		Optional<UtilisateurEntity> utilisateurEntity = utilisateursEntityService.findById(id);
+		if (utilisateurEntity.isPresent()) {
+			utilisateursEntityService.deleteById(id);
+			return "redirect:/";
+		} else {
+			return "redirect:/";
+		}
+    }
 
 }
 
