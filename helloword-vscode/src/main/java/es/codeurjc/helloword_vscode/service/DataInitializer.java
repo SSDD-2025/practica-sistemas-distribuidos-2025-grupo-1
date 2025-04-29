@@ -30,8 +30,15 @@ import org.springframework.util.StreamUtils;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/**
+ * This service class is used to initialize the database with predefined data, including users,
+ * associations, roles, and minutes. It is executed after the application context is loaded.
+*/
 @Service
 public class DataInitializer {
+
+
+    // Autowired repositories for database interactions //
 
     @Autowired
     private UtilisateurEntityRepository UtilisateurEntityRepository;
@@ -48,6 +55,7 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /* Get a random image blob from predefined image files */
     private Blob getRandomImageBlob() {
     try {
         // List of file names
@@ -71,6 +79,8 @@ public class DataInitializer {
         }
     }
 
+
+    /* Initialize the database with predefined data */
     @PostConstruct
     public void init() throws SQLException{
         // Add users
@@ -101,7 +111,7 @@ public class DataInitializer {
         Minute minute2 = new Minute("2024-11-03", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "Discussion on government measures", 30.0, association1);
         minuteRepository.save(minute2);
 
-        // Generate new data random
+        // Generate new random data
         List<UtilisateurEntity> utilisateurs = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             String role = (i % 5 == 0) ? "USER,ADMIN" : "USER";

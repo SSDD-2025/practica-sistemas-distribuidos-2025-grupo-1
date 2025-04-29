@@ -30,6 +30,8 @@ import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 @Controller
 public class MinuteController {
 
+    // Service for database interaction 
+
     @Autowired
 	private MinuteService minuteService;
 
@@ -39,70 +41,100 @@ public class MinuteController {
     @Autowired
     private UtilisateurEntityService utilisateurEntityService;
 
+
+    /* Create mintue */
     @PostMapping("/association/{id}/new_minute")
 	public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
+        // Retrieve the association by ID
         Optional<Association> association = associationService.findById(id);
-
         if (association.isPresent()) {
             try {
+                // Parse the submitted date
                 LocalDate submittedDate = LocalDate.parse(date); 
+                
+                 // Check if the date is in the future
                 if (submittedDate.isAfter(LocalDate.now())) {
                     model.addAttribute("error", "The date can not be in the futur");
                     model.addAttribute("association", association.get());
                     model.addAttribute("members", association.get().getMembers());
                     return "new_minute";
                 }
-			Minute minute = new Minute();
-            minute.setDate(date);
-            List<UtilisateurEntity> participants = participantsIds.stream()
-            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-            minute.setParticipants(participants);
-            minute.setContent(content);
-            minute.setDuration(duration);
-            minute.setAssociation(association.get());
-            minuteService.save(minute);
-			return "redirect:/association/" + id;
-		         } catch (DateTimeParseException e) {
-            model.addAttribute("error", "Format de date invalide.");
-            return "new_minute";
-        } }
-        else {
+
+                // Create a new minute object    
+                Minute minute = new Minute();
+                minute.setDate(date);
+
+                // Retrieve participants by their IDs
+                List<UtilisateurEntity> participants = participantsIds.stream()
+                .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+                // Set minute attributes
+                minute.setParticipants(participants);
+                minute.setContent(content);
+                minute.setDuration(duration);
+                minute.setAssociation(association.get());
+
+                // Save the new minute
+                minuteService.save(minute);
+                return "redirect:/association/" + id;
+		    } catch (DateTimeParseException e) {
+                model.addAttribute("error", "Format de date invalide.");
+                return "new_minute";
+            } 
+        } else {
 			return "redirect:/";
 		}
         
 	}
 
+
+    /* Page with forms to create minute (only if you're in association) */
     @PostMapping("/association/{id}/createMinute")
 	public String createMinute(Model model, @PathVariable long id) {
+        // Retrieve the association by ID
         Optional<Association> association = associationService.findById(id);
+        
+        // Add association and members to the model
         model.addAttribute("association", association.get());
         model.addAttribute("members", association.get().getMembers());
         model.addAttribute("today", LocalDate.now());
         return"new_minute";
 	}
 
+
+    /* Delete minute */
     @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
     public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
+        // Retrieve the minute by ID
         Minute minute = minuteService.findById(minuteId).orElseThrow();
+        
+        // Retrieve participants of the minute
         List<UtilisateurEntity> utilisateurs = minute.getParticipants();
+        
+        // Delete the minute
         minuteService.delete(minute, assoId, utilisateurs);
         return "redirect:/association/" + assoId;
     }
 
+
+    /* Edit minute page */
     @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
     @PreAuthorize("hasRole('ADMIN')")
 	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
-		Optional<Association> association = associationService.findById(assoId);
+		// Retrieve the association and minute by their IDs
+        Optional<Association> association = associationService.findById(assoId);
         Minute minute = minuteService.findById(minuteId).orElseThrow();
+        
+        // Add association, minute, and related data to the model
         model.addAttribute("association", association.get());
         model.addAttribute("minute", minute);
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("members", association.get().getMembers());
         model.addAttribute("participants", minute.getParticipants());
 
-        //Create a list of all members association who doesn't attend to the meeting
+        // Create a list of members who did not participate in the meeting
         Collection<UtilisateurEntity> members = association.get().getMembers();;
         Collection<UtilisateurEntity> participants = minute.getParticipants();
         Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();
@@ -117,6 +149,8 @@ public class MinuteController {
 		}
 	}
 
+
+    /* Edit minute process */
     @PostMapping("/editminute")
     public String editMinuteProcess(@RequestParam long minuteId, 
                                     @RequestParam long assoId,
@@ -127,21 +161,28 @@ public class MinuteController {
                                     Model model,
                                     RedirectAttributes redirectAttributes
                                     ) throws IOException {
+        // Check if participants are selected                                
         if (participantsIds == null || participantsIds.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "You need to select at least one participant");
             return "redirect:/minute/" + minuteId + "/asso/" + assoId + "/edit";
         }
+        
+        // Retrieve the minute and association by their IDs
         Minute minute = minuteService.findById(minuteId).orElseThrow();
         Optional<Association> association = associationService.findById(assoId);
+        
+        // Update minute attributes
         minute.setDate(date);
         List<UtilisateurEntity> participants = participantsIds.stream()
-        .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
         minute.setParticipants(participants);
         minute.setContent(content);
         minute.setDuration(duration);
         minute.setAssociation(association.get());
+
+        // Save the updated minute
         minuteService.save(minute);
         return "redirect:/association/" + assoId;
     }

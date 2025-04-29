@@ -20,15 +20,26 @@ public class UtilisateurEntity {
     private String surname;
     private String pwd;
 
+    // A collection of roles assigned to the user
     @ElementCollection(fetch = FetchType.EAGER)
 	private List<String> roles;
 
+    // A list of membership types associated with the user
     @OneToMany(mappedBy = "utilisateurEntity")
     private List<MemberType> memberTypes;
 
-    // Constructor
+    /* Default constructor */
     public UtilisateurEntity() {}
 
+
+    /**
+     * Parameterized constructor to initialize the user with name, surname, password, and roles.
+     *
+     * @param name The name of the user
+     * @param surname The surname of the user
+     * @param pwd The password of the user
+     * @param roles The roles assigned to the user
+    */
     public UtilisateurEntity(String name, String surname, String pwd, String... roles) {
         this.name = name;
         this.surname = surname;
@@ -36,7 +47,9 @@ public class UtilisateurEntity {
         this.roles = List.of(roles);
     }
 
-    // Getters and Setters
+    
+    // Getters and Setters //
+
     public long getId() {
         return id;
     }

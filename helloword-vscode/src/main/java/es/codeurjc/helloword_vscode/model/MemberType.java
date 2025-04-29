@@ -14,6 +14,7 @@ public class MemberType {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    // The type of membership (e.g., 'member', 'admin')
     private String name;
 
     @ManyToOne
@@ -24,17 +25,27 @@ public class MemberType {
     @JoinColumn(name = "idAssociation")
     private Association association;
 
-    // Constructeur par défaut
+
+    /* Default constructor */
     public MemberType() {}
 
-    // Constructeur avec paramètres
+
+    /**
+     * Parameterized constructor to initialize the MemberType with name, user, and association.
+     *
+     * @param name The type of membership.
+     * @param utilisateurEntity The user entity associated with this membership.
+     * @param association The association to which the user belongs.
+     */
     public MemberType(String name, UtilisateurEntity utilisateurEntity, Association association) {
         this.name = name;
         this.utilisateurEntity = utilisateurEntity;
         this.association = association;
     }
 
-    // Getters et Setters
+
+    // Getters and Setters //
+
     public long getId() {
         return id;
     }

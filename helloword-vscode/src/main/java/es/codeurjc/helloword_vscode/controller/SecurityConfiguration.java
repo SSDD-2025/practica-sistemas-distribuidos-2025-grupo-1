@@ -17,14 +17,19 @@ import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    // Service to retrieve user details
     @Autowired
     public UtilisateurEntityService userDetailService;
 
+    
+    /* Bean for password encoding */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
+
+    /* Bean for authentication provider */
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -35,13 +40,17 @@ public class SecurityConfiguration {
 		return authProvider;
 	}
 
+
+    /* Bean for security filter chain */
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // Set the authentication provider
         http.authenticationProvider(authenticationProvider());
     
+        // Configure authorization rules
         http
             .authorizeHttpRequests(authorize -> authorize
-                // public page
+                // Public pages
                 .requestMatchers(
                     "/images/**",
                     "/search/**", 
@@ -56,10 +65,28 @@ public class SecurityConfiguration {
                     "/association/*/new_minute",
                     "/login/create",
                     "/login.html"
-                    ).permitAll()
+                ).permitAll()
 
-                .requestMatchers("/profile", "/profile/edit", "/edit_profile.html", "/profile/delete", "/association/*/createMinute").hasAnyRole("USER")
-                .requestMatchers("/profile/delete", "/confirm_delete.html", "/profile/edit", "/edit_profile.html", "/association/*/createMinute", "/profile/delete/confirm").authenticated()
+                 // Pages accessible to users with role "USER"
+                .requestMatchers(
+        "/profile", 
+                    "/profile/edit", 
+                    "/edit_profile.html", 
+                    "/profile/delete", 
+                    "/association/*/createMinute"
+                ).hasAnyRole("USER")
+
+                // Pages requiring authentication
+                .requestMatchers(
+        "/profile/delete",
+                    "/confirm_delete.html", 
+                    "/profile/edit", 
+                    "/edit_profile.html", 
+                    "/association/*/createMinute", 
+                    "/profile/delete/confirm"
+                ).authenticated()
+
+                // Pages accessible to users with role "ADMIN"
                 .requestMatchers(
                     "/admin",
                     "/association/create",
@@ -69,21 +96,29 @@ public class SecurityConfiguration {
                     "/editasso/**",
                     "/createasso"
                 ).hasRole("ADMIN")
+
+                // All other requests require authentication
                 .anyRequest().authenticated()
             )
+
+            // Configure form login
             .formLogin(formLogin -> formLogin
-                .loginPage("/login")
-                .failureUrl("/loginerror")
-                .defaultSuccessUrl("/")
-                .permitAll()
+                .loginPage("/login") // Custom login page
+                .failureUrl("/loginerror") // Redirect on login failure
+                .defaultSuccessUrl("/") // Redirect on login success
+                .permitAll() // Allow all users to access the login page
             )
+
+            // Configure logout
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
+                .logoutUrl("/logout") // URL to trigger logout
+                .logoutSuccessUrl("/") // Redirect on logout success
+                .invalidateHttpSession(true) // Invalidate the HTTP session
+                .deleteCookies("JSESSIONID") // Delete the JSESSIONID cookie
+                .permitAll() // Allow all users to access the logout functionality
             )
+
+            // Configure session management
             .sessionManagement(session -> session
                 .sessionFixation().newSession()  // Create new session after login
                 .maximumSessions(1)  // Authorize only one session per user
@@ -93,6 +128,7 @@ public class SecurityConfiguration {
         // Disable CSRF at the moment
         http.csrf(csrf -> csrf.disable());
     
+        // Build and return the security filter chain
         return http.build();
     }
     

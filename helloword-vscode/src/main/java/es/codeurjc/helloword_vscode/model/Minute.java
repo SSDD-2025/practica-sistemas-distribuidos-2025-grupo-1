@@ -35,7 +35,15 @@ public class Minute {
     @JoinColumn(name = "id_association", nullable = false)
     private Association association;
 
-    // Constructeur
+    /**
+     * Parameterized constructor to initialize the Minute with date, participants, content, duration, and association.
+     *
+     * @param date The date of the minute.
+     * @param participants The list of participants in the minute.
+     * @param content The content of the minute.
+     * @param duration The duration of the minute.
+     * @param association The association to which the minute belongs.
+     */
     public Minute(String date, List<UtilisateurEntity> participants, String content, double duration, Association association) {
         this.date = date;
         this.participants = participants;
@@ -44,10 +52,12 @@ public class Minute {
         this.association = association;
     }
 
-    // Constructeur par défaut
+    /* Default constructor */
     public Minute() {}
 
-    // Getters et Setters
+
+    // Getters and Setters //
+    
     public long getId() {
         return id;
     }

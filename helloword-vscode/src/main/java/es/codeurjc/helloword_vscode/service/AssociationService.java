@@ -17,26 +17,44 @@ import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Minute;
 
+/* 
+ * This service class provides methods to perform various operations on
+ * the Association entity, such as saving, retrieving, and deleting 
+ * associations. It interacts with the AssociationRepository to perform 
+ * database operations.
+*/
 @Service
 public class AssociationService {
+
+	// Autowired repository for database interactions
     @Autowired
 	private AssociationRepository associationRepository;
 
+
+	/* Save association without image */
     public void save(Association association) {
 		associationRepository.save(association);
 	}
 
+
+	/* Save association with image */
 	public void save(Association association, MultipartFile imageFile) throws IOException{
 		if(!imageFile.isEmpty()) {
+			// Set the image file as a Blob in the association
 			association.setImageFile(BlobProxy.generateProxy(imageFile.getInputStream(), imageFile.getSize()));
 		}
+		// Save association
 		this.save(association);
 	}
 
+
+	/* Find association by ID */
 	public Optional<Association> findById(long id) {
 		return associationRepository.findById(id);
 	}
 	
+	
+	/* Get all minutes associated with a specific association */
     @Transactional
     public List<Minute> getMinutes(Long associationId) {
         Association association = associationRepository.findById(associationId)
@@ -44,16 +62,20 @@ public class AssociationService {
         return association.getMinutes();
     }
 
+
+	/* Find all associations */
 	public List<Association> findAll() {
 		return associationRepository.findAll();
 	}
 
+
+	/* Delete association by ID */
 	public void deleteById(long id) {
 		try {
 			associationRepository.deleteById(id);
 	    } catch (Exception e) {
+			// Log the error message if deletion fails
 			System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
 		};		
 	}
-
 }

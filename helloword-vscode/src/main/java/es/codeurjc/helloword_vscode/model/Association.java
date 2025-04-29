@@ -32,20 +32,25 @@ public class Association {
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
 
-    // Constructor
+
+    /* Default constructor */
     public Association() {}
 
+
+    /* Constructor with name and image file*/
     public Association(String name, String imgAsso) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
+    /* Constructor only with name */
     public Association(String name) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
-    // Getters and Setters
+
+    // Getters and Setters //
 
     public Blob getImageFile() {
 		return imageFile;
@@ -87,15 +92,13 @@ public class Association {
         this.minutes = minutes;
     }
 
-
-    // Method to get members
     public List<UtilisateurEntity> getMembers() {
+        // Retrieve all users associated with this association
         return memberTypes.stream()
                      .map(MemberType::getUtilisateurEntity)
                      .collect(Collectors.toList());
     }
 
-    // Method to define members
     public void setMembers(List<UtilisateurEntity> members) {
         // Assure that all users has a role in their association
         this.memberTypes = members.stream()
