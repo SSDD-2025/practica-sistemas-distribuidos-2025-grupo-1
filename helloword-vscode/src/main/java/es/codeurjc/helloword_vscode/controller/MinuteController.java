@@ -107,14 +107,7 @@ public class MinuteController {
     /* Delete minute */
     @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
     public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
-        // Retrieve the minute by ID
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
-        
-        // Retrieve participants of the minute
-        List<UtilisateurEntity> utilisateurs = minute.getParticipants();
-        
-        // Delete the minute
-        minuteService.delete(minute, assoId, utilisateurs);
+        minuteService.deleteMinuteById(minuteId, assoId);
         return "redirect:/association/" + assoId;
     }
 

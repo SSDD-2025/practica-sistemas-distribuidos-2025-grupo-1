@@ -23,6 +23,7 @@ import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -189,41 +190,11 @@ public class MemberController {
 
     /* Edition of an user */
     @PostMapping("/profile/update")
-    public String updateProfile(Principal principal,
-                                @RequestParam String name,
-                                @RequestParam String surname,
-                                @RequestParam(required=false) String pwd,
-                                Model model) {
+    public String updateProfile(Principal principal, @RequestParam String name, @RequestParam String surname, @RequestParam(required = false) String pwd, Model model) {
         String username = principal.getName();
-        Optional<UtilisateurEntity> userOpt = utilisateurEntityService.findByName(username);
-        if (userOpt.isPresent()) {
-            UtilisateurEntity user = userOpt.get();
-
-            // Verify if an other user have already this name
-            Optional<UtilisateurEntity> existing = utilisateurEntityService.findByName(name);
-            if (existing.isPresent() && existing.get().getId() != user.getId()) {
-                model.addAttribute("error", "This username already exists");
-                model.addAttribute("user", user);
-                return "edit_profile";
-            }
-
-            // Update the user's name and surname
-            user.setName(name);
-            user.setSurname(surname);
-    
-            // Change password only if there is a new valors
-            if (pwd != null && !pwd.isBlank()) {
-                user.setPwd(passwordEncoder.encode(pwd));
-            }
-    
-            // Save the updated user
-            utilisateurEntityService.save(user);
-    
-            return "redirect:/logout"; 
-        }
-        return "redirect:/login";
+        utilisateurEntityService.updateUser(username, name, surname, pwd);
+        return "redirect:/logout";
     }
-
 
     /*  Page to confirm deletion of user */
     @GetMapping("/profile/delete")
@@ -236,7 +207,7 @@ public class MemberController {
     /* Deletion of our own account */ 
     @PostMapping("/profile/delete/confirm")
     @PreAuthorize("isAuthenticated()")
-    public String deleteOwnAccount(Principal principal, HttpServletRequest request) {
+    public String deleteOwnAccount(Principal principal, HttpServletRequest request) throws IOException {
         String username = principal.getName();
         Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(username);
 
@@ -260,7 +231,7 @@ public class MemberController {
 
     /* Deletion of an user (only for admins) */
     @GetMapping("/profile/{id}/delete")
-	public String deleteMember(@PathVariable long id) {
+	public String deleteMember(@PathVariable long id) throws IOException {
         // Retrieve the user by ID
 		Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
 		if (utilisateurEntity.isPresent()) {

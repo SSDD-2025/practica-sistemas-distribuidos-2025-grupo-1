@@ -3,6 +3,7 @@ package es.codeurjc.helloword_vscode.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
@@ -60,5 +61,26 @@ public class MinuteService {
 
 		// Delete the minute from the repository
 		this.minuteRepository.delete(minute);
+	}
+
+
+	/* Delete minute with association and minute ID */
+	public void deleteMinuteById(Long minuteId, Long assoId) {
+        Minute minute = minuteRepository.findById(minuteId)
+            .orElseThrow(() -> new ResourceNotFoundException("Minute not found with id: " + minuteId));
+        Association association = associationService.findById(assoId)
+            .orElseThrow(() -> new ResourceNotFoundException("Association not found with id: " + assoId));
+
+        association.getMinutes().remove(minute);
+        for (UtilisateurEntity utilisateur : minute.getParticipants()) {
+            utilisateur.getMinutes().remove(minute);
+        }
+        minuteRepository.delete(minute);
+    }
+
+
+	/* Find all Minute entities that contain the specified participant */
+	List<Minute> findAllByParticipantsContains(UtilisateurEntity participant){
+		return minuteRepository.findAllByParticipantsContains(participant);
 	}
 }

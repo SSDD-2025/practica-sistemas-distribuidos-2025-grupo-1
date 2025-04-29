@@ -15,7 +15,9 @@ import java.util.Optional;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
+import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 
 /* 
  * This service class provides methods to perform various operations on
@@ -30,6 +32,11 @@ public class AssociationService {
     @Autowired
 	private AssociationRepository associationRepository;
 
+    @Autowired
+    private UtilisateurEntityService utilisateurEntityService;
+
+    @Autowired
+    private MemberTypeService memberTypeService;
 
 	/* Save association without image */
     public void save(Association association) {
@@ -78,4 +85,21 @@ public class AssociationService {
 			System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
 		};		
 	}
+
+
+	/* Add user to an association */
+	public void addUserToAssociation(Long associationId, Long userId) {
+        Optional<Association> associationOpt = associationRepository.findById(associationId);
+        Optional<UtilisateurEntity> userOpt = utilisateurEntityService.findById(userId);
+
+        if (associationOpt.isPresent() && userOpt.isPresent()) {
+            Association association = associationOpt.get();
+            UtilisateurEntity user = userOpt.get();
+
+            if (!association.getMembers().contains(user)) {
+                MemberType memberType = new MemberType("member", user, association);
+                memberTypeService.save(memberType);
+            }
+        }
+    }
 }

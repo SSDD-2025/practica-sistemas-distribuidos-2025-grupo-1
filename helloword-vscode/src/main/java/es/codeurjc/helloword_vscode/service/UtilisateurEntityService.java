@@ -1,22 +1,24 @@
 package es.codeurjc.helloword_vscode.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
-import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 
@@ -34,11 +36,15 @@ public class UtilisateurEntityService implements UserDetailsService {
 	private UtilisateurEntityRepository utilisateursEntityRepository;
 
 	@Autowired
-	private MemberTypeRepository memberTypeRepository;
+	private MemberTypeService memberTypeService;
 
 	@Autowired
-	private MinuteRepository minuteRepository;
+	@Lazy
+	private MinuteService minuteService;
 
+	@Autowired
+	@Lazy
+    private PasswordEncoder passwordEncoder;
 
 	/* Save user */
     public void save(UtilisateurEntity utilisateurEntity) {
@@ -85,27 +91,47 @@ public class UtilisateurEntityService implements UserDetailsService {
 
 	/* Delete user by ID */
 	@Transactional
-	public void deleteById(long id) {
+	public void deleteById(long id) throws IOException {
 		// Retrieve user by ID
 		Optional<UtilisateurEntity> optUser = utilisateursEntityRepository.findById(id);
 		if (optUser.isPresent()) {
 			UtilisateurEntity user = optUser.get();
 
 			// 1. Delete member type in association
-			List<MemberType> memberTypes = memberTypeRepository.findByUtilisateurEntity(user);
+			List<MemberType> memberTypes = memberTypeService.findByUtilisateurEntity(user);
 			for (MemberType memberType : memberTypes) {
-				memberTypeRepository.delete(memberType);
+				memberTypeService.delete(memberType);
 			}
 
 			// 2. Delete participation to meetings
-			List<Minute> minutes = minuteRepository.findAllByParticipantsContains(user);
+			List<Minute> minutes = minuteService.findAllByParticipantsContains(user);
 			for (Minute minute : minutes) {
 				minute.getParticipants().remove(user);
-				minuteRepository.save(minute); // important !
+				minuteService.save(minute);
 			}
 
 			// 3. Delete user
 			utilisateursEntityRepository.delete(user);
 		}
 	}
+
+
+	/* Update user */
+    public void updateUser(String username, String name, String surname, String password) {
+        Optional<UtilisateurEntity> optUser = findByName(username);
+        if (optUser.isPresent()) {
+            UtilisateurEntity user = optUser.get();
+
+            if (!user.getName().equals(name) && findByName(name).isPresent()) {
+                throw new IllegalArgumentException("This username already exists");
+            }
+
+            user.setName(name);
+            user.setSurname(surname);
+            if (password != null && !password.isBlank()) {
+                user.setPwd(passwordEncoder.encode(password));
+            }
+            save(user);
+        }
+    }
 }

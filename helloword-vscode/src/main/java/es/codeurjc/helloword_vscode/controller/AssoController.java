@@ -112,20 +112,10 @@ public class AssoController {
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
-            // Retrieve the user and association by their respective identifiers  
-            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(principal.getName());
-            Optional<Association> association = associationService.findById(id);
-    
-            if (user.isPresent() && association.isPresent()) {
-                Association asso = association.get();
-                UtilisateurEntity u = user.get();
-    
-                // Verify that the user no is already member
-                if (!asso.getMembers().contains(u)) {
-                    // Create a new member type and save it
-                    MemberType memberType = new MemberType("member", u, asso);
-                    memberTypeService.save(memberType);
-                }
+            String username = principal.getName();
+            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
+            if (user.isPresent()) {
+                associationService.addUserToAssociation(id, user.get().getId());
             }
         }
         return "redirect:/association/" + id;
