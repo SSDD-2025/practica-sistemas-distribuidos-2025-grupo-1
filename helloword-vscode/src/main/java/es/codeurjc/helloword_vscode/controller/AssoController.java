@@ -3,12 +3,7 @@ package es.codeurjc.helloword_vscode.controller;
 import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.sql.rowset.serial.SerialBlob;
 
@@ -29,9 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.model.Association;
-import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
 import es.codeurjc.helloword_vscode.model.MemberType;
-import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -106,16 +99,22 @@ public class AssoController {
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
-            Optional<UtilisateurEntity> user = utilisateurEntityService.findById(id);
+            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(principal.getName());
             Optional<Association> association = associationService.findById(id);
-            
-            if (!association.get().getMembers().contains(user.get())) {
-                MemberType memberType = new MemberType("member", user.get(), association.get());
-                memberTypeService.save(memberType);
+    
+            if (user.isPresent() && association.isPresent()) {
+                Association asso = association.get();
+                UtilisateurEntity u = user.get();
+    
+                // Verify that the user no is already member
+                if (!asso.getMembers().contains(u)) {
+                    MemberType memberType = new MemberType("member", u, asso);
+                    memberTypeService.save(memberType);
+                }
             }
         }
         return "redirect:/association/" + id;
-    }
+    }    
 
     @PostMapping("/association/{id}/delete")
     @PreAuthorize("hasRole('ADMIN')")
