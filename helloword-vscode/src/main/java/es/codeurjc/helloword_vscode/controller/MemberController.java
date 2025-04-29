@@ -18,27 +18,34 @@ import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
+import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Controller
 public class MemberController {
 
+    // Service for database interaction 
+
     @Autowired
     private AssociationService associationService;
 
     @Autowired
-    private UtilisateurEntityService utilisateursEntityService;
+    private UtilisateurEntityService utilisateurEntityService;
     
     @Autowired
     private UtilisateurEntityRepository utilisateursEntityRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
 
     @ModelAttribute
     public void addAttributes(Model model) {
@@ -55,8 +62,50 @@ public class MemberController {
     
     @GetMapping("/members")
     public String showMembers(Model model) {
-        model.addAttribute("Utilisateursentity", utilisateursEntityService.findAll());
+        model.addAttribute("Utilisateursentity", utilisateurEntityService.findAll());
         return "members";
+    }
+
+    // Login page
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    // Login error page
+    @GetMapping("/loginerror")
+    public String loginerror() {
+        return "loginerror";
+    }
+
+    // User profile page
+    @GetMapping("/profile")
+    public String profile(Model model, HttpServletRequest request) {
+        String name = request.getUserPrincipal().getName();
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(name);
+        model.addAttribute("username", utilisateurEntity.get().getName());
+        model.addAttribute("admin", request.isUserInRole("ADMIN"));
+        return "profile";
+    }
+
+    // Displays details of a specific user
+    @GetMapping("/user/{id}")
+    public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
+        if (utilisateurEntity.isPresent()) {
+            UtilisateurEntity utilisateur = utilisateurEntity.get();
+            model.addAttribute("utilisateur", utilisateur);
+            //model.addAttribute("associations", utilisateur.getAssociations());
+            List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
+            .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
+            .collect(Collectors.toList());
+            model.addAttribute("associationRoles", roles);
+            List<Minute> userMinutes = utilisateur.getMinutes();
+            model.addAttribute("userMinutes", userMinutes);
+            return "user_detail";
+        } else {
+            return "user_not_found";
+        }   
     }
 
     @GetMapping("/search")
@@ -64,7 +113,7 @@ public class MemberController {
                            @RequestParam(name = "searchType", required = false) String searchType, 
                            Model model) {
         if (id != null && "user".equals(searchType)) {
-            utilisateursEntityService.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
+            utilisateurEntityService.findById(id).ifPresent(user -> model.addAttribute("userfind", user));
             return "members";
         }
         if (id != null && "association".equals(searchType)) {
@@ -79,7 +128,7 @@ public class MemberController {
                             @RequestParam String surname, 
                             @RequestParam String pwd,
                             Model model) {
-        Optional<UtilisateurEntity> existingUser = utilisateursEntityService.findByName(name);
+        Optional<UtilisateurEntity> existingUser = utilisateurEntityService.findByName(name);
         if (existingUser.isPresent()) {
             model.addAttribute("error", "This username already exists");
             return "new_member";
@@ -108,12 +157,12 @@ public class MemberController {
                                 @RequestParam(required=false) String pwd,
                                 Model model) {
         String username = principal.getName();
-        Optional<UtilisateurEntity> userOpt = utilisateursEntityService.findByName(username);
+        Optional<UtilisateurEntity> userOpt = utilisateurEntityService.findByName(username);
         if (userOpt.isPresent()) {
             UtilisateurEntity user = userOpt.get();
 
             // Verify if an other user have already this name
-            Optional<UtilisateurEntity> existing = utilisateursEntityService.findByName(name);
+            Optional<UtilisateurEntity> existing = utilisateurEntityService.findByName(name);
             if (existing.isPresent() && existing.get().getId() != user.getId()) {
                 model.addAttribute("error", "This username already exists");
                 model.addAttribute("user", user);
@@ -127,7 +176,7 @@ public class MemberController {
                 user.setPwd(passwordEncoder.encode(pwd));
             }
     
-            utilisateursEntityService.save(user);
+            utilisateurEntityService.save(user);
     
             return "redirect:/logout"; 
         }
@@ -145,10 +194,10 @@ public class MemberController {
     @PreAuthorize("isAuthenticated()")
     public String deleteOwnAccount(Principal principal, HttpServletRequest request) {
         String username = principal.getName();
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateursEntityService.findByName(username);
+        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(username);
 
         if (utilisateurEntity.isPresent()) {
-            utilisateursEntityService.deleteById(utilisateurEntity.get().getId());
+            utilisateurEntityService.deleteById(utilisateurEntity.get().getId());
 
             // Logout after delete
             try {
@@ -166,9 +215,9 @@ public class MemberController {
 
     @PostMapping("/profile/{id}/delete")
 	public String deleteMember(@PathVariable long id) {
-		Optional<UtilisateurEntity> utilisateurEntity = utilisateursEntityService.findById(id);
+		Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
 		if (utilisateurEntity.isPresent()) {
-			utilisateursEntityService.deleteById(id);
+			utilisateurEntityService.deleteById(id);
 			return "redirect:/";
 		} else {
 			return "redirect:/";

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
@@ -36,8 +35,6 @@ import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.format.DateTimeParseException;
-import java.util.Collection;
 
 
 
@@ -51,9 +48,6 @@ public class AssoController {
 
     @Autowired
 	private AssociationService associationService;
-
-    @Autowired
-	private MinuteService minuteService;
 
     @Autowired
 	private MemberTypeService memberTypeService;
@@ -78,48 +72,6 @@ public class AssoController {
         model.addAttribute("associations", associationService.findAll());
         model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return "index";
-    }
-
-    // Login page
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-    // Login error page
-    @GetMapping("/loginerror")
-    public String loginerror() {
-        return "loginerror";
-    }
-
-    // User profile page
-    @GetMapping("/profile")
-    public String profile(Model model, HttpServletRequest request) {
-        String name = request.getUserPrincipal().getName();
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(name);
-        model.addAttribute("username", utilisateurEntity.get().getName());
-        model.addAttribute("admin", request.isUserInRole("ADMIN"));
-        return "profile";
-    }
-
-    // Displays details of a specific user
-    @GetMapping("/user/{id}")
-    public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
-        if (utilisateurEntity.isPresent()) {
-            UtilisateurEntity utilisateur = utilisateurEntity.get();
-            model.addAttribute("utilisateur", utilisateur);
-            //model.addAttribute("associations", utilisateur.getAssociations());
-            List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
-            .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
-            .collect(Collectors.toList());
-            model.addAttribute("associationRoles", roles);
-            List<Minute> userMinutes = utilisateur.getMinutes();
-            model.addAttribute("userMinutes", userMinutes);
-            return "user_detail";
-        } else {
-            return "user_not_found";
-        }   
     }
 
     // Displays details of a specific association
@@ -254,118 +206,8 @@ public class AssoController {
         return "redirect:/editasso/"+id;
     }
 
-    
-
-    @PostMapping("/association/{id}/new_minute")
-	public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
-        Optional<Association> association = associationService.findById(id);
-
-        if (association.isPresent()) {
-            try {
-                LocalDate submittedDate = LocalDate.parse(date); 
-                if (submittedDate.isAfter(LocalDate.now())) {
-                    model.addAttribute("error", "The date can not be in the futur");
-                    model.addAttribute("association", association.get());
-                    model.addAttribute("members", association.get().getMembers());
-                    return "new_minute";
-                }
-			Minute minute = new Minute();
-            minute.setDate(date);
-            List<UtilisateurEntity> participants = participantsIds.stream()
-            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-            minute.setParticipants(participants);
-            minute.setContent(content);
-            minute.setDuration(duration);
-            minute.setAssociation(association.get());
-            minuteService.save(minute);
-			return "redirect:/association/" + id;
-		         } catch (DateTimeParseException e) {
-            model.addAttribute("error", "Format de date invalide.");
-            return "new_minute";
-        } }
-        else {
-			return "redirect:/";
-		}
-        
-	}
-
-    @PostMapping("/association/{id}/createMinute")
-	public String createMinute(Model model, @PathVariable long id) {
-        Optional<Association> association = associationService.findById(id);
-        model.addAttribute("association", association.get());
-        model.addAttribute("members", association.get().getMembers());
-        model.addAttribute("today", LocalDate.now());
-        return"new_minute";
-	}
-
     @GetMapping("/createasso")
     public String createAsso(){
         return "new_asso";
     }
-
-    @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
-    public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
-        List<UtilisateurEntity> utilisateurs = minute.getParticipants();
-        minuteService.delete(minute, assoId, utilisateurs);
-        return "redirect:/association/" + assoId;
-    }
-
-    @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
-    @PreAuthorize("hasRole('ADMIN')")
-	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
-		Optional<Association> association = associationService.findById(assoId);
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
-        model.addAttribute("association", association.get());
-        model.addAttribute("minute", minute);
-        model.addAttribute("today", LocalDate.now());
-        model.addAttribute("members", association.get().getMembers());
-        model.addAttribute("participants", minute.getParticipants());
-
-        //Create a list of all members association who doesn't attend to the meeting
-        Collection<UtilisateurEntity> members = association.get().getMembers();;
-        Collection<UtilisateurEntity> participants = minute.getParticipants();
-        Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();
-        memberNoPart.addAll(members);
-        memberNoPart.removeAll(participants);
-        model.addAttribute("noPart", memberNoPart);
-
-		if (association.isPresent()) {
-			return "editMinutePage";
-		} else {
-			return "redirect:/";
-		}
-	}
-
-    @PostMapping("/editminute")
-    public String editMinuteProcess(@RequestParam long minuteId, 
-                                    @RequestParam long assoId,
-                                    @RequestParam String date,
-                                    @RequestParam(required = false) List<Long> participantsIds, 
-                                    @RequestParam String content, 
-                                    @RequestParam double duration, 
-                                    Model model,
-                                    RedirectAttributes redirectAttributes
-                                    ) throws IOException {
-        if (participantsIds == null || participantsIds.isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "You need to select at least one participant");
-            return "redirect:/minute/" + minuteId + "/asso/" + assoId + "/edit";
-        }
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
-        Optional<Association> association = associationService.findById(assoId);
-        minute.setDate(date);
-        List<UtilisateurEntity> participants = participantsIds.stream()
-        .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-        minute.setParticipants(participants);
-        minute.setContent(content);
-        minute.setDuration(duration);
-        minute.setAssociation(association.get());
-        minuteService.save(minute);
-        return "redirect:/association/" + assoId;
-    }
-
 }

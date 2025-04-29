@@ -1,0 +1,148 @@
+package es.codeurjc.helloword_vscode.controller;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import es.codeurjc.helloword_vscode.model.Association;
+import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.service.AssociationService;
+import es.codeurjc.helloword_vscode.service.MinuteService;
+import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+
+@Controller
+public class MinuteController {
+
+    @Autowired
+	private MinuteService minuteService;
+
+    @Autowired
+	private AssociationService associationService;
+
+    @Autowired
+    private UtilisateurEntityService utilisateurEntityService;
+
+    @PostMapping("/association/{id}/new_minute")
+	public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
+        Optional<Association> association = associationService.findById(id);
+
+        if (association.isPresent()) {
+            try {
+                LocalDate submittedDate = LocalDate.parse(date); 
+                if (submittedDate.isAfter(LocalDate.now())) {
+                    model.addAttribute("error", "The date can not be in the futur");
+                    model.addAttribute("association", association.get());
+                    model.addAttribute("members", association.get().getMembers());
+                    return "new_minute";
+                }
+			Minute minute = new Minute();
+            minute.setDate(date);
+            List<UtilisateurEntity> participants = participantsIds.stream()
+            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+            minute.setParticipants(participants);
+            minute.setContent(content);
+            minute.setDuration(duration);
+            minute.setAssociation(association.get());
+            minuteService.save(minute);
+			return "redirect:/association/" + id;
+		         } catch (DateTimeParseException e) {
+            model.addAttribute("error", "Format de date invalide.");
+            return "new_minute";
+        } }
+        else {
+			return "redirect:/";
+		}
+        
+	}
+
+    @PostMapping("/association/{id}/createMinute")
+	public String createMinute(Model model, @PathVariable long id) {
+        Optional<Association> association = associationService.findById(id);
+        model.addAttribute("association", association.get());
+        model.addAttribute("members", association.get().getMembers());
+        model.addAttribute("today", LocalDate.now());
+        return"new_minute";
+	}
+
+    @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
+    public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        List<UtilisateurEntity> utilisateurs = minute.getParticipants();
+        minuteService.delete(minute, assoId, utilisateurs);
+        return "redirect:/association/" + assoId;
+    }
+
+    @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
+		Optional<Association> association = associationService.findById(assoId);
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        model.addAttribute("association", association.get());
+        model.addAttribute("minute", minute);
+        model.addAttribute("today", LocalDate.now());
+        model.addAttribute("members", association.get().getMembers());
+        model.addAttribute("participants", minute.getParticipants());
+
+        //Create a list of all members association who doesn't attend to the meeting
+        Collection<UtilisateurEntity> members = association.get().getMembers();;
+        Collection<UtilisateurEntity> participants = minute.getParticipants();
+        Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();
+        memberNoPart.addAll(members);
+        memberNoPart.removeAll(participants);
+        model.addAttribute("noPart", memberNoPart);
+
+		if (association.isPresent()) {
+			return "editMinutePage";
+		} else {
+			return "redirect:/";
+		}
+	}
+
+    @PostMapping("/editminute")
+    public String editMinuteProcess(@RequestParam long minuteId, 
+                                    @RequestParam long assoId,
+                                    @RequestParam String date,
+                                    @RequestParam(required = false) List<Long> participantsIds, 
+                                    @RequestParam String content, 
+                                    @RequestParam double duration, 
+                                    Model model,
+                                    RedirectAttributes redirectAttributes
+                                    ) throws IOException {
+        if (participantsIds == null || participantsIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "You need to select at least one participant");
+            return "redirect:/minute/" + minuteId + "/asso/" + assoId + "/edit";
+        }
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        Optional<Association> association = associationService.findById(assoId);
+        minute.setDate(date);
+        List<UtilisateurEntity> participants = participantsIds.stream()
+        .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+        minute.setParticipants(participants);
+        minute.setContent(content);
+        minute.setDuration(duration);
+        minute.setAssociation(association.get());
+        minuteService.save(minute);
+        return "redirect:/association/" + assoId;
+    }
+}
