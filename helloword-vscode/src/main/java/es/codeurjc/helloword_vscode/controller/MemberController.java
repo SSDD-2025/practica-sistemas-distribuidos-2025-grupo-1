@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -40,9 +39,6 @@ public class MemberController {
     @Autowired
     private UtilisateurEntityService utilisateurEntityService;
     
-    @Autowired
-    private UtilisateurEntityRepository utilisateursEntityRepository;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -153,7 +149,7 @@ public class MemberController {
 
     /* Creation of an user */
     @PostMapping("/login/create")
-    public String createUser(@RequestParam String name, 
+    public String User(@RequestParam String name, 
                             @RequestParam String surname, 
                             @RequestParam String pwd,
                             Model model) {
@@ -164,9 +160,8 @@ public class MemberController {
             return "new_member";
         }
 
-        // Create a new user with encoded password
-        UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(pwd), "USER");
-        utilisateursEntityRepository.save(user);
+        // Create a new user
+        utilisateurEntityService.createUser( name,  surname, pwd);
         return "redirect:/";
     }
 
@@ -182,7 +177,7 @@ public class MemberController {
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal principal) {
         // Retrieve the user by name and add to the model
-        UtilisateurEntity user = utilisateursEntityRepository.findByName(principal.getName()).orElseThrow();
+        UtilisateurEntity user = utilisateurEntityService.findByName(principal.getName()).orElseThrow();
         model.addAttribute("user", user);
         return "edit_profile";
     }

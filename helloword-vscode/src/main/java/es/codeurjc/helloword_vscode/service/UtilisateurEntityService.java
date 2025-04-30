@@ -134,4 +134,14 @@ public class UtilisateurEntityService implements UserDetailsService {
             save(user);
         }
     }
+
+
+	/* Create user */
+	public void createUser(String name, String surname, String password) {
+        if (findByName(name).isPresent()) {
+            throw new IllegalArgumentException("This username already exists");
+        }
+        UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(password), "USER");
+        save(user);
+    }
 }
