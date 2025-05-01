@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.model.Association;
-import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.service.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +41,6 @@ public class AssoController {
     @Autowired
 	private AssociationService associationService;
 
-    @Autowired
-	private MemberTypeService memberTypeService;
 
     /* Adds authentication attributes to all templates */ 
     @ModelAttribute
