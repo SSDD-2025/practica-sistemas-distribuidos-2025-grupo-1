@@ -1,4 +1,4 @@
-# Web Application: [Your App Name]
+# Web Application: Association Management
 
 ## Development Team
 
@@ -9,8 +9,7 @@
 
 
 ## Project Coordination
-- **Trello Board**: [[Public Trello Link]](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)
-
+- **[Trello Board](https://trello.com/invite/623787fba3139956f2e254f9/ATTIcc5e4f3d4670f971016a3c76493b78b9276AAE4D)**
 ## Key Features
 ### Entities
 The main entities of the application are:
@@ -105,7 +104,7 @@ Relationships:
 //Img UML 
 
 ### Class Diagram
-//Img 
+![class_diagram](classDiagram.png)
 
 ---
 
