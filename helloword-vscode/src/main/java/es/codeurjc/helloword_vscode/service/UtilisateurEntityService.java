@@ -20,7 +20,6 @@ import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
 import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
-import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 
 /*
  * This service class provides methods to perform various operations on UtilisateurEntity entities,

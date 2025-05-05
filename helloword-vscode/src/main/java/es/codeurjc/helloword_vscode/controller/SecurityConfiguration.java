@@ -43,6 +43,7 @@ public class SecurityConfiguration {
 
     /* Bean for security filter chain */
 	@Bean
+    // Configure method with http object for security
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Set the authentication provider
         http.authenticationProvider(authenticationProvider());
@@ -63,13 +64,12 @@ public class SecurityConfiguration {
                     "/profile/create", 
                     "/association/*/image",
                     "/association/*/new_minute",
-                    "/login/create",
-                    "/login.html"
+                    "/login/create"
                 ).permitAll()
 
                  // Pages accessible to users with role "USER"
                 .requestMatchers(
-        "/profile", 
+                    "/profile", 
                     "/profile/edit", 
                     "/edit_profile.html", 
                     "/profile/delete", 

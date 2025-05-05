@@ -2,17 +2,16 @@ package es.codeurjc.helloword_vscode.controller;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Optional;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import java.sql.Blob;
-import org.springframework.http.HttpHeaders;
-
-import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,12 +19,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
-import es.codeurjc.helloword_vscode.service.*;
+import es.codeurjc.helloword_vscode.service.AssociationService;
+import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -44,7 +48,7 @@ public class AssoController {
 
     /* Adds authentication attributes to all templates */ 
     @ModelAttribute
-    public void addAttributes(Model model) {
+    public void addAttributes(Model model, HttpServletRequest request) {
 
         // Retrieve the current authentication information
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -58,6 +62,18 @@ public class AssoController {
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
             model.addAttribute("username", userDetails.getUsername());
         }
+
+        // Attributes are created based on the user
+        Principal principal = request.getUserPrincipal();
+        if(principal != null) {
+		
+			model.addAttribute("logged", true);		
+			model.addAttribute("userName", principal.getName());
+			model.addAttribute("admin", request.isUserInRole("ADMIN"));
+			
+		} else {
+			model.addAttribute("logged", false);
+		}
     }
 
 
