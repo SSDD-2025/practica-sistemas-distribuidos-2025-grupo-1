@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.controller;
+package es.codeurjc.helloword_vscode.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -60,42 +60,36 @@ public class SecurityConfiguration {
                     "/",
                     "/association/*", 
                     "/user/*", 
-                    "/new_minute.html", 
                     "/profile/create", 
-                    "/association/*/image",
-                    "/association/*/new_minute",
-                    "/login/create"
+                    "/login/create",
+                    "/association/*/image"
                 ).permitAll()
 
                  // Pages accessible to users with role "USER"
                 .requestMatchers(
                     "/profile", 
+                    "/association/*/join",
+                    "/profile/update",
                     "/profile/edit", 
-                    "/edit_profile.html", 
+                    "/profile/delete/confirm",
                     "/profile/delete", 
-                    "/association/*/createMinute"
+                    "/association/*/createMinute",
+                    "/association/*/new_minute"
                 ).hasAnyRole("USER")
-
-                // Pages requiring authentication
-                .requestMatchers(
-        "/profile/delete",
-                    "/confirm_delete.html", 
-                    "/profile/edit", 
-                    "/edit_profile.html", 
-                    "/association/*/createMinute", 
-                    "/profile/delete/confirm"
-                ).authenticated()
 
                 // Pages accessible to users with role "ADMIN"
                 .requestMatchers(
-                    "/admin",
                     "/association/create",
                     "/association/*/delete",
                     "/association/*/deleteImage",
                     "/editasso",
                     "/editasso/**",
-                    "/createasso"
-                ).hasRole("ADMIN")
+                    "/createasso",
+                    "/profile/*/delete",
+                    "/minute/*/asso/*/edit",
+                    "/editminute",
+                    "/minute/*/asso/*/delete"
+                ).hasAnyRole("ADMIN")
 
                 // All other requests require authentication
                 .anyRequest().authenticated()
@@ -126,7 +120,7 @@ public class SecurityConfiguration {
             );
     
         // Disable CSRF at the moment
-        http.csrf(csrf -> csrf.disable());
+        // http.csrf(csrf -> csrf.disable());
     
         // Build and return the security filter chain
         return http.build();

@@ -1,0 +1,8 @@
+<body>
+    <form id="logoutForm" action="/logout" method="post" style="display:none;">
+        <input type="hidden" name="_csrf" value="{{token}}"/>
+    </form>
+    <script>
+        document.getElementById('logoutForm').submit();
+    </script>
+</body>

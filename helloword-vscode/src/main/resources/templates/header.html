@@ -4,9 +4,10 @@
 </head>
 <div class="navbar">
     {{#isAuthenticated}}
-        <form action="/logout" method="post">
+      <form action="/logout" method="post">
+            <input type="hidden" name="_csrf" value="{{token}}"/>
             <input type="submit" value="Sign Out"/>
-        </form>
+        </form>  
     {{/isAuthenticated}}
     {{^isAuthenticated}}
         <a href="/login"><button>Login</button></a>
@@ -22,6 +23,7 @@
             <option value="user">User</option>
             <option value="association">Association</option>
         </select>
+        <input type="hidden" name="_csrf" value="{{token}}"/>
         <button type="submit" class="search-button">Search</button>
     </form>
 </div>

@@ -74,6 +74,7 @@ public class AssoController {
 		} else {
 			model.addAttribute("logged", false);
 		}
+        
     }
 
 

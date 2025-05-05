@@ -184,7 +184,8 @@ public class MemberController {
     public String updateProfile(Principal principal, @RequestParam String name, @RequestParam String surname, @RequestParam(required = false) String pwd, Model model) {
         String username = principal.getName();
         utilisateurEntityService.updateUser(username, name, surname, pwd);
-        return "redirect:/logout";
+        model.addAttribute("triggerLogout", true);
+        return "post_update_profile"; // une page temporaire avec le script ci-dessus
     }
 
     /*  Page to confirm deletion of user */

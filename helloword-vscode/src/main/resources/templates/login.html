@@ -11,6 +11,7 @@
             <input type="text" name="username" placeholder="username" />
             <label for="password">Password</label>
             <input type="password" name="password" placeholder="password" />
+            <input type="hidden" name="_csrf" value="{{token}}"/>
             <button type="submit" class="connect">Sign In</button> 
             <a href="/profile/create">Create an account</a>
         </form>

@@ -7,6 +7,7 @@
 <body>
     <p>Do you really want to delete your account ?</p>
     <form action="/profile/delete/confirm" method="post">
+        <input type="hidden" name="_csrf" value="{{token}}"/>
         <input type="submit" value="Confirm" />
     </form>
     <a href="/">Back to home</a>
