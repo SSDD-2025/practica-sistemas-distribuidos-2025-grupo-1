@@ -102,9 +102,9 @@ public class Association {
     public void setMembers(List<Member> members) {
         // Assure that all users has a role in their association
         this.memberTypes = members.stream()
-                            .map(Utilisateurentity -> {
+                            .map(member -> {
                                 MemberType memberType = new MemberType();
-                                memberType.setMember(Utilisateurentity);
+                                memberType.setMember(member);
                                 memberType.setAssociation(this);
                                 return memberType;
                             })

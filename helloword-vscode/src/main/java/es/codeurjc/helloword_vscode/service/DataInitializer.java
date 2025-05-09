@@ -84,10 +84,10 @@ public class DataInitializer {
     @PostConstruct
     public void init() throws SQLException{
         // Add users
-        Member Utilisateurentity1 = new Member("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
-        Member Utilisateurentity2 = new Member("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
-        Member Utilisateurentity3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
-        MemberRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2, Utilisateurentity3));
+        Member member1 = new Member("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
+        Member member2 = new Member("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
+        Member member3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
+        MemberRepository.saveAll(Arrays.asList(member1, member2, member3));
 
         // Add associations
         Association association1 = new Association("GreenPeace");
@@ -98,29 +98,29 @@ public class DataInitializer {
         associationRepository.save(association3);
 
         // Add roles
-        MemberType role1 = new MemberType("secretary", Utilisateurentity1, association1);
+        MemberType role1 = new MemberType("secretary", member1, association1);
         roleRepository.save(role1);
-        MemberType role2 = new MemberType("president", Utilisateurentity2, association1);
+        MemberType role2 = new MemberType("president", member2, association1);
         roleRepository.save(role2);
-        MemberType role3 = new MemberType("president", Utilisateurentity2, association2);
+        MemberType role3 = new MemberType("president", member2, association2);
         roleRepository.save(role3);
 
         // Add minutes
-        Minute minute1 = new Minute("2023-10-01", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "New actions about climat", 60.0, association1);
+        Minute minute1 = new Minute("2023-10-01", Arrays.asList(member1, member2), "New actions about climat", 60.0, association1);
         minuteRepository.save(minute1);
-        Minute minute2 = new Minute("2024-11-03", Arrays.asList(Utilisateurentity1, Utilisateurentity2), "Discussion on government measures", 30.0, association1);
+        Minute minute2 = new Minute("2024-11-03", Arrays.asList(member1, member2), "Discussion on government measures", 30.0, association1);
         minuteRepository.save(minute2);
 
         // Generate new random data
-        List<Member> utilisateurs = new ArrayList<>();
+        List<Member> members = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             String role = (i % 5 == 0) ? "USER,ADMIN" : "USER";
             Member user = new Member(
                 "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), role.split(",")
             );
-            utilisateurs.add(user);
+            members.add(user);
         }
-        MemberRepository.saveAll(utilisateurs);
+        MemberRepository.saveAll(members);
 
         List<String> names = List.of("Love Earth", "Give Smile", "Construct Avenir", "Culture Club", "Nature Warrior", "Book Lovers");
         List<Association> associations = new ArrayList<>();
@@ -134,7 +134,7 @@ public class DataInitializer {
 
         List<MemberType> roles = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            Member user = utilisateurs.get(i);
+            Member user = members.get(i);
             Association asso = associations.get(i % associations.size());
             String roleName = switch (i % 3) {
                 case 0 -> "president";
@@ -149,8 +149,8 @@ public class DataInitializer {
         for (int i = 0; i < 10; i++) {
             Association asso = associations.get(i % associations.size());
             List<Member> participants = Arrays.asList(
-                utilisateurs.get(i % utilisateurs.size()),
-                utilisateurs.get((i + 1) % utilisateurs.size())
+                members.get(i % members.size()),
+                members.get((i + 1) % members.size())
             );
             minutes.add(new Minute(
                 "2024-0" + ((i % 9) + 1) + "-0" + ((i % 27) + 1),

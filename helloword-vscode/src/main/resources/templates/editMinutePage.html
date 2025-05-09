@@ -4,7 +4,7 @@
     <input type="hidden" name="assoId" value="{{association.id}}"/>
     <div>
         <label>Date: </label>
-        <input type='date' name='date' value="{{minute.date}}" max="{{today}}"/>
+        <input type='date' name='date' value="{{minute.date}}" max="{{today}}" required/>
     </div>
     <label for="participantsIds">Choose participants:</label>
 
@@ -35,9 +35,9 @@
 
 
     <p>Content :</p>	
-        <input type='text' name='content' value="{{minute.content}}"/>
+        <input type='text' name='content' value="{{minute.content}}" required/>
     <p>Duration : </p>
-        <input type="number" name="duration" id="duration" value="{{minute.duration}}" min="0" max="180" step="0.01"/>
+        <input type="number" name="duration" id="duration" value="{{minute.duration}}" min="0" max="180" step="0.01" required/>
     <p>
         <input type="hidden" name="_csrf" value="{{token}}"/>
         <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>

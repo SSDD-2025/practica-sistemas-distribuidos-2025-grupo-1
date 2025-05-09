@@ -24,7 +24,7 @@ public class Minute {
     @JoinTable(
         name = "minute_participants",
         joinColumns = @JoinColumn(name = "minute_id"),
-        inverseJoinColumns = @JoinColumn(name = "Utilisateur_id")
+        inverseJoinColumns = @JoinColumn(name = "member_id")
     )
     private List<Member> participants;
 

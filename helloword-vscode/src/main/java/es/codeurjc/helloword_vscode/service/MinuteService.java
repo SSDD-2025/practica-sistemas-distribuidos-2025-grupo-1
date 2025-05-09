@@ -47,7 +47,7 @@ public class MinuteService {
 
 
 	/* Delete minute and update association */
-	public void delete(Minute minute, Long assoId, List <Member> utilisateurs) {
+	public void delete(Minute minute, Long assoId, List <Member> members) {
 		// Retrieve the association by ID
 		Association association = associationService.findById(assoId).orElseThrow();
 
@@ -55,8 +55,8 @@ public class MinuteService {
 		association.getMinutes().remove(minute);
 		
 		// Remove the minute from each user's list of minutes
-		for (Member utilisateur : utilisateurs ){
-			utilisateur.getMinutes().remove(minute);
+		for (Member member : members ){
+			member.getMinutes().remove(minute);
 		}
 
 		// Delete the minute from the repository
@@ -72,8 +72,8 @@ public class MinuteService {
             .orElseThrow(() -> new ResourceNotFoundException("Association not found with id: " + assoId));
 
         association.getMinutes().remove(minute);
-        for (Member utilisateur : minute.getParticipants()) {
-            utilisateur.getMinutes().remove(minute);
+        for (Member member : minute.getParticipants()) {
+            member.getMinutes().remove(minute);
         }
         minuteRepository.delete(minute);
     }

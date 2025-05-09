@@ -18,7 +18,7 @@ public class MemberType {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "idUtilisateur")
+    @JoinColumn(name = "idMember")
     private Member member;
 
     @ManyToOne

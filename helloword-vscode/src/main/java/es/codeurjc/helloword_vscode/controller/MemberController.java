@@ -36,7 +36,7 @@ public class MemberController {
     private AssociationService associationService;
 
     @Autowired
-    private MemberService utilisateurEntityService;
+    private MemberService memberService;
     
 
     /* Adds authentication attributes to all templates */ 
@@ -61,7 +61,7 @@ public class MemberController {
     @GetMapping("/members")
     public String showMembers(Model model) {
         // Fetch all users and add them to the model
-        model.addAttribute("Utilisateursentity", utilisateurEntityService.findAll());
+        model.addAttribute("isMember", memberService.findAll());
         return "members";
     }
 
@@ -85,10 +85,10 @@ public class MemberController {
     public String profile(Model model, HttpServletRequest request) {
         // Retrieve the username of the authenticated user
         String name = request.getUserPrincipal().getName();
-        Optional<Member> utilisateurEntity = utilisateurEntityService.findByName(name);
+        Optional<Member> member = memberService.findByName(name);
         
         // Add the username and admin status to the model
-        model.addAttribute("username", utilisateurEntity.get().getName());
+        model.addAttribute("username", member.get().getName());
         model.addAttribute("admin", request.isUserInRole("ADMIN"));
         return "profile";
     }
@@ -98,19 +98,19 @@ public class MemberController {
     @GetMapping("/user/{id}")
     public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         // Retrieve the user by ID
-        Optional<Member> utilisateurEntity = utilisateurEntityService.findById(id);
-        if (utilisateurEntity.isPresent()) {
-            Member utilisateur = utilisateurEntity.get();
-            model.addAttribute("utilisateur", utilisateur);
+        Optional<Member> member = memberService.findById(id);
+        if (member.isPresent()) {
+            Member memberAttribute = member.get();
+            model.addAttribute("memberAttribute", memberAttribute);
             
             // Map the user's roles in associations to a DTO and add to the model
-            List<AssociationMemberTypeDTO> roles = utilisateur.getMemberTypes().stream()
+            List<AssociationMemberTypeDTO> roles = memberAttribute.getMemberTypes().stream()
                 .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
                 .collect(Collectors.toList());
             model.addAttribute("associationRoles", roles);
             
             // Add the user's minutes to the model
-            List<Minute> userMinutes = utilisateur.getMinutes();
+            List<Minute> userMinutes = memberAttribute.getMinutes();
             model.addAttribute("userMinutes", userMinutes);
             return "user_detail";
         } else {
@@ -126,8 +126,8 @@ public class MemberController {
                                           Model model) {
         if (id != null && "user".equals(searchType)) {
             // Search for a user by ID and add to the model
-            utilisateurEntityService.findById(id).ifPresent(user ->
-                model.addAttribute("Utilisateursentity", List.of(user))
+            memberService.findById(id).ifPresent(user ->
+                model.addAttribute("isMember", List.of(user))
             );
             return "members";
         }
@@ -150,14 +150,14 @@ public class MemberController {
                             @RequestParam String pwd,
                             Model model) {
         // Check if the username already exists                        
-        Optional<Member> existingUser = utilisateurEntityService.findByName(name);
+        Optional<Member> existingUser = memberService.findByName(name);
         if (existingUser.isPresent()) {
             model.addAttribute("error", "This username already exists");
             return "new_member";
         }
 
         // Create a new user
-        utilisateurEntityService.createUser( name,  surname, pwd);
+        memberService.createUser( name,  surname, pwd);
         return "redirect:/";
     }
 
@@ -173,7 +173,7 @@ public class MemberController {
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal principal) {
         // Retrieve the user by name and add to the model
-        Member user = utilisateurEntityService.findByName(principal.getName()).orElseThrow();
+        Member user = memberService.findByName(principal.getName()).orElseThrow();
         model.addAttribute("user", user);
         return "edit_profile";
     }
@@ -183,7 +183,7 @@ public class MemberController {
     @PostMapping("/profile/update")
     public String updateProfile(Principal principal, @RequestParam String name, @RequestParam String surname, @RequestParam(required = false) String pwd, Model model) {
         String username = principal.getName();
-        utilisateurEntityService.updateUser(username, name, surname, pwd);
+        memberService.updateUser(username, name, surname, pwd);
         model.addAttribute("triggerLogout", true);
         return "post_update_profile"; // une page temporaire avec le script ci-dessus
     }
@@ -201,11 +201,11 @@ public class MemberController {
     @PreAuthorize("isAuthenticated()")
     public String deleteOwnAccount(Principal principal, HttpServletRequest request) throws IOException {
         String username = principal.getName();
-        Optional<Member> utilisateurEntity = utilisateurEntityService.findByName(username);
+        Optional<Member> member = memberService.findByName(username);
 
-        if (utilisateurEntity.isPresent()) {
+        if (member.isPresent()) {
             // Delete the user by ID
-            utilisateurEntityService.deleteById(utilisateurEntity.get().getId());
+            memberService.deleteById(member.get().getId());
 
             // Logout after deletion
             try {
@@ -225,10 +225,10 @@ public class MemberController {
     @GetMapping("/profile/{id}/delete")
 	public String deleteMember(@PathVariable long id) throws IOException {
         // Retrieve the user by ID
-		Optional<Member> utilisateurEntity = utilisateurEntityService.findById(id);
-		if (utilisateurEntity.isPresent()) {
+		Optional<Member> member = memberService.findById(id);
+		if (member.isPresent()) {
             // Delete the user by ID
-			utilisateurEntityService.deleteById(id);
+			memberService.deleteById(id);
 			return "redirect:/";
 		} else {
 			return "redirect:/";

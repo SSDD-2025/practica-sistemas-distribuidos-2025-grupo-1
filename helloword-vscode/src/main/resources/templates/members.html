@@ -7,9 +7,9 @@
     {{> header}}
     <h2>Members</h2>
     <ul>
-        {{#Utilisateursentity}}
+        {{#isMember}}
             <a href="/user/{{id}}"><li>{{name}} {{surname}} {{id}}</li></a>  
-        {{/Utilisateursentity}}
+        {{/isMember}}
     </ul>
     {{> footer}}
 </body>

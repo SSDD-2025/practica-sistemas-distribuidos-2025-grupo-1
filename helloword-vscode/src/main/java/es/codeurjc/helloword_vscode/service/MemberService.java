@@ -32,7 +32,7 @@ public class MemberService implements UserDetailsService {
     // Autowired repositories for database interactions //
 
     @Autowired
-	private MemberRepository utilisateursEntityRepository;
+	private MemberRepository memberRepository;
 
 	@Autowired
 	private MemberTypeService memberTypeService;
@@ -46,14 +46,14 @@ public class MemberService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
 	/* Save user */
-    public void save(Member utilisateurEntity) {
-		utilisateursEntityRepository.save(utilisateurEntity);
+    public void save(Member member) {
+		memberRepository.save(member);
 	}
 
 
 	/* Find user by their name */
 	public Optional<Member> findByName(String name) {
-		return utilisateursEntityRepository.findByName(name);
+		return memberRepository.findByName(name);
 	}
 
 
@@ -61,30 +61,30 @@ public class MemberService implements UserDetailsService {
     @Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// Retrieve the user by username
-		Member utilisateur = utilisateursEntityRepository.findByName(username)
+		Member member = memberRepository.findByName(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 		// Map the user's roles to granted authorities
 		List<GrantedAuthority> roles = new ArrayList<>();
-		for (String role : utilisateur.getRoles()) {
+		for (String role : member.getRoles()) {
 			roles.add(new SimpleGrantedAuthority("ROLE_" + role));
 		}
 
 		// Return a UserDetails object containing the user's data
-		return new org.springframework.security.core.userdetails.User(utilisateur.getName(), 
-				utilisateur.getPwd(), roles);
+		return new org.springframework.security.core.userdetails.User(member.getName(), 
+				member.getPwd(), roles);
 	}
 
 
 	/* Find user by ID */
 	public Optional<Member> findById(long id) {
-		return utilisateursEntityRepository.findById(id);
+		return memberRepository.findById(id);
 	}
 
 
 	/* Find all users */
 	public List<Member> findAll() {
-		return utilisateursEntityRepository.findAll();
+		return memberRepository.findAll();
 	}
 
 
@@ -92,7 +92,7 @@ public class MemberService implements UserDetailsService {
 	@Transactional
 	public void deleteById(long id) throws IOException {
 		// Retrieve user by ID
-		Optional<Member> optUser = utilisateursEntityRepository.findById(id);
+		Optional<Member> optUser = memberRepository.findById(id);
 		if (optUser.isPresent()) {
 			Member user = optUser.get();
 
@@ -110,7 +110,7 @@ public class MemberService implements UserDetailsService {
 			}
 
 			// 3. Delete user
-			utilisateursEntityRepository.delete(user);
+			memberRepository.delete(user);
 		}
 	}
 
