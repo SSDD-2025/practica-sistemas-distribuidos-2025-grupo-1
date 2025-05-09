@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.Map;
 
 @Entity
-public class UtilisateurEntity {
+public class Member {
     @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	long id;
@@ -25,11 +25,11 @@ public class UtilisateurEntity {
 	private List<String> roles;
 
     // A list of membership types associated with the user
-    @OneToMany(mappedBy = "utilisateurEntity")
+    @OneToMany(mappedBy = "member")
     private List<MemberType> memberTypes;
 
     /* Default constructor */
-    public UtilisateurEntity() {}
+    public Member() {}
 
 
     /**
@@ -40,7 +40,7 @@ public class UtilisateurEntity {
      * @param pwd The password of the user
      * @param roles The roles assigned to the user
     */
-    public UtilisateurEntity(String name, String surname, String pwd, String... roles) {
+    public Member(String name, String surname, String pwd, String... roles) {
         this.name = name;
         this.surname = surname;
         this.pwd = pwd;

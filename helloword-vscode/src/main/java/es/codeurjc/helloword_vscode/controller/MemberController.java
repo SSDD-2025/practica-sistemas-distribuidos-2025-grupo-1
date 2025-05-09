@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -36,7 +36,7 @@ public class MemberController {
     private AssociationService associationService;
 
     @Autowired
-    private UtilisateurEntityService utilisateurEntityService;
+    private MemberService utilisateurEntityService;
     
 
     /* Adds authentication attributes to all templates */ 
@@ -85,7 +85,7 @@ public class MemberController {
     public String profile(Model model, HttpServletRequest request) {
         // Retrieve the username of the authenticated user
         String name = request.getUserPrincipal().getName();
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(name);
+        Optional<Member> utilisateurEntity = utilisateurEntityService.findByName(name);
         
         // Add the username and admin status to the model
         model.addAttribute("username", utilisateurEntity.get().getName());
@@ -98,9 +98,9 @@ public class MemberController {
     @GetMapping("/user/{id}")
     public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         // Retrieve the user by ID
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
+        Optional<Member> utilisateurEntity = utilisateurEntityService.findById(id);
         if (utilisateurEntity.isPresent()) {
-            UtilisateurEntity utilisateur = utilisateurEntity.get();
+            Member utilisateur = utilisateurEntity.get();
             model.addAttribute("utilisateur", utilisateur);
             
             // Map the user's roles in associations to a DTO and add to the model
@@ -150,7 +150,7 @@ public class MemberController {
                             @RequestParam String pwd,
                             Model model) {
         // Check if the username already exists                        
-        Optional<UtilisateurEntity> existingUser = utilisateurEntityService.findByName(name);
+        Optional<Member> existingUser = utilisateurEntityService.findByName(name);
         if (existingUser.isPresent()) {
             model.addAttribute("error", "This username already exists");
             return "new_member";
@@ -173,7 +173,7 @@ public class MemberController {
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal principal) {
         // Retrieve the user by name and add to the model
-        UtilisateurEntity user = utilisateurEntityService.findByName(principal.getName()).orElseThrow();
+        Member user = utilisateurEntityService.findByName(principal.getName()).orElseThrow();
         model.addAttribute("user", user);
         return "edit_profile";
     }
@@ -201,7 +201,7 @@ public class MemberController {
     @PreAuthorize("isAuthenticated()")
     public String deleteOwnAccount(Principal principal, HttpServletRequest request) throws IOException {
         String username = principal.getName();
-        Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findByName(username);
+        Optional<Member> utilisateurEntity = utilisateurEntityService.findByName(username);
 
         if (utilisateurEntity.isPresent()) {
             // Delete the user by ID
@@ -225,7 +225,7 @@ public class MemberController {
     @GetMapping("/profile/{id}/delete")
 	public String deleteMember(@PathVariable long id) throws IOException {
         // Retrieve the user by ID
-		Optional<UtilisateurEntity> utilisateurEntity = utilisateurEntityService.findById(id);
+		Optional<Member> utilisateurEntity = utilisateurEntityService.findById(id);
 		if (utilisateurEntity.isPresent()) {
             // Delete the user by ID
 			utilisateurEntityService.deleteById(id);

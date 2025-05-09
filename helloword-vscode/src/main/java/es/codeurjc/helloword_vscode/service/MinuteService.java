@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class MinuteService {
 
 
 	/* Delete minute and update association */
-	public void delete(Minute minute, Long assoId, List <UtilisateurEntity> utilisateurs) {
+	public void delete(Minute minute, Long assoId, List <Member> utilisateurs) {
 		// Retrieve the association by ID
 		Association association = associationService.findById(assoId).orElseThrow();
 
@@ -55,7 +55,7 @@ public class MinuteService {
 		association.getMinutes().remove(minute);
 		
 		// Remove the minute from each user's list of minutes
-		for (UtilisateurEntity utilisateur : utilisateurs ){
+		for (Member utilisateur : utilisateurs ){
 			utilisateur.getMinutes().remove(minute);
 		}
 
@@ -72,7 +72,7 @@ public class MinuteService {
             .orElseThrow(() -> new ResourceNotFoundException("Association not found with id: " + assoId));
 
         association.getMinutes().remove(minute);
-        for (UtilisateurEntity utilisateur : minute.getParticipants()) {
+        for (Member utilisateur : minute.getParticipants()) {
             utilisateur.getMinutes().remove(minute);
         }
         minuteRepository.delete(minute);
@@ -80,7 +80,7 @@ public class MinuteService {
 
 
 	/* Find all Minute entities that contain the specified participant */
-	List<Minute> findAllByParticipantsContains(UtilisateurEntity participant){
+	List<Minute> findAllByParticipantsContains(Member participant){
 		return minuteRepository.findAllByParticipantsContains(participant);
 	}
 }

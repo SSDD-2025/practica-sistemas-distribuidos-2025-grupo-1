@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
 import jakarta.annotation.PostConstruct;
 
@@ -41,7 +41,7 @@ public class DataInitializer {
     // Autowired repositories for database interactions //
 
     @Autowired
-    private UtilisateurEntityRepository UtilisateurEntityRepository;
+    private MemberRepository MemberRepository;
 
     @Autowired
     private MinuteRepository minuteRepository;
@@ -84,10 +84,10 @@ public class DataInitializer {
     @PostConstruct
     public void init() throws SQLException{
         // Add users
-        UtilisateurEntity Utilisateurentity1 = new UtilisateurEntity("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
-        UtilisateurEntity Utilisateurentity2 = new UtilisateurEntity("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
-        UtilisateurEntity Utilisateurentity3 = new UtilisateurEntity("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
-        UtilisateurEntityRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2, Utilisateurentity3));
+        Member Utilisateurentity1 = new Member("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
+        Member Utilisateurentity2 = new Member("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
+        Member Utilisateurentity3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
+        MemberRepository.saveAll(Arrays.asList(Utilisateurentity1, Utilisateurentity2, Utilisateurentity3));
 
         // Add associations
         Association association1 = new Association("GreenPeace");
@@ -112,15 +112,15 @@ public class DataInitializer {
         minuteRepository.save(minute2);
 
         // Generate new random data
-        List<UtilisateurEntity> utilisateurs = new ArrayList<>();
+        List<Member> utilisateurs = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             String role = (i % 5 == 0) ? "USER,ADMIN" : "USER";
-            UtilisateurEntity user = new UtilisateurEntity(
+            Member user = new Member(
                 "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), role.split(",")
             );
             utilisateurs.add(user);
         }
-        UtilisateurEntityRepository.saveAll(utilisateurs);
+        MemberRepository.saveAll(utilisateurs);
 
         List<String> names = List.of("Love Earth", "Give Smile", "Construct Avenir", "Culture Club", "Nature Warrior", "Book Lovers");
         List<Association> associations = new ArrayList<>();
@@ -134,7 +134,7 @@ public class DataInitializer {
 
         List<MemberType> roles = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            UtilisateurEntity user = utilisateurs.get(i);
+            Member user = utilisateurs.get(i);
             Association asso = associations.get(i % associations.size());
             String roleName = switch (i % 3) {
                 case 0 -> "president";
@@ -148,7 +148,7 @@ public class DataInitializer {
         List<Minute> minutes = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Association asso = associations.get(i % associations.size());
-            List<UtilisateurEntity> participants = Arrays.asList(
+            List<Member> participants = Arrays.asList(
                 utilisateurs.get(i % utilisateurs.size()),
                 utilisateurs.get((i + 1) % utilisateurs.size())
             );

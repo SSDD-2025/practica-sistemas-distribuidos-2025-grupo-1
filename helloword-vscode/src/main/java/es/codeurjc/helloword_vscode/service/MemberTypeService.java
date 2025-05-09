@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import es.codeurjc.helloword_vscode.repository.MemberTypeRepository;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 
 import java.util.List;
 
@@ -34,8 +34,8 @@ public class MemberTypeService {
 
 
   /* Find all member type from user */
-  public List<MemberType> findByUtilisateurEntity(UtilisateurEntity utilisateurEntity) {
-    return memberTypeRepository.findByUtilisateurEntity(utilisateurEntity);
+  public List<MemberType> findByMember(Member member) {
+    return memberTypeRepository.findByMember(member);
   }
 }
 

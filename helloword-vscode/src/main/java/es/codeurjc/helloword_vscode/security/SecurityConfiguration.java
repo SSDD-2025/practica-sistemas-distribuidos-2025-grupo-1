@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+import es.codeurjc.helloword_vscode.service.MemberService;
 
 @Configuration
 @EnableWebSecurity
@@ -19,7 +19,7 @@ public class SecurityConfiguration {
 
     // Service to retrieve user details
     @Autowired
-    public UtilisateurEntityService userDetailService;
+    public MemberService userDetailService;
 
     
     /* Bean for password encoding */

@@ -26,7 +26,7 @@ public class Minute {
         joinColumns = @JoinColumn(name = "minute_id"),
         inverseJoinColumns = @JoinColumn(name = "Utilisateur_id")
     )
-    private List<UtilisateurEntity> participants;
+    private List<Member> participants;
 
     private String content;
     private double duration;
@@ -44,7 +44,7 @@ public class Minute {
      * @param duration The duration of the minute.
      * @param association The association to which the minute belongs.
      */
-    public Minute(String date, List<UtilisateurEntity> participants, String content, double duration, Association association) {
+    public Minute(String date, List<Member> participants, String content, double duration, Association association) {
         this.date = date;
         this.participants = participants;
         this.content = content;
@@ -74,11 +74,11 @@ public class Minute {
         this.date = date;
     }
 
-    public List<UtilisateurEntity> getParticipants() {
+    public List<Member> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<UtilisateurEntity> participants) {
+    public void setParticipants(List<Member> participants) {
         this.participants = participants;
     }
 

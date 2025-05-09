@@ -92,19 +92,19 @@ public class Association {
         this.minutes = minutes;
     }
 
-    public List<UtilisateurEntity> getMembers() {
+    public List<Member> getMembers() {
         // Retrieve all users associated with this association
         return memberTypes.stream()
-                     .map(MemberType::getUtilisateurEntity)
+                     .map(MemberType::getMember)
                      .collect(Collectors.toList());
     }
 
-    public void setMembers(List<UtilisateurEntity> members) {
+    public void setMembers(List<Member> members) {
         // Assure that all users has a role in their association
         this.memberTypes = members.stream()
                             .map(Utilisateurentity -> {
                                 MemberType memberType = new MemberType();
-                                memberType.setUtilisateurEntity(Utilisateurentity);
+                                memberType.setMember(Utilisateurentity);
                                 memberType.setAssociation(this);
                                 return memberType;
                             })

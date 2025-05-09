@@ -19,7 +19,7 @@ public class MemberType {
 
     @ManyToOne
     @JoinColumn(name = "idUtilisateur")
-    private UtilisateurEntity utilisateurEntity;
+    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "idAssociation")
@@ -34,12 +34,12 @@ public class MemberType {
      * Parameterized constructor to initialize the MemberType with name, user, and association.
      *
      * @param name The type of membership.
-     * @param utilisateurEntity The user entity associated with this membership.
+     * @param member The user entity associated with this membership.
      * @param association The association to which the user belongs.
      */
-    public MemberType(String name, UtilisateurEntity utilisateurEntity, Association association) {
+    public MemberType(String name, Member member, Association association) {
         this.name = name;
-        this.utilisateurEntity = utilisateurEntity;
+        this.member = member;
         this.association = association;
     }
 
@@ -62,12 +62,12 @@ public class MemberType {
         this.name = name;
     }
 
-    public UtilisateurEntity getUtilisateurEntity() {
-        return utilisateurEntity;
+    public Member getMember() {
+        return member;
     }
 
-    public void setUtilisateurEntity(UtilisateurEntity utilisateurEntity) {
-        this.utilisateurEntity = utilisateurEntity;
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public Association getAssociation() {

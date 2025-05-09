@@ -22,10 +22,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MinuteService;
-import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+import es.codeurjc.helloword_vscode.service.MemberService;
 
 @Controller
 public class MinuteController {
@@ -39,7 +39,7 @@ public class MinuteController {
 	private AssociationService associationService;
 
     @Autowired
-    private UtilisateurEntityService utilisateurEntityService;
+    private MemberService memberService;
 
 
     /* Create mintue */
@@ -65,8 +65,8 @@ public class MinuteController {
                 minute.setDate(date);
 
                 // Retrieve participants by their IDs
-                List<UtilisateurEntity> participants = participantsIds.stream()
-                .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+                List<Member> participants = participantsIds.stream()
+                .map(participantId -> memberService.findById(participantId).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -128,9 +128,9 @@ public class MinuteController {
         model.addAttribute("participants", minute.getParticipants());
 
         // Create a list of members who did not participate in the meeting
-        Collection<UtilisateurEntity> members = association.get().getMembers();;
-        Collection<UtilisateurEntity> participants = minute.getParticipants();
-        Collection<UtilisateurEntity> memberNoPart = new HashSet<UtilisateurEntity>();
+        Collection<Member> members = association.get().getMembers();;
+        Collection<Member> participants = minute.getParticipants();
+        Collection<Member> memberNoPart = new HashSet<Member>();
         memberNoPart.addAll(members);
         memberNoPart.removeAll(participants);
         model.addAttribute("noPart", memberNoPart);
@@ -166,8 +166,8 @@ public class MinuteController {
         
         // Update minute attributes
         minute.setDate(date);
-        List<UtilisateurEntity> participants = participantsIds.stream()
-            .map(participantId -> utilisateurEntityService.findById(participantId).orElse(null))
+        List<Member> participants = participantsIds.stream()
+            .map(participantId -> memberService.findById(participantId).orElse(null))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
         minute.setParticipants(participants);

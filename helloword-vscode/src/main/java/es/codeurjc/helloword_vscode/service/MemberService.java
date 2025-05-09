@@ -18,21 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
-import es.codeurjc.helloword_vscode.repository.UtilisateurEntityRepository;
+import es.codeurjc.helloword_vscode.model.Member;
+import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
 /*
- * This service class provides methods to perform various operations on UtilisateurEntity entities,
+ * This service class provides methods to perform various operations on Member entities,
  * such as saving, retrieving, and deleting users. It implements UserDetailsService to load user-specific 
  * data
 */
 @Service
-public class UtilisateurEntityService implements UserDetailsService {
+public class MemberService implements UserDetailsService {
 
     // Autowired repositories for database interactions //
 
     @Autowired
-	private UtilisateurEntityRepository utilisateursEntityRepository;
+	private MemberRepository utilisateursEntityRepository;
 
 	@Autowired
 	private MemberTypeService memberTypeService;
@@ -46,13 +46,13 @@ public class UtilisateurEntityService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
 	/* Save user */
-    public void save(UtilisateurEntity utilisateurEntity) {
+    public void save(Member utilisateurEntity) {
 		utilisateursEntityRepository.save(utilisateurEntity);
 	}
 
 
 	/* Find user by their name */
-	public Optional<UtilisateurEntity> findByName(String name) {
+	public Optional<Member> findByName(String name) {
 		return utilisateursEntityRepository.findByName(name);
 	}
 
@@ -61,7 +61,7 @@ public class UtilisateurEntityService implements UserDetailsService {
     @Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// Retrieve the user by username
-		UtilisateurEntity utilisateur = utilisateursEntityRepository.findByName(username)
+		Member utilisateur = utilisateursEntityRepository.findByName(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
 		// Map the user's roles to granted authorities
@@ -77,13 +77,13 @@ public class UtilisateurEntityService implements UserDetailsService {
 
 
 	/* Find user by ID */
-	public Optional<UtilisateurEntity> findById(long id) {
+	public Optional<Member> findById(long id) {
 		return utilisateursEntityRepository.findById(id);
 	}
 
 
 	/* Find all users */
-	public List<UtilisateurEntity> findAll() {
+	public List<Member> findAll() {
 		return utilisateursEntityRepository.findAll();
 	}
 
@@ -92,12 +92,12 @@ public class UtilisateurEntityService implements UserDetailsService {
 	@Transactional
 	public void deleteById(long id) throws IOException {
 		// Retrieve user by ID
-		Optional<UtilisateurEntity> optUser = utilisateursEntityRepository.findById(id);
+		Optional<Member> optUser = utilisateursEntityRepository.findById(id);
 		if (optUser.isPresent()) {
-			UtilisateurEntity user = optUser.get();
+			Member user = optUser.get();
 
 			// 1. Delete member type in association
-			List<MemberType> memberTypes = memberTypeService.findByUtilisateurEntity(user);
+			List<MemberType> memberTypes = memberTypeService.findByMember(user);
 			for (MemberType memberType : memberTypes) {
 				memberTypeService.delete(memberType);
 			}
@@ -117,9 +117,9 @@ public class UtilisateurEntityService implements UserDetailsService {
 
 	/* Update user */
     public void updateUser(String username, String name, String surname, String password) {
-        Optional<UtilisateurEntity> optUser = findByName(username);
+        Optional<Member> optUser = findByName(username);
         if (optUser.isPresent()) {
-            UtilisateurEntity user = optUser.get();
+            Member user = optUser.get();
 
             if (!user.getName().equals(name) && findByName(name).isPresent()) {
                 throw new IllegalArgumentException("This username already exists");
@@ -140,7 +140,7 @@ public class UtilisateurEntityService implements UserDetailsService {
         if (findByName(name).isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
-        UtilisateurEntity user = new UtilisateurEntity(name, surname, passwordEncoder.encode(password), "USER");
+        Member user = new Member(name, surname, passwordEncoder.encode(password), "USER");
         save(user);
     }
 }

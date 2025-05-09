@@ -27,9 +27,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import es.codeurjc.helloword_vscode.model.Association;
-import es.codeurjc.helloword_vscode.model.UtilisateurEntity;
+import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.service.AssociationService;
-import es.codeurjc.helloword_vscode.service.UtilisateurEntityService;
+import es.codeurjc.helloword_vscode.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -40,7 +40,7 @@ public class AssoController {
     // Service for database interaction 
 
     @Autowired
-    private UtilisateurEntityService utilisateurEntityService;
+    private MemberService memberService;
 
     @Autowired
 	private AssociationService associationService;
@@ -107,7 +107,7 @@ public class AssoController {
             // Check if the user is a member of the association
             if (principal != null) {
                 String username = principal.getName();
-                Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
+                Optional<Member> user = memberService.findByName(username);
                 if (user.isPresent()) {
                     boolean isMember = asso.get().getMembers().contains(user.get());
                     model.addAttribute("isMember", isMember);
@@ -127,7 +127,7 @@ public class AssoController {
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
-            Optional<UtilisateurEntity> user = utilisateurEntityService.findByName(username);
+            Optional<Member> user = memberService.findByName(username);
             if (user.isPresent()) {
                 associationService.addUserToAssociation(id, user.get().getId());
             }
