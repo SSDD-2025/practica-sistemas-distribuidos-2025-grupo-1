@@ -39,6 +39,7 @@
     <p>Duration : </p>
         <input type="number" name="duration" id="duration" value="{{minute.duration}}" min="0" max="180" step="0.01"/>
     <p>
+        <input type="hidden" name="_csrf" value="{{token}}"/>
         <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>
         <input type="submit" value="Save"/>
     </p>
