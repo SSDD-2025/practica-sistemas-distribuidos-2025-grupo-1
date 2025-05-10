@@ -28,7 +28,7 @@ import es.codeurjc.helloword_vscode.service.MinuteService;
 import es.codeurjc.helloword_vscode.service.MemberService;
 
 @Controller
-public class MinuteController {
+public class MinuteWebController {
 
     // Service for database interaction 
 

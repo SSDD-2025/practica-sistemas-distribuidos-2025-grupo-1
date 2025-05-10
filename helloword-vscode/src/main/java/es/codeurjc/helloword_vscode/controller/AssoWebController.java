@@ -35,7 +35,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 @Controller
-public class AssoController {
+public class AssoWebController {
 
     // Service for database interaction 
 

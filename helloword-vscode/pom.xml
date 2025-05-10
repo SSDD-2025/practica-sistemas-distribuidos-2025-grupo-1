@@ -198,7 +198,7 @@
 				<artifactId>copy-rename-maven-plugin</artifactId>
 				<version>1.0.1</version>
 				<executions>
-					<execution>
+					<!-- <execution>
 						<id>copy-file</id>
 						<phase>integration-test</phase>
 						<goals>
@@ -208,7 +208,7 @@
 							<sourceFile>api-docs/index.html</sourceFile>
 							<destinationFile>api-docs/api-docs.html</destinationFile>
 						</configuration>
-					</execution>
+					</execution> -->
 				</executions>
 			</plugin>
 		</plugins>
