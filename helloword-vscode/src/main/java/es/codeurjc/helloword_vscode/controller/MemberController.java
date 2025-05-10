@@ -65,21 +65,6 @@ public class MemberController {
         return "members";
     }
 
-
-    /* Login page */ 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-
-    /* Login error page */ 
-    @GetMapping("/loginerror")
-    public String loginerror() {
-        return "loginerror";
-    }
-
-
     /* User profile page */ 
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
