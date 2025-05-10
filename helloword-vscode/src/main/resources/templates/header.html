@@ -1,12 +1,13 @@
 <head>
-    <title>Association Details</title>
+    <title>Heade'r</title>
     <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <div class="navbar">
     {{#isAuthenticated}}
-        <form action="/logout" method="post">
+      <form action="/logout" method="post">
+            <input type="hidden" name="_csrf" value="{{token}}"/>
             <input type="submit" value="Sign Out"/>
-        </form>
+        </form>  
     {{/isAuthenticated}}
     {{^isAuthenticated}}
         <a href="/login"><button>Login</button></a>
@@ -17,11 +18,12 @@
     <a href="/"><button>Associations</button></a>
 
     <form action="/search" method="get">
-        <input type="text" name="searchId" placeholder="Enter ID" />
+        <input type="number" min="0" step="1" name="searchId" placeholder="Enter ID" />
         <select name="searchType">
             <option value="user">User</option>
             <option value="association">Association</option>
         </select>
+        <input type="hidden" name="_csrf" value="{{token}}"/>
         <button type="submit" class="search-button">Search</button>
     </form>
 </div>

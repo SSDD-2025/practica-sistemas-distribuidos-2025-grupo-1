@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.Map;
 
 @Entity
-public class UtilisateurEntity {
+public class Member {
     @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	long id;
@@ -20,23 +20,36 @@ public class UtilisateurEntity {
     private String surname;
     private String pwd;
 
+    // A collection of roles assigned to the user
     @ElementCollection(fetch = FetchType.EAGER)
 	private List<String> roles;
 
-    @OneToMany(mappedBy = "Utilisateurentity")
+    // A list of membership types associated with the user
+    @OneToMany(mappedBy = "member")
     private List<MemberType> memberTypes;
 
-    // Constructor
-    public UtilisateurEntity() {}
+    /* Default constructor */
+    public Member() {}
 
-    public UtilisateurEntity(String name, String surname, String pwd, String... roles) {
+
+    /**
+     * Parameterized constructor to initialize the user with name, surname, password, and roles.
+     *
+     * @param name The name of the user
+     * @param surname The surname of the user
+     * @param pwd The password of the user
+     * @param roles The roles assigned to the user
+    */
+    public Member(String name, String surname, String pwd, String... roles) {
         this.name = name;
         this.surname = surname;
         this.pwd = pwd;
         this.roles = List.of(roles);
     }
 
-    // Getters and Setters
+    
+    // Getters and Setters //
+
     public long getId() {
         return id;
     }

@@ -40,6 +40,9 @@ a:hover {
     padding: 10px;
 }
 
+.navbar p{
+    color: white;
+}
 .navbar a button {
     background-color: #f8f9fa;
     border: none;

@@ -5,7 +5,7 @@
 <body>
 	{{>header}}
 
-	<h1>New post</h1>
+	<h1>New association</h1>
 	<form action="/association/create" method="post" enctype="multipart/form-data">
 		<p>Association name: </p>	
 		<input type='text' name='name'/>
@@ -14,7 +14,9 @@
 		<input type='file' name='image'/>
 		<br>
 		<br>
+		<input type="hidden" name="_csrf" value="{{token}}"/>
 		<input type='submit' value='Save'/>
 	</form>
+	{{> footer}}
 </body>
 </html>

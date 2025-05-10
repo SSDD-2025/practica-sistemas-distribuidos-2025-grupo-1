@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    <form action="/profile/update" method="post">
+        {{#error}}
+		<p style="color:red">{{error}}</p>
+		{{/error}}	
+        <p>Name: <input type="text" name="name" value="{{user.name}}" required/></p>
+        <p>Surname: <input type="text" name="surname" value="{{user.surname}}" required/></p>
+        <p>Password: <input type="password" name="pwd" /></p>
+        <input type="hidden" name="_csrf" value="{{token}}"/>
+        <button onclick="location.href='/'; return false;">Cancel</button>
+        <input type="submit" value="Update" />
+    </form>
+    <br>
+    <a href="/">Back to home</a>
+</body>
+</html>

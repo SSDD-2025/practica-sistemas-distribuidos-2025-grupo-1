@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,20 +32,25 @@ public class Association {
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
 
-    // Constructor
+
+    /* Default constructor */
     public Association() {}
 
+
+    /* Constructor with name and image file*/
     public Association(String name, String imgAsso) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
+    /* Constructor only with name */
     public Association(String name) {
         this.name = name;
         this.memberTypes = new ArrayList<>();
     }
 
-    // Getters and Setters
+
+    // Getters and Setters //
 
     public Blob getImageFile() {
 		return imageFile;
@@ -87,21 +92,19 @@ public class Association {
         this.minutes = minutes;
     }
 
-
-    // Méthode pour obtenir les membres
-    public List<UtilisateurEntity> getMembers() {
+    public List<Member> getMembers() {
+        // Retrieve all users associated with this association
         return memberTypes.stream()
-                     .map(MemberType::getUtilisateurEntity)
+                     .map(MemberType::getMember)
                      .collect(Collectors.toList());
     }
 
-    // Méthode pour définir les membres
-    public void setMembers(List<UtilisateurEntity> members) {
-        // Assurez-vous que chaque utilisateur a un rôle associé à cette association
+    public void setMembers(List<Member> members) {
+        // Assure that all users has a role in their association
         this.memberTypes = members.stream()
-                            .map(Utilisateurentity -> {
+                            .map(member -> {
                                 MemberType memberType = new MemberType();
-                                memberType.setUtilisateurEntity(Utilisateurentity);
+                                memberType.setMember(member);
                                 memberType.setAssociation(this);
                                 return memberType;
                             })

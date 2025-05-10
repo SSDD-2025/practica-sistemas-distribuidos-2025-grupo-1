@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Delete</title>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+    <p>Do you really want to delete your account ?</p>
+    <form action="/profile/delete/confirm" method="post">
+        <input type="hidden" name="_csrf" value="{{token}}"/>
+        <input type="submit" value="Confirm" />
+    </form>
+    <a href="/">Back to home</a>
+</body>
+</html>

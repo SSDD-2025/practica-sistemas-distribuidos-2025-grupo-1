@@ -1,4 +1,4 @@
-package es.codeurjc.helloword_vscode.entities;
+package es.codeurjc.helloword_vscode.model;
 
 import java.util.List;
 
@@ -24,9 +24,9 @@ public class Minute {
     @JoinTable(
         name = "minute_participants",
         joinColumns = @JoinColumn(name = "minute_id"),
-        inverseJoinColumns = @JoinColumn(name = "Utilisateur_id")
+        inverseJoinColumns = @JoinColumn(name = "member_id")
     )
-    private List<UtilisateurEntity> participants;
+    private List<Member> participants;
 
     private String content;
     private double duration;
@@ -35,8 +35,16 @@ public class Minute {
     @JoinColumn(name = "id_association", nullable = false)
     private Association association;
 
-    // Constructeur
-    public Minute(String date, List<UtilisateurEntity> participants, String content, double duration, Association association) {
+    /**
+     * Parameterized constructor to initialize the Minute with date, participants, content, duration, and association.
+     *
+     * @param date The date of the minute.
+     * @param participants The list of participants in the minute.
+     * @param content The content of the minute.
+     * @param duration The duration of the minute.
+     * @param association The association to which the minute belongs.
+     */
+    public Minute(String date, List<Member> participants, String content, double duration, Association association) {
         this.date = date;
         this.participants = participants;
         this.content = content;
@@ -44,10 +52,12 @@ public class Minute {
         this.association = association;
     }
 
-    // Constructeur par défaut
+    /* Default constructor */
     public Minute() {}
 
-    // Getters et Setters
+
+    // Getters and Setters //
+    
     public long getId() {
         return id;
     }
@@ -64,11 +74,11 @@ public class Minute {
         this.date = date;
     }
 
-    public List<UtilisateurEntity> getParticipants() {
+    public List<Member> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<UtilisateurEntity> participants) {
+    public void setParticipants(List<Member> participants) {
         this.participants = participants;
     }
 

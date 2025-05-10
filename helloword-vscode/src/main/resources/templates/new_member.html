@@ -1,0 +1,27 @@
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>Create members</title>
+	<link rel="stylesheet" type="text/css" href="/css/styles.css">
+</head>
+<body>
+	<h1>New Member</h1>
+	<form action="/login/create" method="post" enctype="multipart/form-data">
+		<p>Name (username): </p>
+		{{#error}}
+		<p style="color:red">{{error}}</p>
+		{{/error}}	
+		<input type='text' name='name' required/>
+		<br>
+		<p>Surame: </p>	
+		<input type='text' name='surname' required/>
+		<br>
+		<p>Pwd: </p>	
+		<input type='password' name='pwd' required/>
+		<br>
+		<br>
+		<input type="hidden" name="_csrf" value="{{token}}"/>
+		<input type='submit' value='Save'/>
+	</form>
+</body>
+</html>

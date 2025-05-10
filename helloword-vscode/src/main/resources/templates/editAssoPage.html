@@ -14,7 +14,7 @@
         <label>New image (optional):</label>
         <input type="file" name="image" accept="image/*"/>
     </div>
-
+    <input type="hidden" name="_csrf" value="{{token}}"/>
     <p>
         <button onclick="location.href='/association/{{association.id}}'; return false;">Cancel</button>
         <input type="submit" value="Save"/>
@@ -26,6 +26,7 @@
     <p>Actual Image: </p>
     <img src="/association/{{association.id}}/image" alt="Association image" width="150"/><br><br>
     <form action="/association/{{association.id}}/deleteImage" method="post">
+        <input type="hidden" name="_csrf" value="{{token}}"/>
         <button type="submit">Delete image</button>
     </form>
 {{/association.imageFile}}
