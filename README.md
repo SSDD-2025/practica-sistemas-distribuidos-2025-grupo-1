@@ -146,9 +146,10 @@ In the second phase, I implemented critical security features, including user au
 ![entities_diagram](entitiesDiagram.png) 
 
 ### Class Diagram
+![class_diagram](classDiag.png)
 
 ### Navigation Diagram
-
+![nav_diagram](navDiag.png)
 ---
 
 
