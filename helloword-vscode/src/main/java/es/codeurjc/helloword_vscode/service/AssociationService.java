@@ -97,9 +97,17 @@ public class AssociationService {
             Association association = associationOpt.get();
             Member user = userOpt.get();
 
+			// Verify if the user isn't already in the association
             if (!association.getMembers().contains(user)) {
-                MemberType memberType = new MemberType("member", user, association);
-                memberTypeService.save(memberType);
+
+				// If the user is the first one to join an association he will become president else he will be member
+				if(association.getMembers().isEmpty()){
+					MemberType memberType = new MemberType("president", user, association);
+                	memberTypeService.save(memberType);
+				} else {
+					MemberType memberType = new MemberType("member", user, association);
+                	memberTypeService.save(memberType);
+				}
             }
         }
     }
@@ -112,13 +120,16 @@ public class AssociationService {
 
 		if (associationOpt.isPresent() && memberOpt.isPresent()) {
 			Member member = memberOpt.get();
-
+	
 			// Find MemberType matching
 			List<MemberType> memberTypes = member.getMemberTypes().stream()
 				.filter(mt -> mt.getAssociation().getId() == associationId)
 				.collect(Collectors.toList());
 
 			for (MemberType memberType : memberTypes) {
+				if ("president".equalsIgnoreCase(memberType.getName())) {
+					throw new IllegalStateException("You must choose a new president before leaving the association");
+				}
 				memberTypeService.delete(memberType);
 			}
 		}

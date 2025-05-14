@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
@@ -137,12 +138,18 @@ public class AssoWebController {
 
     /* Allow an user to leave an association */ 
     @PostMapping("/association/{id}/leave")
-    public String leaveAssociation(@PathVariable Long id, Principal principal) {
+    public String leaveAssociation(@PathVariable Long id, Principal principal, Model model, RedirectAttributes redirectAttributes) {
         if (principal != null) {
             String username = principal.getName();
             Optional<Member> user = memberService.findByName(username);
             if (user.isPresent()) {
+                try {
                 associationService.deleteUserFromAssociation(id, user.get().getId());
+            } catch (IllegalStateException e) {
+                // Redirect with a message
+                redirectAttributes.addFlashAttribute("leaveError", e.getMessage());
+                return "redirect:/association/" + id;
+            }
             }
         }
         return "redirect:/association/" + id;

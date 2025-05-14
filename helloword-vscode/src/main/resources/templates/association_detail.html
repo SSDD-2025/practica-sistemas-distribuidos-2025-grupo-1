@@ -6,7 +6,10 @@
 </head>
 <body>
     {{> header}}
-    <h2>{{association.name}}</h2>
+    {{#leaveError}}
+        <div class="error-message">{{leaveError}}</p></div>
+    {{/leaveError}}
+    <h2>{{association.name}}</h2>    
     {{#hasImage}}
         <img src="/association/{{association.id}}/image" alt="Association Image"></img>
     {{/hasImage}}
