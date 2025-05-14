@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
@@ -102,4 +103,25 @@ public class AssociationService {
             }
         }
     }
+	
+	/* Delete user from an association */
+	@Transactional
+	public void deleteUserFromAssociation(Long associationId, Long userId) {
+		Optional<Association> associationOpt = associationRepository.findById(associationId);
+		Optional<Member> memberOpt = memberService.findById(userId);
+
+		if (associationOpt.isPresent() && memberOpt.isPresent()) {
+			Association association = associationOpt.get();
+			Member member = memberOpt.get();
+
+			// Trouver le MemberType correspondant
+			List<MemberType> memberTypes = member.getMemberTypes().stream()
+				.filter(mt -> mt.getAssociation().getId() == associationId)
+				.collect(Collectors.toList());
+
+			for (MemberType memberType : memberTypes) {
+				memberTypeService.delete(memberType);
+			}
+		}
+	}
 }

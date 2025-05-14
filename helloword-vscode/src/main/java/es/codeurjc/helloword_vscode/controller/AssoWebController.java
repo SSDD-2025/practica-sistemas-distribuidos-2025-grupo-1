@@ -135,6 +135,18 @@ public class AssoWebController {
         return "redirect:/association/" + id;
     }    
 
+    /* Allows a user to leave an association */ 
+    @PostMapping("/association/{id}/leave")
+    public String leaveAssociation(@PathVariable Long id, Principal principal) {
+        if (principal != null) {
+            String username = principal.getName();
+            Optional<Member> user = memberService.findByName(username);
+            if (user.isPresent()) {
+                associationService.deleteUserFromAssociation(id, user.get().getId());
+            }
+        }
+        return "redirect:/association/" + id;
+    } 
 
     /*  Delete association (only for admins) */
     @PostMapping("/association/{id}/delete")
