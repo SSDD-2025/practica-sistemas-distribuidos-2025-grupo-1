@@ -111,10 +111,9 @@ public class AssociationService {
 		Optional<Member> memberOpt = memberService.findById(userId);
 
 		if (associationOpt.isPresent() && memberOpt.isPresent()) {
-			Association association = associationOpt.get();
 			Member member = memberOpt.get();
 
-			// Trouver le MemberType correspondant
+			// Find MemberType matching
 			List<MemberType> memberTypes = member.getMemberTypes().stream()
 				.filter(mt -> mt.getAssociation().getId() == associationId)
 				.collect(Collectors.toList());

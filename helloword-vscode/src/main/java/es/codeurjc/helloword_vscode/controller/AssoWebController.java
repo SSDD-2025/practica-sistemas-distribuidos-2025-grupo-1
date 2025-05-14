@@ -122,7 +122,7 @@ public class AssoWebController {
     }
 
 
-    /* Allows a user to join an association */ 
+    /* Allows an user to join an association */ 
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
@@ -135,7 +135,7 @@ public class AssoWebController {
         return "redirect:/association/" + id;
     }    
 
-    /* Allows a user to leave an association */ 
+    /* Allow an user to leave an association */ 
     @PostMapping("/association/{id}/leave")
     public String leaveAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {

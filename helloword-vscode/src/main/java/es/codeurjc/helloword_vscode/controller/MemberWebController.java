@@ -41,7 +41,7 @@ public class MemberWebController {
 
     /* Adds authentication attributes to all templates */ 
     @ModelAttribute
-    public void addAttributes(Model model) {
+    public void addAttributes(Model model, HttpServletRequest request) {
         // Retrieve the current authentication information        
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName());
@@ -49,6 +49,9 @@ public class MemberWebController {
         // Determine if the user is authenticated and not anonymous
         model.addAttribute("isAuthenticated", isAuthenticated);
         
+        // Determine if the user is admin
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+
         // If authenticated, add the username to the model
         if (isAuthenticated && auth.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
