@@ -19,7 +19,23 @@
     <h3>Members :</h3>  
     <ul>
         {{#members}}
-            <li>{{name}}</li>
+            <li>
+                {{name}}
+                {{#isPresident}}
+                    <form action="/association/{{association.id}}/changeRole" method="post">
+                        <input type="hidden" name="_csrf" value="{{token}}" />
+                        <input type="hidden" name="memberTypeId" value="{{id}}" />
+                        <select name="newRole">
+                            <option value="president">President</option>
+                            <option value="vice-president">Vice-President</option>
+                            <option value="secretary">Secretary</option>
+                            <option value="treasurer">Treasurer</option>
+                            <option value="member">Member</option>
+                        </select>
+                        <button type="submit">Change Role</button>
+                    </form>
+                {{/isPresident}}
+            </li>
         {{/members}}
     </ul>
 
@@ -39,39 +55,44 @@
         {{/minutes}}
     </ul>
 
+
+    {{^isPresident}}
+        <p>Je ne suis pas president!</p>
+    {{/isPresident}}
+
     {{^isMember}}
-    {{#isAuthenticated}}
-    <form action="/association/{{association.id}}/join" method="post">
-        <input type="hidden" name="_csrf" value="{{token}}"/>
-        <button type="submit">Join</button>
-    </form>
-    {{/isAuthenticated}}
+        {{#isAuthenticated}}
+            <form action="/association/{{association.id}}/join" method="post">
+                <input type="hidden" name="_csrf" value="{{token}}"/>
+                <button type="submit">Join</button>
+            </form>
+        {{/isAuthenticated}}
     {{/isMember}}
 
     {{#isMember}}
-    {{#isAuthenticated}}
-    <form action="/association/{{association.id}}/leave" method="post">
-        <input type="hidden" name="_csrf" value="{{token}}"/>
-        <button type="submit">Leave</button>
-    </form>
-    {{/isAuthenticated}}
+        {{#isAuthenticated}}
+            <form action="/association/{{association.id}}/leave" method="post">
+                <input type="hidden" name="_csrf" value="{{token}}"/>
+                <button type="submit">Leave</button>
+            </form>
+        {{/isAuthenticated}}
     {{/isMember}}
 
     {{#isMember}}
-    {{#isAuthenticated}}
-    <form action="/association/{{association.id}}/createMinute" method="post">
-        <input type="hidden" name="_csrf" value="{{token}}"/>
-        <button type="submit">Create Minute</button>
-    </form>
-    {{/isAuthenticated}}
+        {{#isAuthenticated}}
+            <form action="/association/{{association.id}}/createMinute" method="post">
+                <input type="hidden" name="_csrf" value="{{token}}"/>
+                <button type="submit">Create Minute</button>
+            </form>
+        {{/isAuthenticated}}
     {{/isMember}}
 
     {{#isAdmin}}
-    <form action="/association/{{association.id}}/delete" method="post">
-        <input type="hidden" name="_csrf" value="{{token}}"/>
-        <button type="submit">Delete</button>
-    </form>
-    <button onclick="location.href='/editasso/{{association.id}}'">Edit</button>
+        <form action="/association/{{association.id}}/delete" method="post">
+            <input type="hidden" name="_csrf" value="{{token}}"/>
+            <button type="submit">Delete</button>
+        </form>
+        <button onclick="location.href='/editasso/{{association.id}}'">Edit</button>
     {{/isAdmin}} 
 
     {{>footer}}

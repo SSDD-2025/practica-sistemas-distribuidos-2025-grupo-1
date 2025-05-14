@@ -31,6 +31,7 @@ import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MemberService;
+import es.codeurjc.helloword_vscode.service.MemberTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -45,6 +46,9 @@ public class AssoWebController {
 
     @Autowired
 	private AssociationService associationService;
+
+    @Autowired
+    private MemberTypeService memberTypeService;
 
 
     /* Adds authentication attributes to all templates */ 
@@ -112,6 +116,9 @@ public class AssoWebController {
                 if (user.isPresent()) {
                     boolean isMember = asso.get().getMembers().contains(user.get());
                     model.addAttribute("isMember", isMember);
+                    Optional<Member> president = memberTypeService.getPresident(asso.get());
+                    boolean isPresident = president.equals(user);
+                    model.addAttribute("isPresident", isPresident);
                 } else {
                     model.addAttribute("isMember", false);
                 }

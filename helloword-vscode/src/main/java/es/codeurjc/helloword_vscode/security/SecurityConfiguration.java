@@ -75,7 +75,8 @@ public class SecurityConfiguration {
                     "/profile/delete", 
                     "/association/*/createMinute",
                     "/association/*/new_minute",
-                    "/association/*/leave"
+                    "/association/*/leave",
+                    "/association/*/changeRole"
                 ).hasAnyRole("USER")
 
                 // Pages accessible to users with role "ADMIN"
