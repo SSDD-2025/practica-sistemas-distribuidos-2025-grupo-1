@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.security.Principal;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.sql.rowset.serial.SerialBlob;
 
@@ -108,7 +112,20 @@ public class AssoWebController {
             model.addAttribute("minutes", asso.get().getMinutes());
             model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
             model.addAttribute("hasImage", asso.get().getImageFile() != null);
-            model.addAttribute("memberType", asso.get().getMemberTypes());
+            List<Map<String, Object>> memberTypeData = asso.get().getMemberTypes().stream().map(mt -> {
+                Map<String, Object> data = new HashMap<>();
+                data.put("id", mt.getId());
+                data.put("name", mt.getName());
+                data.put("member", mt.getMember());
+                data.put("presidentSelected", "president".equalsIgnoreCase(mt.getName()));
+                data.put("vicePresidentSelected", "vice-president".equalsIgnoreCase(mt.getName()));
+                data.put("secretarySelected", "secretary".equalsIgnoreCase(mt.getName()));
+                data.put("treasurerSelected", "treasurer".equalsIgnoreCase(mt.getName()));
+                data.put("memberSelected", "member".equalsIgnoreCase(mt.getName()));
+                return data;
+            }).collect(Collectors.toList());
+
+            model.addAttribute("memberTypes", memberTypeData);
 
             // Check if the user is a member of the association
             if (principal != null) {

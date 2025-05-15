@@ -18,48 +18,30 @@
     {{/hasImage}}
     <h3>Members </h3>
     <ul>
-    {{#memberType}}
+    {{#memberTypes}}
         <li>
-            {{member.name}} {{name}}
-                {{#isPresident}}
-                    <form action="/association/{{association.id}}/changeRole" method="post">
-                        <input type="hidden" name="_csrf" value="{{token}}" />
-                        <input type="hidden" name="memberTypeId" value="{{id}}" />
-                        <select name="newRole">
-                            <option value="president">President</option>
-                            <option value="vice-president">Vice-President</option>
-                            <option value="secretary">Secretary</option>
-                            <option value="treasurer">Treasurer</option>
-                            <option value="member">Member</option>
-                        </select>
-                        <button type="submit">Change Role</button>
-                    </form>
-                {{/isPresident}}
+            {{^isPresident}}
+                {{member.name}} {{member.surname}}  —  {{name}}
+            {{/isPresident}}
+            {{#isPresident}}
+                <form action="/association/{{association.id}}/changeRole" method="post">
+                    <input type="hidden" name="_csrf" value="{{token}}" />
+                    <input type="hidden" name="memberTypeId" value="{{id}}" />
+                    
+                    <label>{{member.name}} {{member.surname}}</label>
+                    <select name="newRole">
+                        <option value="president" {{#presidentSelected}}selected{{/presidentSelected}}>President</option>
+                        <option value="vice-president" {{#vicePresidentSelected}}selected{{/vicePresidentSelected}}>Vice-President</option>
+                        <option value="secretary" {{#secretarySelected}}selected{{/secretarySelected}}>Secretary</option>
+                        <option value="treasurer" {{#treasurerSelected}}selected{{/treasurerSelected}}>Treasurer</option>
+                        <option value="member" {{#memberSelected}}selected{{/memberSelected}}>Member</option>
+                    </select>
+                    <button type="submit">Change Role</button>
+                </form>
+            {{/isPresident}}
         </li>
-    {{/memberType}}
+    {{/memberTypes}}
     </ul>
-    <!-- <h3>Members :</h3>  
-    <ul>
-        {{#members}}
-            <li>
-                {{name}}
-                {{#isPresident}}
-                    <form action="/association/{{association.id}}/changeRole" method="post">
-                        <input type="hidden" name="_csrf" value="{{token}}" />
-                        <input type="hidden" name="memberTypeId" value="{{id}}" />
-                        <select name="newRole">
-                            <option value="president">President</option>
-                            <option value="vice-president">Vice-President</option>
-                            <option value="secretary">Secretary</option>
-                            <option value="treasurer">Treasurer</option>
-                            <option value="member">Member</option>
-                        </select>
-                        <button type="submit">Change Role</button>
-                    </form>
-                {{/isPresident}}
-            </li>
-        {{/members}}
-    </ul> -->
 
     <h3>Minutes :</h3>
     <ul>
@@ -76,11 +58,6 @@
             </li>
         {{/minutes}}
     </ul>
-
-
-    {{^isPresident}}
-        <p>Je ne suis pas president!</p>
-    {{/isPresident}}
 
     {{^isMember}}
         {{#isAuthenticated}}
