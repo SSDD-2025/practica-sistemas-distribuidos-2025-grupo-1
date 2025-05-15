@@ -17,15 +17,12 @@ import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeDTO;
 import es.codeurjc.helloword_vscode.model.Member;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 public class MemberWebController {

@@ -1,7 +1,6 @@
 package es.codeurjc.helloword_vscode.controller;
 
 import java.security.Principal;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,23 +14,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
-import es.codeurjc.helloword_vscode.model.MemberType;
-import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.MemberTypeService;
 
 
 @Controller
 public class MemberTypeWebController {
-
-    @Autowired
-	private AssociationService associationService;
 
     @Autowired
     private MemberTypeService memberTypeService;
