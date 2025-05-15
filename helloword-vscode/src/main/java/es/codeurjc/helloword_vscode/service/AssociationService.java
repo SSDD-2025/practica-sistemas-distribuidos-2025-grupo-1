@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -133,5 +135,68 @@ public class AssociationService {
 				memberTypeService.delete(memberType);
 			}
 		}
+	}
+
+	public Map<String, Object> getAssociationViewModel(Long associationId, String currentUsername, boolean isAdmin) {
+		Optional<Association> optAsso = findById(associationId);
+		if (optAsso.isEmpty()) {
+			throw new ResourceNotFoundException("Association not found");
+		}
+
+		Association asso = optAsso.get();
+		Map<String, Object> modelMap = new HashMap<>();
+
+		modelMap.put("association", asso);
+		modelMap.put("minutes", asso.getMinutes());
+		modelMap.put("hasImage", asso.getImageFile() != null);
+		modelMap.put("isAdmin", isAdmin);
+
+		List<Map<String, Object>> memberTypeData = asso.getMemberTypes().stream().map(mt -> {
+			Map<String, Object> data = new HashMap<>();
+			data.put("id", mt.getId());
+			data.put("name", mt.getName());
+			data.put("member", mt.getMember());
+			data.put("presidentSelected", "president".equalsIgnoreCase(mt.getName()));
+			data.put("vicePresidentSelected", "vice-president".equalsIgnoreCase(mt.getName()));
+			data.put("secretarySelected", "secretary".equalsIgnoreCase(mt.getName()));
+			data.put("treasurerSelected", "treasurer".equalsIgnoreCase(mt.getName()));
+			data.put("memberSelected", "member".equalsIgnoreCase(mt.getName()));
+			return data;
+		}).collect(Collectors.toList());
+
+		modelMap.put("memberTypes", memberTypeData);
+
+		Optional<Member> user = currentUsername != null ? memberService.findByName(currentUsername) : Optional.empty();
+
+		boolean isMember = user.isPresent() && asso.getMembers().contains(user.get());
+		boolean isPresident = user.isPresent() &&
+			memberTypeService.getPresident(asso).map(p -> p.equals(user.get())).orElse(false);
+
+		modelMap.put("isMember", isMember);
+		modelMap.put("isPresident", isPresident);
+
+		return modelMap;
+	}
+
+	/* Edit the name of an association */
+	public void updateAsso(Association association, String name){
+		association.setName(name);
+		associationRepository.save(association);
+	}
+
+	/* Edit an association with image */
+	public void updateAssoImage(Association association, String name, MultipartFile multipartFile) throws IOException {
+		association.setName(name);
+		if(!multipartFile.isEmpty()) {
+			// Set the image file as a Blob in the association
+			association.setImageFile(BlobProxy.generateProxy(multipartFile.getInputStream(), multipartFile.getSize()));
+		}
+		associationRepository.save(association);
+	}
+
+	/* Delete image from association */
+	public void deleteImage(Association association){
+		association.setImageFile(null);
+		associationRepository.save(association);
 	}
 }
