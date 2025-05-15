@@ -75,9 +75,9 @@ public class MemberTypeWebController {
             memberTypeService.changeMemberRole(id, requester.getId(), memberTypeId, newRole);
             redirectAttributes.addFlashAttribute("success", "Role updated successfully.");
         } catch (SecurityException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("roleChangeError", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "An error occurred while changing the role.");
+            redirectAttributes.addFlashAttribute("roleChangeError", "An unexpected error occurred.");
         }
 
         return "redirect:/association/" + id;

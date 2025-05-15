@@ -77,19 +77,38 @@ public class MemberTypeService {
       Member requester = requesterOpt.get();
       Association association = associationOpt.get();
       MemberType targetMemberType = targetMemberTypeOpt.get();
+      Member targetMember = targetMemberType.getMember();
 
-      // Verify if the person who ask is president
-      boolean isPresident = requester.getMemberTypes().stream()
-          .anyMatch(mt -> mt.getAssociation().equals(association) && "president".equalsIgnoreCase(mt.getName()));
+      // Verify that the request is from the president of the association
+      boolean requesterIsPresident = requester.getMemberTypes().stream()
+          .anyMatch(mt -> mt.getAssociation().equals(association)
+                      && "president".equalsIgnoreCase(mt.getName()));
 
-      if (!isPresident) {
-          throw new SecurityException("Only the president can change roles");
+      if (!requesterIsPresident) {
+          throw new SecurityException("Only the president can change roles.");
       }
 
-      // Add the new role
+      // A president cannot change his own role
+      if (requester.equals(targetMember) && "president".equalsIgnoreCase(targetMemberType.getName())) {
+          throw new SecurityException("If you want to change your role, you need to promote someone else president");
+      }
+
+      // If we choose a new president, we become membre 
+      if ("president".equalsIgnoreCase(newRole)) {
+          for (MemberType mt : association.getMemberTypes()) {
+              if ("president".equalsIgnoreCase(mt.getName())
+                  && !mt.getMember().equals(targetMember)) {
+                  mt.setName("member");
+                  save(mt);
+              }
+          }
+      }
+
+      // Add new role
       targetMemberType.setName(newRole);
       save(targetMemberType);
   }
+
 
 
 }

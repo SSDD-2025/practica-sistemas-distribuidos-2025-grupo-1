@@ -6,6 +6,10 @@
 </head>
 <body>
     {{> header}}
+    {{#roleChangeError}}
+        <div class="error-message">{{roleChangeError}}</div>
+    {{/roleChangeError}}
+
     {{#leaveError}}
         <div class="error-message">{{leaveError}}</p></div>
     {{/leaveError}}
