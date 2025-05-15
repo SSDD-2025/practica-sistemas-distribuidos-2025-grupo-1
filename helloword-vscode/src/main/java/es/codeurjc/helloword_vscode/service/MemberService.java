@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeDTO;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
@@ -143,4 +145,38 @@ public class MemberService implements UserDetailsService {
         Member user = new Member(name, surname, passwordEncoder.encode(password), "USER");
         save(user);
     }
+
+	/* Delete user */
+	public void delete(Member member) throws IOException {
+		// Retrieve user by ID
+		Member user = member;
+
+		// 1. Delete member type in association
+		List<MemberType> memberTypes = memberTypeService.findByMember(user);
+		for (MemberType memberType : memberTypes) {
+			memberTypeService.delete(memberType);
+		}
+
+		// 2. Delete participation to meetings
+		List<Minute> minutes = minuteService.findAllByParticipantsContains(user);
+		for (Minute minute : minutes) {
+			minute.getParticipants().remove(user);
+			minuteService.save(minute);
+		}
+
+		// 3. Delete user
+		memberRepository.delete(user);
+	}
+	
+	/* Find all the user's role in associations */
+	public List<AssociationMemberTypeDTO> getAssociationRoles(Member member) {
+    return member.getMemberTypes().stream()
+        .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
+        .collect(Collectors.toList());
+	}
+
+	/* Find all the user's minutes */
+	public List<Minute> getUserMinutes(Member member) {
+		return member.getMinutes();
+	}
 }
