@@ -108,6 +108,7 @@ public class AssoWebController {
             model.addAttribute("minutes", asso.get().getMinutes());
             model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
             model.addAttribute("hasImage", asso.get().getImageFile() != null);
+            model.addAttribute("memberType", asso.get().getMemberTypes());
 
             // Check if the user is a member of the association
             if (principal != null) {

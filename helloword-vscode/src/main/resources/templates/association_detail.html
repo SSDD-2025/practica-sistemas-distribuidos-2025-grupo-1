@@ -16,7 +16,29 @@
     {{^hasImage}}
         <img src="/images/no_img.png" alt="Pas d'image"></img>
     {{/hasImage}}
-    <h3>Members :</h3>  
+    <h3>Members </h3>
+    <ul>
+    {{#memberType}}
+        <li>
+            {{member.name}} {{name}}
+                {{#isPresident}}
+                    <form action="/association/{{association.id}}/changeRole" method="post">
+                        <input type="hidden" name="_csrf" value="{{token}}" />
+                        <input type="hidden" name="memberTypeId" value="{{id}}" />
+                        <select name="newRole">
+                            <option value="president">President</option>
+                            <option value="vice-president">Vice-President</option>
+                            <option value="secretary">Secretary</option>
+                            <option value="treasurer">Treasurer</option>
+                            <option value="member">Member</option>
+                        </select>
+                        <button type="submit">Change Role</button>
+                    </form>
+                {{/isPresident}}
+        </li>
+    {{/memberType}}
+    </ul>
+    <!-- <h3>Members :</h3>  
     <ul>
         {{#members}}
             <li>
@@ -37,7 +59,7 @@
                 {{/isPresident}}
             </li>
         {{/members}}
-    </ul>
+    </ul> -->
 
     <h3>Minutes :</h3>
     <ul>
