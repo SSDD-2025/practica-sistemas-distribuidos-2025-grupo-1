@@ -1,20 +1,14 @@
 package es.codeurjc.helloword_vscode.controller;
 
 import es.codeurjc.helloword_vscode.dto.MinuteDTO;
-import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.Member;
-import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.service.MinuteService;
-import es.codeurjc.helloword_vscode.service.MemberService;
-import es.codeurjc.helloword_vscode.service.AssociationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/minutes")
@@ -23,56 +17,31 @@ public class MinuteRestController {
     @Autowired
     private MinuteService minuteService;
 
-    @Autowired
-    private MemberService memberService;
-
-    @Autowired
-    private AssociationService associationService;
-
-    // GET all minutes
     @GetMapping
     public List<MinuteDTO> getAllMinutes() {
-        return minuteService.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return minuteService.findAll();
     }
 
-    // GET minute by ID
     @GetMapping("/{id}")
     public ResponseEntity<MinuteDTO> getMinuteById(@PathVariable long id) {
-        Optional<Minute> minuteOpt = minuteService.findById(id);
-        return minuteOpt.map(minute -> ResponseEntity.ok(convertToDTO(minute)))
-                        .orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<MinuteDTO> minute = minuteService.findById(id);
+        return minute.map(ResponseEntity::ok)
+                     .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // DELETE a minute
+    @PostMapping
+    public ResponseEntity<Void> createMinute(@RequestBody MinuteDTO minuteDTO) {
+        minuteService.save(minuteDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMinute(@PathVariable long id) {
-        Optional<Minute> minuteOpt = minuteService.findById(id);
-        if (minuteOpt.isPresent()) {
-            Minute minute = minuteOpt.get();
-            Association asso = minute.getAssociation();
-            List<Member> participants = minute.getParticipants();
-            minuteService.delete(minute, asso.getId(), participants);
+    public ResponseEntity<Void> deleteMinute(@PathVariable long id) {
+        try {
+            minuteService.deleteById(id);
             return ResponseEntity.noContent().build();
-        } else {
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    // Utility method to convert entity to DTO
-    private MinuteDTO convertToDTO(Minute minute) {
-        List<Long> participantIds = minute.getParticipants().stream()
-                .map(Member::getId)
-                .collect(Collectors.toList());
-
-        return new MinuteDTO(
-                minute.getId(),
-                minute.getDate(),
-                participantIds,
-                minute.getContent(),
-                minute.getDuration(),
-                minute.getAssociation().getId()
-        );
     }
 }

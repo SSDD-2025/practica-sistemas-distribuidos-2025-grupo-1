@@ -3,27 +3,17 @@ package es.codeurjc.helloword_vscode.mapper;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.dto.MemberDTO;
 
-public class MemberMapper {
+import java.util.Collection;
+import java.util.List;
 
-    // Convert Member to MemberDTO
-    public static MemberDTO toDTO(Member member) {
-        if (member == null) return null;
-        return new MemberDTO(
-            member.getId(),
-            member.getName(),
-            member.getSurname(),
-            member.getRoles()
-        );
-    }
+import org.mapstruct.Mapper;
 
-    // Convert MemberDTO to Member
-    public static Member toEntity(MemberDTO dto) {
-        if (dto == null) return null;
-        Member member = new Member();
-        member.setId(dto.getId());
-        member.setName(dto.getName());
-        member.setSurname(dto.getSurname());
-        member.setRoles(dto.getRoles());
-        return member;
-    }
+@Mapper(componentModel = "spring")
+public interface MemberMapper {
+
+    MemberDTO toDTO(Member member);
+
+    List<MemberDTO> toDTOs(Collection<Member> members);
+
+    Member toDomain(MemberDTO memberDTO);
 }

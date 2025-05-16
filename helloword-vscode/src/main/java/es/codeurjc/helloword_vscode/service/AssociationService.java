@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,12 +22,6 @@ import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.Member;
 
-/* 
- * This service class provides methods to perform various operations on
- * the Association entity, such as saving, retrieving, and deleting 
- * associations. It interacts with the AssociationRepository to perform 
- * database operations.
-*/
 @Service
 public class AssociationService {
 
@@ -48,12 +41,12 @@ public class AssociationService {
     private MinuteMapper minuteMapper;
 
     public void save(AssociationDTO dto) {
-        Association association = associationMapper.toEntity(dto);
+        Association association = associationMapper.toDomain(dto);
         associationRepository.save(association);
     }
 
     public void save(AssociationDTO dto, MultipartFile imageFile) throws IOException {
-        Association association = associationMapper.toEntity(dto);
+        Association association = associationMapper.toDomain(dto);
         if (!imageFile.isEmpty()) {
             association.setImageFile(BlobProxy.generateProxy(imageFile.getInputStream(), imageFile.getSize()));
         }
@@ -65,18 +58,16 @@ public class AssociationService {
             .map(associationMapper::toDTO);
     }
 
+    public List<AssociationDTO> findAll() {
+        return associationMapper.toDTOs(associationRepository.findAll());
+    }
+
     @Transactional
     public List<MinuteDTO> getMinutes(Long associationId) {
         Association association = associationRepository.findById(associationId)
             .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'id : " + associationId));
         return association.getMinutes().stream()
             .map(minuteMapper::toDTO)
-            .toList();
-    }
-
-    public List<AssociationDTO> findAll() {
-        return associationRepository.findAll().stream()
-            .map(associationMapper::toDTO)
             .toList();
     }
 
@@ -103,7 +94,6 @@ public class AssociationService {
         }
     }
 
-    // Pour les besoins internes (deleteMinuteById, etc.)
     public Optional<Association> findEntityById(long id) {
         return associationRepository.findById(id);
     }
