@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.dto.MemberDTO;
+import es.codeurjc.helloword_vscode.mapper.MemberMapper;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
@@ -29,99 +31,81 @@ import es.codeurjc.helloword_vscode.repository.MemberRepository;
 @Service
 public class MemberService implements UserDetailsService {
 
-    // Autowired repositories for database interactions //
+    @Autowired
+    private MemberRepository memberRepository;
 
     @Autowired
-	private MemberRepository memberRepository;
+    private MemberTypeService memberTypeService;
 
-	@Autowired
-	private MemberTypeService memberTypeService;
+    @Autowired
+    @Lazy
+    private MinuteService minuteService;
 
-	@Autowired
-	@Lazy
-	private MinuteService minuteService;
-
-	@Autowired
-	@Lazy
+    @Autowired
+    @Lazy
     private PasswordEncoder passwordEncoder;
 
-	/* Save user */
-    public void save(Member member) {
-		memberRepository.save(member);
-	}
+    @Autowired
+    private MemberMapper memberMapper;
 
+    public void save(MemberDTO dto) {
+        Member member = memberMapper.toEntity(dto);
+        memberRepository.save(member);
+    }
 
-	/* Find user by their name */
-	public Optional<Member> findByName(String name) {
-		return memberRepository.findByName(name);
-	}
+    public Optional<MemberDTO> findByName(String name) {
+        return memberRepository.findByName(name).map(memberMapper::toDTO);
+    }
 
-
-	/* Load data of user by finding them by their username */
     @Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		// Retrieve the user by username
-		Member member = memberRepository.findByName(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Member member = memberRepository.findByName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        List<GrantedAuthority> roles = member.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+        return new org.springframework.security.core.userdetails.User(member.getName(), member.getPwd(), roles);
+    }
 
-		// Map the user's roles to granted authorities
-		List<GrantedAuthority> roles = new ArrayList<>();
-		for (String role : member.getRoles()) {
-			roles.add(new SimpleGrantedAuthority("ROLE_" + role));
-		}
+    public Optional<MemberDTO> findById(long id) {
+        return memberRepository.findById(id).map(memberMapper::toDTO);
+    }
 
-		// Return a UserDetails object containing the user's data
-		return new org.springframework.security.core.userdetails.User(member.getName(), 
-				member.getPwd(), roles);
-	}
+    public Optional<Member> findEntityById(long id) {
+        return memberRepository.findById(id);
+    }
 
+    public List<MemberDTO> findAll() {
+        return memberRepository.findAll().stream().map(memberMapper::toDTO).toList();
+    }
 
-	/* Find user by ID */
-	public Optional<Member> findById(long id) {
-		return memberRepository.findById(id);
-	}
-
-
-	/* Find all users */
-	public List<Member> findAll() {
-		return memberRepository.findAll();
-	}
-
-
-	/* Delete user by ID */
-	@Transactional
-	public void deleteById(long id) throws IOException {
-		// Retrieve user by ID
-		Optional<Member> optUser = memberRepository.findById(id);
-		if (optUser.isPresent()) {
-			Member user = optUser.get();
-
-			// 1. Delete member type in association
-			List<MemberType> memberTypes = memberTypeService.findByMember(user);
-			for (MemberType memberType : memberTypes) {
-				memberTypeService.delete(memberType);
-			}
-
-			// 2. Delete participation to meetings
-			List<Minute> minutes = minuteService.findAllByParticipantsContains(user);
-			for (Minute minute : minutes) {
-				minute.getParticipants().remove(user);
-				minuteService.save(minute);
-			}
-
-			// 3. Delete user
-			memberRepository.delete(user);
-		}
-	}
-
-
-	/* Update user */
-    public void updateUser(String username, String name, String surname, String password) {
-        Optional<Member> optUser = findByName(username);
+    @Transactional
+    public void deleteById(long id) throws IOException {
+        Optional<Member> optUser = memberRepository.findById(id);
         if (optUser.isPresent()) {
             Member user = optUser.get();
 
-            if (!user.getName().equals(name) && findByName(name).isPresent()) {
+            List<MemberType> memberTypes = memberTypeService.findByMember(user);
+            for (MemberType memberType : memberTypes) {
+                memberTypeService.delete(memberType);
+            }
+
+            List<Minute> minutes = minuteService.findAllByParticipantsContains(user);
+            for (Minute minute : minutes) {
+                minute.getParticipants().remove(user);
+                minuteService.save(minute);
+            }
+
+            memberRepository.delete(user);
+        }
+    }
+
+    public void updateUser(String username, String name, String surname, String password) {
+        Optional<Member> optUser = memberRepository.findByName(username);
+        if (optUser.isPresent()) {
+            Member user = optUser.get();
+
+            if (!user.getName().equals(name) && memberRepository.findByName(name).isPresent()) {
                 throw new IllegalArgumentException("This username already exists");
             }
 
@@ -130,17 +114,15 @@ public class MemberService implements UserDetailsService {
             if (password != null && !password.isBlank()) {
                 user.setPwd(passwordEncoder.encode(password));
             }
-            save(user);
+            memberRepository.save(user);
         }
     }
 
-
-	/* Create user */
-	public void createUser(String name, String surname, String password) {
-        if (findByName(name).isPresent()) {
+    public void createUser(String name, String surname, String password) {
+        if (memberRepository.findByName(name).isPresent()) {
             throw new IllegalArgumentException("This username already exists");
         }
         Member user = new Member(name, surname, passwordEncoder.encode(password), "USER");
-        save(user);
+        memberRepository.save(user);
     }
 }

@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
+import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.dto.MinuteDTO;
+import es.codeurjc.helloword_vscode.mapper.AssociationMapper;
+import es.codeurjc.helloword_vscode.mapper.MinuteMapper;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
@@ -28,9 +32,8 @@ import es.codeurjc.helloword_vscode.model.Member;
 @Service
 public class AssociationService {
 
-	// Autowired repository for database interactions
     @Autowired
-	private AssociationRepository associationRepository;
+    private AssociationRepository associationRepository;
 
     @Autowired
     private MemberService memberService;
@@ -38,59 +41,56 @@ public class AssociationService {
     @Autowired
     private MemberTypeService memberTypeService;
 
-	/* Save association without image */
-    public void save(Association association) {
-		associationRepository.save(association);
-	}
+    @Autowired
+    private AssociationMapper associationMapper;
 
+    @Autowired
+    private MinuteMapper minuteMapper;
 
-	/* Save association with image */
-	public void save(Association association, MultipartFile imageFile) throws IOException{
-		if(!imageFile.isEmpty()) {
-			// Set the image file as a Blob in the association
-			association.setImageFile(BlobProxy.generateProxy(imageFile.getInputStream(), imageFile.getSize()));
-		}
-		// Save association
-		this.save(association);
-	}
-
-
-	/* Find association by ID */
-	public Optional<Association> findById(long id) {
-		return associationRepository.findById(id);
-	}
-	
-	
-	/* Get all minutes associated with a specific association */
-    @Transactional
-    public List<Minute> getMinutes(Long associationId) {
-        Association association = associationRepository.findById(associationId)
-            .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'id : " + associationId));
-        return association.getMinutes();
+    public void save(AssociationDTO dto) {
+        Association association = associationMapper.toEntity(dto);
+        associationRepository.save(association);
     }
 
+    public void save(AssociationDTO dto, MultipartFile imageFile) throws IOException {
+        Association association = associationMapper.toEntity(dto);
+        if (!imageFile.isEmpty()) {
+            association.setImageFile(BlobProxy.generateProxy(imageFile.getInputStream(), imageFile.getSize()));
+        }
+        associationRepository.save(association);
+    }
 
-	/* Find all associations */
-	public List<Association> findAll() {
-		return associationRepository.findAll();
-	}
+    public Optional<AssociationDTO> findById(long id) {
+        return associationRepository.findById(id)
+            .map(associationMapper::toDTO);
+    }
 
+    @Transactional
+    public List<MinuteDTO> getMinutes(Long associationId) {
+        Association association = associationRepository.findById(associationId)
+            .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'id : " + associationId));
+        return association.getMinutes().stream()
+            .map(minuteMapper::toDTO)
+            .toList();
+    }
 
-	/* Delete association by ID */
-	public void deleteById(long id) {
-		try {
-			associationRepository.deleteById(id);
-	    } catch (Exception e) {
-			// Log the error message if deletion fails
-			System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
-		};		
-	}
+    public List<AssociationDTO> findAll() {
+        return associationRepository.findAll().stream()
+            .map(associationMapper::toDTO)
+            .toList();
+    }
 
+    public void deleteById(long id) {
+        try {
+            associationRepository.deleteById(id);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
+        }
+    }
 
-	/* Add user to an association */
-	public void addUserToAssociation(Long associationId, Long userId) {
+    public void addUserToAssociation(Long associationId, Long userId) {
         Optional<Association> associationOpt = associationRepository.findById(associationId);
-        Optional<Member> userOpt = memberService.findById(userId);
+        Optional<Member> userOpt = memberService.findEntityById(userId);
 
         if (associationOpt.isPresent() && userOpt.isPresent()) {
             Association association = associationOpt.get();
@@ -101,5 +101,10 @@ public class AssociationService {
                 memberTypeService.save(memberType);
             }
         }
+    }
+
+    // Pour les besoins internes (deleteMinuteById, etc.)
+    public Optional<Association> findEntityById(long id) {
+        return associationRepository.findById(id);
     }
 }
