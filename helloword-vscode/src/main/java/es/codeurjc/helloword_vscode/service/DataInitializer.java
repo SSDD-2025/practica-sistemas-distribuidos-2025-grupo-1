@@ -86,7 +86,7 @@ public class DataInitializer {
         // Add users
         Member member1 = new Member("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
         Member member2 = new Member("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
-        Member member3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER", "ADMIN");
+        Member member3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER");
         MemberRepository.saveAll(Arrays.asList(member1, member2, member3));
 
         // Add associations
@@ -114,9 +114,8 @@ public class DataInitializer {
         // Generate new random data
         List<Member> members = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
-            String role = (i % 5 == 0) ? "USER,ADMIN" : "USER";
             Member user = new Member(
-                "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), role.split(",")
+                "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), "USER"
             );
             members.add(user);
         }

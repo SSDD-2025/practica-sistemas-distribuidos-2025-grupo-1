@@ -6,10 +6,10 @@
 <body>
     {{> header}}
     <h2>Info User</h2>
-    <p>Hello {{username}}.</p>
-    {{#admin}}
+    <p>Hello {{username.name}}.</p>
+    {{#isAdmin}}
 	    <p>You're admin</p>
-	{{/admin}}
+	{{/isAdmin}}
     <a href="/profile/edit"><button>Edit Profile</button></a>
     <a href="/profile/delete"><button>Delete Profile</button></a>
 </body>

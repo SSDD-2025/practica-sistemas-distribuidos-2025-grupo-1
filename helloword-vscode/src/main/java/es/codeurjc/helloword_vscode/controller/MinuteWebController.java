@@ -2,13 +2,9 @@ package es.codeurjc.helloword_vscode.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +18,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Minute;
-import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MinuteService;
-import es.codeurjc.helloword_vscode.service.MemberService;
 
 @Controller
-public class MinuteController {
+public class MinuteWebController {
 
     // Service for database interaction 
 
@@ -38,56 +32,21 @@ public class MinuteController {
     @Autowired
 	private AssociationService associationService;
 
-    @Autowired
-    private MemberService memberService;
 
 
     /* Create mintue */
     @PostMapping("/association/{id}/new_minute")
-	public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
-        // Retrieve the association by ID
-        Optional<Association> association = associationService.findById(id);
-        if (association.isPresent()) {
-            try {
-                // Parse the submitted date
-                LocalDate submittedDate = LocalDate.parse(date); 
-                
-                 // Check if the date is in the future
-                if (submittedDate.isAfter(LocalDate.now())) {
-                    model.addAttribute("error", "The date can not be in the futur");
-                    model.addAttribute("association", association.get());
-                    model.addAttribute("members", association.get().getMembers());
-                    return "new_minute";
-                }
-
-                // Create a new minute object    
-                Minute minute = new Minute();
-                minute.setDate(date);
-
-                // Retrieve participants by their IDs
-                List<Member> participants = participantsIds.stream()
-                .map(participantId -> memberService.findById(participantId).orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-                // Set minute attributes
-                minute.setParticipants(participants);
-                minute.setContent(content);
-                minute.setDuration(duration);
-                minute.setAssociation(association.get());
-
-                // Save the new minute
-                minuteService.save(minute);
-                return "redirect:/association/" + id;
-		    } catch (DateTimeParseException e) {
-                model.addAttribute("error", "Format de date invalide.");
+    public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
+        Optional<Association> optAsso = associationService.findById(id);
+        if(optAsso.isPresent()){
+            Map<String, Object> result = minuteService.processCreateMinute(optAsso.get(), date, participantsIds, content, duration);
+            if (result.containsKey("error")) {
+                model.addAllAttributes(result);
                 return "new_minute";
-            } 
-        } else {
-			return "redirect:/";
-		}
-        
-	}
+            }
+        }
+        return "redirect:/association/" + id;
+    }
 
 
     /* Page with forms to create minute (only if you're in association) */
@@ -95,12 +54,14 @@ public class MinuteController {
 	public String createMinute(Model model, @PathVariable long id) {
         // Retrieve the association by ID
         Optional<Association> association = associationService.findById(id);
-        
-        // Add association and members to the model
-        model.addAttribute("association", association.get());
-        model.addAttribute("members", association.get().getMembers());
-        model.addAttribute("today", LocalDate.now());
-        return"new_minute";
+        if(association.isPresent()){
+            // Add association and members to the model
+            model.addAttribute("association", association.get());
+            model.addAttribute("members", minuteService.findMembers(association.get()));
+            model.addAttribute("today", LocalDate.now());
+            return"new_minute"; 
+        }
+        return "redirect:/association/" + id;
 	}
 
 
@@ -124,16 +85,9 @@ public class MinuteController {
         model.addAttribute("association", association.get());
         model.addAttribute("minute", minute);
         model.addAttribute("today", LocalDate.now());
-        model.addAttribute("members", association.get().getMembers());
-        model.addAttribute("participants", minute.getParticipants());
-
-        // Create a list of members who did not participate in the meeting
-        Collection<Member> members = association.get().getMembers();;
-        Collection<Member> participants = minute.getParticipants();
-        Collection<Member> memberNoPart = new HashSet<Member>();
-        memberNoPart.addAll(members);
-        memberNoPart.removeAll(participants);
-        model.addAttribute("noPart", memberNoPart);
+        model.addAttribute("members", minuteService.findMembers(association.get()));
+        model.addAttribute("participants", minuteService.findParticipants(minute));
+        model.addAttribute("noPart", minuteService.findNoParticipants(association.get(), minute));
 
 		if (association.isPresent()) {
 			return "editMinutePage";
@@ -163,20 +117,10 @@ public class MinuteController {
         // Retrieve the minute and association by their IDs
         Minute minute = minuteService.findById(minuteId).orElseThrow();
         Optional<Association> association = associationService.findById(assoId);
-        
-        // Update minute attributes
-        minute.setDate(date);
-        List<Member> participants = participantsIds.stream()
-            .map(participantId -> memberService.findById(participantId).orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-        minute.setParticipants(participants);
-        minute.setContent(content);
-        minute.setDuration(duration);
-        minute.setAssociation(association.get());
-
-        // Save the updated minute
-        minuteService.save(minute);
+        if(association.isPresent()){
+            // Save the updated minute
+            minuteService.update(minute, date, participantsIds, content, duration, association.get());
+        }
         return "redirect:/association/" + assoId;
     }
 }

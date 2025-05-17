@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.security.Principal;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Optional;
-
-import javax.sql.rowset.serial.SerialBlob;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -25,7 +24,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.service.AssociationService;
@@ -35,7 +36,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 
 @Controller
-public class AssoController {
+public class AssoWebController {
 
     // Service for database interaction 
 
@@ -69,7 +70,9 @@ public class AssoController {
 		
 			model.addAttribute("logged", true);		
 			model.addAttribute("userName", principal.getName());
-			model.addAttribute("admin", request.isUserInRole("ADMIN"));
+
+            // Check if the user has the ADMIN role and add this information to the model
+			model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
 			
 		} else {
 			model.addAttribute("logged", false);
@@ -83,9 +86,6 @@ public class AssoController {
     public String getPosts(Model model, HttpServletRequest request) {
         // Fetch all associations and add them to the model
         model.addAttribute("associations", associationService.findAll());
-        
-        // Check if the user has the ADMIN role and add this information to the model
-        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
         return "index";
     }
 
@@ -93,36 +93,21 @@ public class AssoController {
     /* Displays details of a specific association */ 
     @GetMapping("/association/{id}")
     public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
-        // Retrieve the association by ID
-        Optional<Association> asso = associationService.findById(id);
-        
-        if (asso.isPresent()) {
-            // Add association details to the model
-            model.addAttribute("association", asso.get());
-            model.addAttribute("members", asso.get().getMembers());
-            model.addAttribute("minutes", asso.get().getMinutes());
-            model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
-            model.addAttribute("hasImage", asso.get().getImageFile() != null);
+        String username = (principal != null) ? principal.getName() : null;
+        boolean isAdmin = request.isUserInRole("ADMIN");
 
-            // Check if the user is a member of the association
-            if (principal != null) {
-                String username = principal.getName();
-                Optional<Member> user = memberService.findByName(username);
-                if (user.isPresent()) {
-                    boolean isMember = asso.get().getMembers().contains(user.get());
-                    model.addAttribute("isMember", isMember);
-                } else {
-                    model.addAttribute("isMember", false);
-                }
-            }            
+        try {
+            Map<String, Object> attributes = associationService.getAssociationViewModel(id, username, isAdmin);
+            model.addAllAttributes(attributes);
             return "association_detail";
-        } else {
+        } catch (ResourceNotFoundException e) {
             return "asso_not_found";
         }
     }
 
 
-    /* Allows a user to join an association */ 
+
+    /* Allows an user to join an association */ 
     @PostMapping("/association/{id}/join")
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
@@ -135,6 +120,24 @@ public class AssoController {
         return "redirect:/association/" + id;
     }    
 
+    /* Allow an user to leave an association */ 
+    @PostMapping("/association/{id}/leave")
+    public String leaveAssociation(@PathVariable Long id, Principal principal, Model model, RedirectAttributes redirectAttributes) {
+        if (principal != null) {
+            String username = principal.getName();
+            Optional<Member> user = memberService.findByName(username);
+            if (user.isPresent()) {
+                try {
+                associationService.deleteUserFromAssociation(id, user.get().getId());
+            } catch (IllegalStateException e) {
+                // Redirect with a message
+                redirectAttributes.addFlashAttribute("leaveError", e.getMessage());
+                return "redirect:/association/" + id;
+            }
+            }
+        }
+        return "redirect:/association/" + id;
+    } 
 
     /*  Delete association (only for admins) */
     @PostMapping("/association/{id}/delete")
@@ -214,21 +217,17 @@ public class AssoController {
         
         if (optAsso.isPresent()) {
             Association asso = optAsso.get();
-            // Update the association's name
-            asso.setName(name);
     
-            // Update the association's image if a new one is provided
+            // Update the association with image or without
             if (image != null && !image.isEmpty()) {
                 try {
-                    byte[] bytes = image.getBytes();
-                    Blob blob = new SerialBlob(bytes);
-                    asso.setImageFile(blob);
-                } catch (SQLException | IOException e) {
+                    associationService.updateAssoImage(asso, name, image);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }    
-            // Save the updated association
-            associationService.save(asso);
+            } else {
+                associationService.updateAsso(asso, name);
+            }
             return "redirect:/association/" + id;
         } else {
             return "redirect:/";
@@ -245,10 +244,7 @@ public class AssoController {
             Association asso = optAsso.get();
 
             // Remove the image from the association
-            asso.setImageFile(null);
-
-            // Save the updated association
-            associationService.save(asso);
+            associationService.deleteImage(asso);
         }
         return "redirect:/editasso/"+id;
     }

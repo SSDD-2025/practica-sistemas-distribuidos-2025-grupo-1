@@ -27,6 +27,9 @@
             <li>No participation in a meeting.</li>
         {{/userMinutes}}
     </ul>
+    {{#isAdmin}}
+            <a href="/profile/{{memberAttribute.id}}/delete"><button>Delete Profile</button></a>
+    {{/isAdmin}}
     {{> footer}}
 </body>
 </html>

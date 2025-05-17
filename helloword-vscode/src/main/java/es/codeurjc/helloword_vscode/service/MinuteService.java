@@ -10,8 +10,16 @@ import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MinuteRepository;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This service class provides methods to perform various operations on Minute entities,
@@ -26,6 +34,9 @@ public class MinuteService {
 
 	@Autowired
 	private AssociationService associationService;
+
+	@Autowired
+	private MemberService memberService;
 
 
 	/* Find all minutes */
@@ -82,5 +93,71 @@ public class MinuteService {
 	/* Find all Minute entities that contain the specified participant */
 	List<Minute> findAllByParticipantsContains(Member participant){
 		return minuteRepository.findAllByParticipantsContains(participant);
+	}
+
+	/* Create new minute */
+	public Map<String, Object> processCreateMinute(Association association, String dateStr, List<Long> participantIds, String content, double duration) {
+		Map<String, Object> model = new HashMap<>();
+		model.put("association", association);
+		model.put("members", association.getMembers());
+
+		try {
+			LocalDate date = LocalDate.parse(dateStr);
+			if (date.isAfter(LocalDate.now())) {
+				model.put("error", "The date can not be in the futur");
+				return model;
+			}
+
+			Minute minute = new Minute();
+			minute.setDate(dateStr);
+			List<Member> participants = participantIds.stream()
+				.map(id -> memberService.findById(id).orElse(null))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+			minute.setParticipants(participants);
+			minute.setContent(content);
+			minute.setDuration(duration);
+			minute.setAssociation(association);
+
+			minuteRepository.save(minute);
+			return model;
+		} catch (DateTimeParseException e) {
+			model.put("error", "Invalid date format.");
+			return model;
+		}
+	}
+
+	public List<Member> findMembers(Association association){
+		return association.getMembers();
+	}
+
+	/* Find participants of a meeting */
+	public List<Member> findParticipants(Minute minute){
+		return minute.getParticipants();
+	}
+
+	/* Find association members who didn't attend the meeting */
+	public Collection<Member> findNoParticipants(Association association, Minute minute){
+		// Create a list of members who did not participate in the meeting
+        Collection<Member> members = association.getMembers();;
+        Collection<Member> participants = minute.getParticipants();
+        Collection<Member> memberNoPart = new HashSet<Member>();
+        memberNoPart.addAll(members);
+        memberNoPart.removeAll(participants);
+		return memberNoPart;
+	}
+
+	public void update(Minute minute, String date, List<Long> participantsIds, String content, double duration, Association association){
+        // Update minute attributes
+        minute.setDate(date);
+        List<Member> participants = participantsIds.stream()
+            .map(participantId -> memberService.findById(participantId).orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+        minute.setParticipants(participants);
+        minute.setContent(content);
+        minute.setDuration(duration);
+        minute.setAssociation(association);
+		minuteRepository.save(minute);
 	}
 }

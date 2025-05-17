@@ -17,18 +17,15 @@ import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import es.codeurjc.helloword_vscode.model.AssociationMemberTypeDTO;
-import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.Member;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
-public class MemberController {
+public class MemberWebController {
 
     // Service for database interaction 
 
@@ -41,7 +38,7 @@ public class MemberController {
 
     /* Adds authentication attributes to all templates */ 
     @ModelAttribute
-    public void addAttributes(Model model) {
+    public void addAttributes(Model model, HttpServletRequest request) {
         // Retrieve the current authentication information        
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName());
@@ -49,6 +46,9 @@ public class MemberController {
         // Determine if the user is authenticated and not anonymous
         model.addAttribute("isAuthenticated", isAuthenticated);
         
+        // Determine if the user is admin
+        model.addAttribute("isAdmin", request.isUserInRole("ADMIN"));
+
         // If authenticated, add the username to the model
         if (isAuthenticated && auth.getPrincipal() instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) auth.getPrincipal();
@@ -65,21 +65,6 @@ public class MemberController {
         return "members";
     }
 
-
-    /* Login page */ 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
-
-
-    /* Login error page */ 
-    @GetMapping("/loginerror")
-    public String loginerror() {
-        return "loginerror";
-    }
-
-
     /* User profile page */ 
     @GetMapping("/profile")
     public String profile(Model model, HttpServletRequest request) {
@@ -87,35 +72,29 @@ public class MemberController {
         String name = request.getUserPrincipal().getName();
         Optional<Member> member = memberService.findByName(name);
         
-        // Add the username and admin status to the model
-        model.addAttribute("username", member.get().getName());
-        model.addAttribute("admin", request.isUserInRole("ADMIN"));
-        return "profile";
+        if(member.isPresent()){
+            // Add the username and admin status to the model
+            model.addAttribute("username", member.get());
+            return "profile";
+        } else { 
+            return "redirect:/";
+        }
     }
 
 
     /* Displays details of a specific user */ 
     @GetMapping("/user/{id}")
-    public String userId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
-        // Retrieve the user by ID
-        Optional<Member> member = memberService.findById(id);
-        if (member.isPresent()) {
-            Member memberAttribute = member.get();
-            model.addAttribute("memberAttribute", memberAttribute);
-            
-            // Map the user's roles in associations to a DTO and add to the model
-            List<AssociationMemberTypeDTO> roles = memberAttribute.getMemberTypes().stream()
-                .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
-                .collect(Collectors.toList());
-            model.addAttribute("associationRoles", roles);
-            
-            // Add the user's minutes to the model
-            List<Minute> userMinutes = memberAttribute.getMinutes();
-            model.addAttribute("userMinutes", userMinutes);
+    public String userId(@PathVariable long id, Model model) {
+        Optional<Member> memberOpt = memberService.findById(id);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            model.addAttribute("memberAttribute", member);
+            model.addAttribute("associationRoles", memberService.getAssociationRoles(member));
+            model.addAttribute("userMinutes", memberService.getUserMinutes(member));
             return "user_detail";
         } else {
             return "user_not_found";
-        }   
+        }
     }
 
 
@@ -185,7 +164,7 @@ public class MemberController {
         String username = principal.getName();
         memberService.updateUser(username, name, surname, pwd);
         model.addAttribute("triggerLogout", true);
-        return "post_update_profile"; // une page temporaire avec le script ci-dessus
+        return "post_update_profile"; // temporary page
     }
 
     /*  Page to confirm deletion of user */
@@ -205,7 +184,7 @@ public class MemberController {
 
         if (member.isPresent()) {
             // Delete the user by ID
-            memberService.deleteById(member.get().getId());
+            memberService.delete(member.get());
 
             // Logout after deletion
             try {
