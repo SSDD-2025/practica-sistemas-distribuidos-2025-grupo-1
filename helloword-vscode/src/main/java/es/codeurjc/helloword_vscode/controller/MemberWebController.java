@@ -17,6 +17,9 @@ import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.dto.MemberDTO;
+import es.codeurjc.helloword_vscode.dto.NewMemberRequestDTO;
 import es.codeurjc.helloword_vscode.model.Member;
 
 import java.io.IOException;
@@ -112,10 +115,8 @@ public class MemberWebController {
         }
     
         if (id != null && "association".equals(searchType)) {
-            // Search for an association by ID and add to the model
-            associationService.findById(id).ifPresent(association ->
-                model.addAttribute("assofind", association)
-            );
+            AssociationDTO associationDTO = associationService.findByIdDTO(id);
+            model.addAttribute("assofind", associationDTO);
             return "index";
         }
         return "index";
@@ -124,20 +125,14 @@ public class MemberWebController {
 
     /* Creation of an user */
     @PostMapping("/login/create")
-    public String User(@RequestParam String name, 
-                            @RequestParam String surname, 
-                            @RequestParam String pwd,
-                            Model model) {
-        // Check if the username already exists                        
-        Optional<Member> existingUser = memberService.findByName(name);
-        if (existingUser.isPresent()) {
-            model.addAttribute("error", "This username already exists");
+    public String User(@ModelAttribute NewMemberRequestDTO dto, Model model) {
+        try {
+            memberService.createMember(dto);
+            return "redirect:/";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
             return "new_member";
         }
-
-        // Create a new user
-        memberService.createUser( name,  surname, pwd);
-        return "redirect:/";
     }
 
 
@@ -151,21 +146,30 @@ public class MemberWebController {
     /* Page with the form of user edition */
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal principal) {
-        // Retrieve the user by name and add to the model
-        Member user = memberService.findByName(principal.getName()).orElseThrow();
-        model.addAttribute("user", user);
+        MemberDTO userDTO = memberService.findByName(principal.getName())
+                                        .map(member -> new MemberDTO(member.getId(), member.getName(), member.getSurname()))
+                                        .orElseThrow();
+        model.addAttribute("user", userDTO);
         return "edit_profile";
     }
 
 
     /* Edition of an user */
     @PostMapping("/profile/update")
-    public String updateProfile(Principal principal, @RequestParam String name, @RequestParam String surname, @RequestParam(required = false) String pwd, Model model) {
-        String username = principal.getName();
-        memberService.updateUser(username, name, surname, pwd);
-        model.addAttribute("triggerLogout", true);
-        return "post_update_profile"; // temporary page
+    public String updateProfile(Principal principal,
+                                @ModelAttribute NewMemberRequestDTO dto,
+                                Model model) {
+        try {
+            memberService.updateUserDTO(principal.getName(), dto);
+            model.addAttribute("triggerLogout", true);
+            return "post_update_profile";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("user", dto);  // Pour réafficher le formulaire avec les données
+            return "edit_profile";
+        }
     }
+
 
     /*  Page to confirm deletion of user */
     @GetMapping("/profile/delete")

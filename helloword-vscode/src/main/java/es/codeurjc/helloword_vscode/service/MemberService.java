@@ -2,10 +2,12 @@ package es.codeurjc.helloword_vscode.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,8 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
+import es.codeurjc.helloword_vscode.ResourceNotFoundException;
+import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeDTO;
+import es.codeurjc.helloword_vscode.dto.MemberDTO;
+import es.codeurjc.helloword_vscode.dto.MemberMapper;
 import es.codeurjc.helloword_vscode.dto.MemberTypeMapper;
+import es.codeurjc.helloword_vscode.dto.NewMemberRequestDTO;
+import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
@@ -51,15 +59,46 @@ public class MemberService implements UserDetailsService {
 	@Autowired
 	private MemberTypeMapper memberTypeMapper;
 
+	@Autowired
+	private MemberMapper memberMapper;
+
 	/* Save user */
     public void save(Member member) {
 		memberRepository.save(member);
 	}
 
+	/* Create User */
+	public MemberDTO createMember(NewMemberRequestDTO memberDTO) {
+		try {
+			MemberDTO existingMember = findByNameDTO(memberDTO.name());
+			if (existingMember != null) {
+				throw new IllegalArgumentException("This username already exists");
+			}
+		} catch (ResourceNotFoundException e) {
+			// If no member is found, continue with member creation
+		}
+
+		Member member = new Member(
+			memberDTO.name(),
+			memberDTO.surname(),
+			passwordEncoder.encode(memberDTO.password()),
+			"USER"
+		);
+
+		save(member);
+
+		return toDTO(member);
+	}
+
+
 
 	/* Find user by their name */
 	public Optional<Member> findByName(String name) {
 		return memberRepository.findByName(name);
+	}
+
+	public MemberDTO findByNameDTO(String name) {
+		return toDTO(memberRepository.findByName(name).orElseThrow());
 	}
 
 
@@ -122,33 +161,23 @@ public class MemberService implements UserDetailsService {
 
 
 	/* Update user */
-    public void updateUser(String username, String name, String surname, String password) {
-        Optional<Member> optUser = findByName(username);
-        if (optUser.isPresent()) {
-            Member user = optUser.get();
+	public void updateUserDTO(String currentUsername, NewMemberRequestDTO dto) {
+		Member member = findByName(currentUsername).orElseThrow();
 
-            if (!user.getName().equals(name) && findByName(name).isPresent()) {
-                throw new IllegalArgumentException("This username already exists");
-            }
+		if (!member.getName().equals(dto.name()) && findByName(dto.name()).isPresent()) {
+			throw new IllegalArgumentException("This username already exists");
+		}
 
-            user.setName(name);
-            user.setSurname(surname);
-            if (password != null && !password.isBlank()) {
-                user.setPwd(passwordEncoder.encode(password));
-            }
-            save(user);
-        }
-    }
+		member.setName(dto.name());
+		member.setSurname(dto.surname());
 
+		if (dto.password() != null && !dto.password().isBlank()) {
+			member.setPwd(passwordEncoder.encode(dto.password()));
+		}
 
-	/* Create user */
-	public void createUser(String name, String surname, String password) {
-        if (findByName(name).isPresent()) {
-            throw new IllegalArgumentException("This username already exists");
-        }
-        Member user = new Member(name, surname, passwordEncoder.encode(password), "USER");
-        save(user);
-    }
+		save(member);
+	}
+
 
 	/* Delete user */
 	public void delete(Member member) throws IOException {
@@ -182,5 +211,20 @@ public class MemberService implements UserDetailsService {
 	/* Find all the user's minutes */
 	public List<Minute> getUserMinutes(Member member) {
 		return member.getMinutes();
+	}
+
+	/* Convert entity to DTO */
+	private MemberDTO toDTO(Member member) {
+		return memberMapper.toDTO(member);
+	}
+
+	/* Converted an association set to DTOs */
+	private Collection<MemberDTO> toDTOs(Collection<Member> members) {
+		return memberMapper.toDTOs(members);
+	}
+
+	/* Converted a DTO to entity */
+	private Member toDomain(MemberDTO memberDTO){
+		return memberMapper.toDomain(memberDTO);
 	}
 }

@@ -24,14 +24,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.NewAssoRequestDTO;
-import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
@@ -202,28 +200,28 @@ public class AssoWebController {
     }
 
 
-private AssociationDTO createOrReplaceAssociation(Long id,
-                                                  NewAssoRequestDTO request,
-                                                  Boolean removeImage) throws IOException, SQLException {
-    boolean image = false;
-    if (id != null) {
-        AssociationDTO old = associationService.findByIdDTO(id);
-        image = (removeImage != null && removeImage) ? false : old.image();
+    private AssociationDTO createOrReplaceAssociation(Long id,
+                                                    NewAssoRequestDTO request,
+                                                    Boolean removeImage) throws IOException, SQLException {
+        boolean image = false;
+        if (id != null) {
+            AssociationDTO old = associationService.findByIdDTO(id);
+            image = (removeImage != null && removeImage) ? false : old.image();
+        }
+
+        List<Minute> minutes = Collections.emptyList();
+        List<MemberType> memberTypes = Collections.emptyList();
+
+        AssociationDTO dto = new AssociationDTO(id, request.name(), image, null, memberTypes, minutes);
+        AssociationDTO saved = associationService.createOrReplaceAssociation(id, dto);
+
+        MultipartFile imageField = request.imageField();
+        if (!imageField.isEmpty()) {
+            associationService.createAssociationImage(dto.id(), imageField.getInputStream(), imageField.getSize());
+        }
+
+        return saved;
     }
-
-    List<Minute> minutes = Collections.emptyList();
-    List<MemberType> memberTypes = Collections.emptyList();
-
-    AssociationDTO dto = new AssociationDTO(id, request.name(), image, null, memberTypes, minutes);
-    AssociationDTO saved = associationService.createOrReplaceAssociation(id, dto);
-
-    MultipartFile imageField = request.imageField();
-    if (!imageField.isEmpty()) {
-        associationService.createAssociationImage(dto.id(), imageField.getInputStream(), imageField.getSize());
-    }
-
-    return saved;
-}
 
 
     /* Delete image from association */ 
