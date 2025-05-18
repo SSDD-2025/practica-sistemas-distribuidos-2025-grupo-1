@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,10 +62,6 @@ public class AssociationService {
 	private AssociationMapper associationMapper;
 
 	/* Save association without image */
-    public void save(Association association) {
-		associationRepository.save(association);
-	}
-
 	public AssociationDTO createAsso(AssociationDTO associationDTO) {
 		if(associationDTO.id() != null) {
 			throw new IllegalArgumentException();
@@ -81,15 +78,6 @@ public class AssociationService {
 	}
 
 	/* Save association with image */
-	public void save(Association association, MultipartFile imageFile) throws IOException{
-		if(!imageFile.isEmpty()) {
-			// Set the image file as a Blob in the association
-			association.setImageFile(BlobProxy.generateProxy(imageFile.getInputStream(), imageFile.getSize()));
-		}
-		// Save association
-		this.save(association);
-	}
-
 	public void createAssociationImage(long id, InputStream inputStream, long size) {
 
 		Association association = associationRepository.findById(id).orElseThrow();
@@ -133,23 +121,24 @@ public class AssociationService {
 
 
 	/* Find all associations */
-	public List<Association> findAll() {
-		return associationRepository.findAll();
-	}
-
 	public Collection<AssociationDTO> findAllDTOs() {
     	return toDTOs(associationRepository.findAll());
 	}
 
 
 	/* Delete association by ID */
-	public void deleteById(long id) {
-		try {
-			associationRepository.deleteById(id);
-	    } catch (Exception e) {
-			// Log the error message if deletion fails
-			System.err.println("Erreur lors de la suppression de l'association : " + e.getMessage());
-		};		
+	public AssociationDTO deleteAssociation(long id) {
+
+		Association association = associationRepository.findById(id).orElseThrow();
+
+		//As associations are related to minutes and member types, 
+		// it is needed to load the association minutes and member types 
+		//before deleting it to avoid LazyInitializationException
+		AssociationDTO associationDTO = toDTO(association);
+
+		associationRepository.deleteById(id);
+
+		return associationDTO;
 	}
 
 
@@ -241,33 +230,20 @@ public class AssociationService {
 		return modelMap;
 	}
 
-	/* Edit the name of an association */
-	public void updateAsso(Association association, String name){
-		association.setName(name);
-		associationRepository.save(association);
-	}
-
-	public void updateAssociation(Long id, AssociationDTO dto) {
-		Association existing = associationRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Association not found"));
-		
-		existing.setName(dto.name());
-		associationRepository.save(existing);
-	}
-
+	/* Update the data of an association */
 	public AssociationDTO replaceAssociation(long id, AssociationDTO updatedAssociationDTO) throws SQLException {
 
 		Association oldAssociation = associationRepository.findById(id).orElseThrow();
 		Association updatedAssociation = toDomain(updatedAssociationDTO);
 		updatedAssociation.setId(id);
 
-		// Conserver les memberTypes (car c'est le lien vers les membres)
 		updatedAssociation.setMemberTypes(oldAssociation.getMemberTypes());
-
-		// Conserver les minutes si tu veux les garder aussi
 		updatedAssociation.setMinutes(oldAssociation.getMinutes());
 
-		if (oldAssociation.getImage() && updatedAssociation.getImage()) {
+		if (oldAssociation.getImage()
+			&& updatedAssociation.getImage()
+			&& oldAssociation.getImageFile() != null) {
+
 			updatedAssociation.setImageFile(BlobProxy.generateProxy(
 				oldAssociation.getImageFile().getBinaryStream(),
 				oldAssociation.getImageFile().length()
@@ -279,46 +255,39 @@ public class AssociationService {
 	}
 
 
+
 	/* Edit an association with image */
 	public void updateAssoImage(Association association, String name, MultipartFile multipartFile) throws IOException {
 		association.setName(name);
 		if(!multipartFile.isEmpty()) {
 			// Set the image file as a Blob in the association
 			association.setImageFile(BlobProxy.generateProxy(multipartFile.getInputStream(), multipartFile.getSize()));
+			association.setImage(true);
 		}
 		associationRepository.save(association);
 	}
 
-	public void updateImage(Long id, InputStream inputStream, long size) {
+	/* Recover the image of an association */
+	public Resource getImage(Long id) throws SQLException {
 		Association association = associationRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Association not found"));
 
-		association.setImageFile(BlobProxy.generateProxy(inputStream, size));
-		associationRepository.save(association);
-	}
+		Blob imageBlob = association.getImageFile();
 
-	public Resource getImage(Long id) throws SQLException {
-    Association association = associationRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Association not found"));
-
-    if (association.getImageFile() != null) {
-			return new InputStreamResource(association.getImageFile().getBinaryStream());
+		if (imageBlob != null) {
+			return new InputStreamResource(imageBlob.getBinaryStream());
 		} else {
-			throw new NoSuchElementException();
+			throw new NoSuchElementException("Image file is null");
 		}
 	}
 
+	/* Delete image from association */
 	public void deleteImage(Long id) {
 		Association association = associationRepository.findById(id)
 			.orElseThrow(() -> new ResourceNotFoundException("Association not found"));
 
 		association.setImageFile(null);
-		associationRepository.save(association);
-	}
-
-	/* Delete image from association */
-	public void deleteImage(Association association){
-		association.setImageFile(null);
+		association.setImage(false);
 		associationRepository.save(association);
 	}
 
@@ -327,10 +296,12 @@ public class AssociationService {
 		return associationMapper.toDTO(association);
 	}
 
+	/* Converted an association set to DTOs */
 	private Collection<AssociationDTO> toDTOs(Collection<Association> associations) {
 		return associationMapper.toDTOs(associations);
 	}
 
+	/* Converted a DTO to entity */
 	private Association toDomain(AssociationDTO associationDTO){
 		return associationMapper.toDomain(associationDTO);
 	}

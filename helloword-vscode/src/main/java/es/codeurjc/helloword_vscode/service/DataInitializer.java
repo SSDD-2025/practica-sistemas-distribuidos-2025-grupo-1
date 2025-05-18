@@ -55,23 +55,17 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /* Get a random image blob from predefined image files */
-    private Blob getRandomImageBlob() {
-    try {
-        // List of file names
-        String[] imageFiles = {"image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg",
-         "image5.jpg", "image6.jpg", "image7.jpg", "image8.jpg"};
+    private Blob loadImageBlobByIndex(int index) {
+        try {
+            String[] imageFiles = {
+                "image1.jpg", "image2.jpg", "image3.jpg",
+                "image4.jpg", "image5.jpg", "image6.jpg"
+            };
+            // Sécurité : si plus d'associations que d'images, on boucle
+            String fileName = imageFiles[index % imageFiles.length];
 
-        // Choose ramdom image
-        String fileName = imageFiles[new Random().nextInt(imageFiles.length)];
-
-        // Load file
-        ClassPathResource imgFile = new ClassPathResource("static/images/asso/" + fileName);
-
-        // Read in byte
+            ClassPathResource imgFile = new ClassPathResource("static/images/asso/" + fileName);
             byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
-
-            // Create blob
             return new SerialBlob(bytes);
         } catch (IOException | SQLException e) {
             e.printStackTrace();
@@ -82,8 +76,8 @@ public class DataInitializer {
 
     /* Initialize the database with predefined data */
     @PostConstruct
-    public void init() throws SQLException{
-        // Add users
+    public void init() throws SQLException, IOException {
+
         Member member1 = new Member("Jean", "Jan", passwordEncoder.encode("mdp"), "USER");
         Member member2 = new Member("Pierre", "Pro", passwordEncoder.encode("pwd"), "USER", "ADMIN");
         Member member3 = new Member("Luc", "lds", passwordEncoder.encode("aaa"), "USER");
@@ -111,39 +105,65 @@ public class DataInitializer {
         Minute minute2 = new Minute("2024-11-03", Arrays.asList(member1, member2), "Discussion on government measures", 30.0, association1);
         minuteRepository.save(minute2);
 
-        // Generate new random data
+        // Création des membres
         List<Member> members = new ArrayList<>();
-        for (int i = 1; i <= 20; i++) {
-            Member user = new Member(
-                "Name" + i, "surname" + i, passwordEncoder.encode("pass" + i), "USER"
-            );
-            members.add(user);
+        for (int i = 1; i <= 30; i++) {
+            members.add(new Member("Name" + i, "Surname" + i, passwordEncoder.encode("pass" + i), "USER"));
         }
         MemberRepository.saveAll(members);
 
+        // Associations à créer avec image fixe
         List<String> names = List.of("Love Earth", "Give Smile", "Construct Avenir", "Culture Club", "Nature Warrior", "Book Lovers");
+        List<String> imageFiles = List.of("image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg", "image6.jpg");
+
         List<Association> associations = new ArrayList<>();
-        for (String name : names) {
-            Association asso = new Association(name);
-            asso.setImageFile(getRandomImageBlob());
+
+        for (int i = 0; i < names.size(); i++) {
+            Association asso = new Association(names.get(i));
+
+            // Image en ordre
+            ClassPathResource imgFile = new ClassPathResource("static/images/asso/" + imageFiles.get(i));
+            byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
+            asso.setImageFile(new SerialBlob(bytes));
+            asso.setImage(true);
+
+            associationRepository.save(asso);
             associations.add(asso);
         }
-        
-        associationRepository.saveAll(associations);
 
+        // Répartition des rôles dans chaque association
         List<MemberType> roles = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            Member user = members.get(i);
-            Association asso = associations.get(i % associations.size());
-            String roleName = switch (i % 3) {
-                case 0 -> "president";
-                case 1 -> "secretary";
-                default -> "member";
-            };
-            roles.add(new MemberType(roleName, user, asso));
+        int memberIndex = 0;
+
+        for (Association asso : associations) {
+            // 1 president
+            roles.add(new MemberType("president", members.get(memberIndex++), asso));
+
+            // 0 or 1 secretary
+            if (memberIndex < members.size() && memberIndex % 2 == 0) {
+                roles.add(new MemberType("secretary", members.get(memberIndex++), asso));
+            }
+
+            // 0 or 1 treasurer
+            if (memberIndex < members.size() && memberIndex % 3 == 0) {
+                roles.add(new MemberType("treasurer", members.get(memberIndex++), asso));
+            }
+
+            // 0 or 1 vice-president
+            if (memberIndex < members.size() && memberIndex % 4 == 0) {
+                roles.add(new MemberType("vice-president", members.get(memberIndex++), asso));
+            }
+
+            // Add 3 to five members
+            int numMembers = 3 + (memberIndex % 3); // 3, 4 ou 5
+            for (int j = 0; j < numMembers && memberIndex < members.size(); j++) {
+                roles.add(new MemberType("member", members.get(memberIndex++), asso));
+            }
         }
+
         roleRepository.saveAll(roles);
 
+        // Create minute for each 
         List<Minute> minutes = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Association asso = associations.get(i % associations.size());
@@ -160,7 +180,5 @@ public class DataInitializer {
             ));
         }
         minuteRepository.saveAll(minutes);
-
-        }
-
+    }
 }

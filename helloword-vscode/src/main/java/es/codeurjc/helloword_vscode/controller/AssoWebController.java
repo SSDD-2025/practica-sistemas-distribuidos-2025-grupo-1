@@ -150,7 +150,7 @@ public class AssoWebController {
     @PreAuthorize("hasRole('ADMIN')")
 	public String deleteAssociation(@PathVariable long id, Authentication auth) {
         associationService.findByIdDTO(id); // throws if not found
-        associationService.deleteById(id); // Delete the association by ID
+        associationService.deleteAssociation(id); // Delete the association by ID
         return "redirect:/";
 	}
 
