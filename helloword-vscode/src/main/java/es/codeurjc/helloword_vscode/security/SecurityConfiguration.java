@@ -59,7 +59,7 @@ public class SecurityConfiguration {
                     "/css/**",
                     "/",
                     "/association/*", 
-                    "/user/*", 
+                    "/user/**", 
                     "/profile/create", 
                     "/login/create",
                     "/association/*/image"

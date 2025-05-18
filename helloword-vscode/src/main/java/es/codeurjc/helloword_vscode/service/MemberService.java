@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeDTO;
+import es.codeurjc.helloword_vscode.dto.MemberTypeMapper;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.repository.MemberRepository;
 
@@ -46,6 +47,9 @@ public class MemberService implements UserDetailsService {
 	@Autowired
 	@Lazy
     private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private MemberTypeMapper memberTypeMapper;
 
 	/* Save user */
     public void save(Member member) {
@@ -168,12 +172,12 @@ public class MemberService implements UserDetailsService {
 		memberRepository.delete(user);
 	}
 	
-	/* Find all the user's role in associations */
+
+
 	public List<AssociationMemberTypeDTO> getAssociationRoles(Member member) {
-    return member.getMemberTypes().stream()
-        .map(mt -> new AssociationMemberTypeDTO(mt.getAssociation(), mt.getName()))
-        .collect(Collectors.toList());
+		return memberTypeMapper.toDTOs(member.getMemberTypes());
 	}
+
 
 	/* Find all the user's minutes */
 	public List<Minute> getUserMinutes(Member member) {
