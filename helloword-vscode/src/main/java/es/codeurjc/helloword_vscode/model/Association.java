@@ -26,8 +26,10 @@ public class Association {
     @Lob
     private Blob imageFile;
 
+    private boolean image;
+
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberType> memberTypes;
+    private List<MemberType> memberTypes = new ArrayList<>();
     
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Minute> minutes;    
@@ -58,6 +60,14 @@ public class Association {
 
 	public void setImageFile(Blob imageFile) {
 		this.imageFile = imageFile;
+	}
+
+    public boolean getImage(){
+		return this.image;
+	}
+
+    public void setImage(boolean image){
+		this.image = image;
 	}
 
     public long getId() {
@@ -92,6 +102,7 @@ public class Association {
         this.minutes = minutes;
     }
 
+    // DO NOT DO THIS
     public List<Member> getMembers() {
         // Retrieve all users associated with this association
         return memberTypes.stream()
@@ -99,16 +110,17 @@ public class Association {
                      .collect(Collectors.toList());
     }
 
-    public void setMembers(List<Member> members) {
-        // Assure that all users has a role in their association
-        this.memberTypes = members.stream()
-                            .map(member -> {
-                                MemberType memberType = new MemberType();
-                                memberType.setMember(member);
-                                memberType.setAssociation(this);
-                                return memberType;
-                            })
-                            .collect(Collectors.toList());
-    }
+    // DO NOT DO THIS
+    // public void setMembers(List<Member> members) {
+    //     // Assure that all users has a role in their association
+    //     this.memberTypes = members.stream()
+    //                         .map(member -> {
+    //                             MemberType memberType = new MemberType();
+    //                             memberType.setMember(member);
+    //                             memberType.setAssociation(this);
+    //                             return memberType;
+    //                         })
+    //                         .collect(Collectors.toList());
+    // }
 }
 

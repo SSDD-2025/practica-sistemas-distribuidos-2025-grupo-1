@@ -14,22 +14,3 @@ public record AssociationMemberTypeDTO(
     String memberType
 ) {}
 
-// public class AssociationMemberTypeDTO {
-//     private Association association;
-//     private String memberType;
-
-//     /* Constructor to initialize the DTO with association and member type */
-//     public AssociationMemberTypeDTO(Association association, String memberType) {
-//         this.association = association;
-//         this.memberType = memberType;
-//     }
-
-//     // Getters and Setters //
-//     public Association getAssociation() {
-//         return association;
-//     }
-
-//     public String getMemberType() {
-//         return memberType;
-//     }
-// }

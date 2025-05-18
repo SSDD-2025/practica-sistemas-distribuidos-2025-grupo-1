@@ -18,5 +18,7 @@ public interface MemberTypeMapper {
     AssociationMemberTypeDTO toDTO(MemberType memberType);
 
     List<AssociationMemberTypeDTO> toDTOs(Collection<MemberType> memberTypes);
+
+    MemberType toDomain(MemberTypeDTO dto);
 }
 

@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
@@ -26,7 +28,7 @@ public class Member {
 
     // A list of membership types associated with the user
     @OneToMany(mappedBy = "member")
-    private List<MemberType> memberTypes;
+    private List<MemberType> memberTypes = new ArrayList<>();
 
     /* Default constructor */
     public Member() {}
