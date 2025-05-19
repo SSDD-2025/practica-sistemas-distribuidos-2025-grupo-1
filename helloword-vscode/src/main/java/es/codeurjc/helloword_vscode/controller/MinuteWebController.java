@@ -16,9 +16,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.model.Association;
+import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.service.AssociationService;
+import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.MinuteService;
 
 @Controller
@@ -32,10 +37,18 @@ public class MinuteWebController {
     @Autowired
 	private AssociationService associationService;
 
-
-
-    /* Create mintue */
+    /* Create minute */
     @PostMapping("/association/{id}/new_minute")
+    public String createMinuteDTO(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
+        AssociationDTO assoDTO = associationService.findByIdDTO(id);
+        Map<String, Object> result = minuteService.processCreateMinuteDTO(assoDTO, date, participantsIds, content, duration);
+        if (result.containsKey("error")) {
+            model.addAllAttributes(result);
+            return "new_minute";
+        }
+        return "redirect:/association/" + id;
+    }
+    /*@PostMapping("/association/{id}/new_minute")
     public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
         Optional<Association> optAsso = associationService.findById(id);
         if(optAsso.isPresent()){
@@ -46,35 +59,37 @@ public class MinuteWebController {
             }
         }
         return "redirect:/association/" + id;
-    }
+    }*/
 
-
+    
     /* Page with forms to create minute (only if you're in association) */
     @PostMapping("/association/{id}/createMinute")
-	public String createMinute(Model model, @PathVariable long id) {
+	public String createMinuteDTO(Model model, @PathVariable long id) {
         // Retrieve the association by ID
+        //AssociationDTO associationDTO = associationService.findByIdDTO(id);
         Optional<Association> association = associationService.findById(id);
+        // Add association and members to the model
         if(association.isPresent()){
             // Add association and members to the model
             model.addAttribute("association", association.get());
             model.addAttribute("members", minuteService.findMembers(association.get()));
+            //model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
             model.addAttribute("today", LocalDate.now());
-            return"new_minute"; 
+            return "new_minute"; 
         }
         return "redirect:/association/" + id;
 	}
 
-
     /* Delete minute */
     @PostMapping("/minute/{minuteId}/asso/{assoId}/delete")
     public String deleteMinute(@PathVariable Long assoId, @PathVariable Long minuteId){
-        minuteService.deleteMinuteById(minuteId, assoId);
+        minuteService.deleteMinuteByIdDTO(minuteId, assoId);
         return "redirect:/association/" + assoId;
     }
 
-
+   
     /* Edit minute page */
-    @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
+    /*@GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
     @PreAuthorize("hasRole('ADMIN')")
 	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
 		// Retrieve the association and minute by their IDs
@@ -94,6 +109,36 @@ public class MinuteWebController {
 		} else {
 			return "redirect:/";
 		}
+	}*/
+
+
+    /* Edit minute page */
+    @GetMapping("/minute/{minuteId}/asso/{assoId}/edit")
+    @PreAuthorize("hasRole('ADMIN')")
+	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
+		// Retrieve the association and minute by their IDs
+        Optional<Association> association = associationService.findById(assoId);
+        AssociationDTO associationDTO = associationService.findByIdDTO(assoId);
+        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        MinuteDTO minuteDTO = minuteService.findByIdDTO(minuteId);
+        
+        // Add association, minute, and related data to the model
+        model.addAttribute("association", associationDTO);
+        model.addAttribute("minute", minuteDTO);
+        model.addAttribute("today", LocalDate.now());
+        model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
+        model.addAttribute("participants", minuteService.findParticipantsDTO(minuteDTO));
+        model.addAttribute("noPart", minuteService.findNoParticipantsDTO(associationDTO, minute));
+        //model.addAttribute("members", minuteService.findMembers(association.get()));
+        //model.addAttribute("participants", minuteService.findParticipants(minute));
+        //model.addAttribute("noPart", minuteService.findNoParticipants(association.get(), minute));
+
+        return "editMinutePage";
+		/*if (association.isPresent()) {
+			return "editMinutePage";
+		} else {
+			return "redirect:/";
+		}*/
 	}
 
 
@@ -115,11 +160,13 @@ public class MinuteWebController {
         }
         
         // Retrieve the minute and association by their IDs
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
+        //Minute minute = minuteService.findById(minuteId).orElseThrow();
+        MinuteDTO minuteDTO = minuteService.findByIdDTO(minuteId);
         Optional<Association> association = associationService.findById(assoId);
+        AssociationDTO associationDTO = associationService.findByIdDTO(assoId);
         if(association.isPresent()){
             // Save the updated minute
-            minuteService.update(minute, date, participantsIds, content, duration, association.get());
+            minuteService.updateDTO(minuteDTO, date, participantsIds, content, duration, association.get());
         }
         return "redirect:/association/" + assoId;
     }
