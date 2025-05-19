@@ -9,9 +9,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {MemberMapper.class})
 public interface MinuteMapper {
-
+    @Mapping(source = "association", target = "association")
     MinuteDTO toDTO(Minute minute);
 
     List<MinuteDTO> toDTOs(Collection<Minute> minutes);

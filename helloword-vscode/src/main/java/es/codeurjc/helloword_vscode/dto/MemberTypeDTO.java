@@ -7,5 +7,5 @@ public record MemberTypeDTO(
     Long id,
     String name,
     MemberDTO member,
-    AssociationDTO association
+    AssociationBasicDTO association
 ) {}

@@ -27,8 +27,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
+import es.codeurjc.helloword_vscode.dto.AssociationBasicDTO;
+import es.codeurjc.helloword_vscode.dto.AssociationBasicMapper;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.AssociationMapper;
+import es.codeurjc.helloword_vscode.dto.MemberDTO;
+import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
+import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
@@ -62,6 +67,9 @@ public class AssociationService {
 
 	@Autowired
 	private AssociationMapper associationMapper;
+
+	@Autowired
+	private AssociationBasicMapper associationBasicMapper;
 
 	/* Save association without image */
 	public AssociationDTO createAsso(AssociationDTO associationDTO) {
@@ -111,15 +119,11 @@ public class AssociationService {
 	public AssociationDTO findByIdDTO(long id) {
 		return toDTO(associationRepository.findById(id).orElseThrow());
 	}
-	
-	
-	/* Get all minutes associated with a specific association */
-    @Transactional
-    public List<Minute> getMinutes(Long associationId) {
-        Association association = associationRepository.findById(associationId)
-            .orElseThrow(() -> new ResourceNotFoundException("Association non trouvée avec l'id : " + associationId));
-        return association.getMinutes();
-    }
+
+	/* Find association by ID */
+	public AssociationBasicDTO findByIdDTOBasic(long id) {
+		return toDTOAssociationBasic(associationRepository.findById(id).orElseThrow());
+	}
 
 
 	/* Find all associations */
@@ -143,30 +147,23 @@ public class AssociationService {
 		return associationDTO;
 	}
 
-
 	/* Add user to an association */
-	public void addUserToAssociation(Long associationId, Long userId) {
-        Optional<Association> associationOpt = associationRepository.findById(associationId);
-        Optional<Member> userOpt = memberService.findById(userId);
+	public void addUserToAssociation(Long associationId, String userId) {
+		AssociationBasicDTO associationDTO = findByIdDTOBasic(associationId);
+		MemberDTO memberDTO = memberService.findByNameDTO(userId);
+		List<MemberDTO> currentMembers = memberService.findMembersByAssociationId(associationId);
+		// Verify if the user isn't already in the association
+		boolean alreadyMember = currentMembers.stream()
+        .anyMatch(member -> member.id().equals(memberDTO.id()));
 
-        if (associationOpt.isPresent() && userOpt.isPresent()) {
-            Association association = associationOpt.get();
-            Member user = userOpt.get();
-
-			// Verify if the user isn't already in the association
-            if (!association.getMembers().contains(user)) {
-
-				// If the user is the first one to join an association he will become president else he will be member
-				if(association.getMembers().isEmpty()){
-					MemberType memberType = new MemberType("president", user, association);
-                	memberTypeService.save(memberType);
-				} else {
-					MemberType memberType = new MemberType("member", user, association);
-                	memberTypeService.save(memberType);
-				}
-            }
-        }
-    }
+		// If the user is the first one to join an association he will become president else he will be member
+		if (!alreadyMember) {
+        	String role = currentMembers.isEmpty() ? "president" : "member";
+        	MemberTypeDTO newMemberType = new MemberTypeDTO(null, role, memberDTO, associationDTO);
+        	memberTypeService.createMemberType(newMemberType);
+    	}
+	}
+    
 	
 	/* Delete user from an association */
 	@Transactional
@@ -190,6 +187,24 @@ public class AssociationService {
 			}
 		}
 	}
+
+	// @Transactional
+	// public void deleteUserFromAssociation(Long associationId, String username) {
+	// 	AssociationDTO associationDTO = findByIdDTO(associationId); // throws if not found
+	// 	MemberDTO memberDTO = memberService.findByNameDTO(username); // throws if not found
+
+	// 	Collection<MemberTypeDTO> memberTypes = memberTypeService.findByMemberDTO(memberDTO);
+
+	// 	for (MemberTypeDTO memberType : memberTypes) {
+	// 		if (memberType.association().id().equals(associationId)) {
+	// 			if ("president".equalsIgnoreCase(memberType.name())) {
+	// 				throw new IllegalStateException("You must choose a new president before leaving the association");
+	// 			}
+	// 			memberTypeService.deleteMemberType(memberType.id());
+	// 		}
+	// 	}
+	// }
+
 
 	public Map<String, Object> getAssociationViewModel(Long associationId, String currentUsername, boolean isAdmin) {
 		Optional<Association> optAsso = findById(associationId);
@@ -296,6 +311,10 @@ public class AssociationService {
 	/* Convert entity to DTO */
 	private AssociationDTO toDTO(Association association) {
 		return associationMapper.toDTO(association);
+	}
+
+	private AssociationBasicDTO toDTOAssociationBasic(Association association) {
+		return associationBasicMapper.toDTO(association);
 	}
 
 	/* Converted an association set to DTOs */

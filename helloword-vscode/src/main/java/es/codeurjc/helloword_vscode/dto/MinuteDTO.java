@@ -11,5 +11,7 @@ public record MinuteDTO (
      List<MemberDTO> participants,
      String content,
      Double duration,
-     Association association
-){}
+     AssociationBasicDTO association
+) {}
+
+

@@ -11,6 +11,6 @@ public record AssociationDTO (
     String name,
     boolean image,
     Blob imageFile,
-    List<MemberType> memberTypes,
-    List<Minute> minutes
+    List<MemberTypeDTO> memberTypes,
+    List<MinuteDTO> minutes
 ){}

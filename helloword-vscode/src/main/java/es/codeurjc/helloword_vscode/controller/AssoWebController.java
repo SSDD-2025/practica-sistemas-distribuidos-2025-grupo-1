@@ -29,6 +29,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
+import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.dto.NewAssoRequestDTO;
 import es.codeurjc.helloword_vscode.model.Member;
 import es.codeurjc.helloword_vscode.model.MemberType;
@@ -116,13 +118,11 @@ public class AssoWebController {
     public String joinAssociation(@PathVariable Long id, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
-            Optional<Member> user = memberService.findByName(username);
-            if (user.isPresent()) {
-                associationService.addUserToAssociation(id, user.get().getId());
-            }
+            associationService.addUserToAssociation(id, username);
         }
         return "redirect:/association/" + id;
-    }    
+    }
+
 
     /* Allow an user to leave an association */ 
     @PostMapping("/association/{id}/leave")
@@ -142,6 +142,21 @@ public class AssoWebController {
         }
         return "redirect:/association/" + id;
     } 
+
+    // @PostMapping("/association/{id}/leave")
+    // public String leaveAssociation(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
+    //     if (principal != null) {
+    //         String username = principal.getName();
+    //         try {
+    //             associationService.deleteUserFromAssociation(id, username);
+    //         } catch (IllegalStateException e) {
+    //             redirectAttributes.addFlashAttribute("leaveError", e.getMessage());
+    //             return "redirect:/association/" + id;
+    //         }
+    //     }
+    //     return "redirect:/association/" + id;
+    // }
+
 
     /*  Delete association (only for admins) */
     @PostMapping("/association/{id}/delete")
@@ -209,8 +224,8 @@ public class AssoWebController {
             image = (removeImage != null && removeImage) ? false : old.image();
         }
 
-        List<Minute> minutes = Collections.emptyList();
-        List<MemberType> memberTypes = Collections.emptyList();
+        List<MinuteDTO> minutes = Collections.emptyList();
+        List<MemberTypeDTO> memberTypes = Collections.emptyList();
 
         AssociationDTO dto = new AssociationDTO(id, request.name(), image, null, memberTypes, minutes);
         AssociationDTO saved = associationService.createOrReplaceAssociation(id, dto);

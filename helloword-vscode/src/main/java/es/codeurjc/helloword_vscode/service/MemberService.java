@@ -133,6 +133,10 @@ public class MemberService implements UserDetailsService {
 		return memberRepository.findById(id);
 	}
 
+	/* Find user by ID */
+	public MemberDTO findByIdDTO(long id) {
+		return toDTO(memberRepository.findById(id).orElseThrow());
+	}
 
 	/* Find all users */
 	public List<Member> findAll() {
