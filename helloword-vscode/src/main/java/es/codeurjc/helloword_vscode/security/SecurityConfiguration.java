@@ -72,9 +72,9 @@ public class SecurityConfiguration {
 		http
 			.authorizeHttpRequests(authorize -> authorize
                     // PRIVATE ENDPOINTS
-                    .requestMatchers(HttpMethod.POST,"/api/asso/").hasRole("USER")
-                    .requestMatchers(HttpMethod.PUT,"/api/asso/**").hasRole("USER")
-                    .requestMatchers(HttpMethod.DELETE,"/api/asso/**").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST,"/api/associations/").hasRole("USER")
+                    .requestMatchers(HttpMethod.PUT,"/api/associations/**").hasRole("USER")
+                    .requestMatchers(HttpMethod.DELETE,"/api/associations/**").hasRole("ADMIN")
 					// PUBLIC ENDPOINTS
 					.anyRequest().permitAll()
 			);
@@ -120,6 +120,8 @@ public class SecurityConfiguration {
                     "/login/create",
                     "/association/*/image"
                 ).permitAll()
+                
+                .requestMatchers("/api/associations/").permitAll()
 
                  // Pages accessible to users with role "USER"
                 .requestMatchers(

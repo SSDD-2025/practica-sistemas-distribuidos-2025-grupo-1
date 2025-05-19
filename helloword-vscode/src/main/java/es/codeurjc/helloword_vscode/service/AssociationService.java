@@ -194,14 +194,14 @@ public class AssociationService {
 		updatedAssociation.setMemberTypes(oldAssociation.getMemberTypes());
 		updatedAssociation.setMinutes(oldAssociation.getMinutes());
 
-		if (oldAssociation.getImage()
-			&& updatedAssociation.getImage()
-			&& oldAssociation.getImageFile() != null) {
-
-			updatedAssociation.setImageFile(BlobProxy.generateProxy(
-				oldAssociation.getImageFile().getBinaryStream(),
-				oldAssociation.getImageFile().length()
-			));
+		if (oldAssociation.getImage() && oldAssociation.getImageFile() != null) {
+			updatedAssociation.setImage(true);
+			updatedAssociation.setImageFile(
+				BlobProxy.generateProxy(
+					oldAssociation.getImageFile().getBinaryStream(),
+					oldAssociation.getImageFile().length()
+				)
+			);
 		}
 
 		associationRepository.save(updatedAssociation);

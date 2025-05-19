@@ -2,17 +2,14 @@ package es.codeurjc.helloword_vscode.controller;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +32,6 @@ import es.codeurjc.helloword_vscode.dto.MemberDTO;
 import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
 import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.dto.NewAssoRequestDTO;
-import es.codeurjc.helloword_vscode.model.Member;
-import es.codeurjc.helloword_vscode.model.MemberType;
-import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.MemberTypeService;

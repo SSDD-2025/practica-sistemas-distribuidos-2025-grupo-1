@@ -18,21 +18,71 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @RestController
-@RequestMapping("/api/asso")
+@RequestMapping("/api/associations")
 public class AssoRestController {
 
-   	@Autowired
-	private AssociationService associationService;
+    @Autowired
+    private AssociationService associationService;
 
-	@GetMapping("/")
-	public Collection<AssociationDTO> getAssos() {
-		return associationService.findAllDTOs();
-	} 
+    // GET all associations
+    @GetMapping("/")
+    public Collection<AssociationDTO> getAllAssociations() {
+        return associationService.findAllDTOs();
+    }
+
+    // GET one association by id
+    @GetMapping("/{id}")
+    public ResponseEntity<AssociationDTO> getAssociation(@PathVariable long id) {
+        try {
+            AssociationDTO asso = associationService.findByIdDTO(id);
+            return ResponseEntity.ok(asso);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // POST create new association
+    @PostMapping("/")
+    public ResponseEntity<AssociationDTO> createAssociation(@RequestBody AssociationDTO associationDTO) {
+        AssociationDTO created = associationService.createAsso(associationDTO);
+        URI location = ServletUriComponentsBuilder
+            .fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(created.id())
+            .toUri();
+        return ResponseEntity.created(location).body(created);
+    }
+
+    // PUT update association
+    @PutMapping("/{id}")
+    public ResponseEntity<AssociationDTO> updateAssociation(@PathVariable long id,
+                                                            @RequestBody AssociationDTO updatedDTO) throws SQLException {
+        try {
+            AssociationDTO updated = associationService.replaceAssociation(id, updatedDTO);
+            return ResponseEntity.ok(updated);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // DELETE association
+    @DeleteMapping("/{id}")
+    public ResponseEntity<AssociationDTO> deleteAssociation(@PathVariable long id) {
+        try {
+            AssociationDTO deleted = associationService.deleteAssociation(id);
+            return ResponseEntity.ok(deleted);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
+

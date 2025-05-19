@@ -3,7 +3,6 @@ package es.codeurjc.helloword_vscode.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.model.Association;
-import es.codeurjc.helloword_vscode.model.Member;
-import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.service.AssociationService;
-import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.service.MemberService;
 import es.codeurjc.helloword_vscode.service.MinuteService;
 
@@ -59,20 +55,6 @@ public class MinuteWebController {
             return "new_minute";
         }
     }
-
-    /*@PostMapping("/association/{id}/new_minute")
-    public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
-        Optional<Association> optAsso = associationService.findById(id);
-        if(optAsso.isPresent()){
-            Map<String, Object> result = minuteService.processCreateMinute(optAsso.get(), date, participantsIds, content, duration);
-            if (result.containsKey("error")) {
-                model.addAllAttributes(result);
-                return "new_minute";
-            }
-        }
-        return "redirect:/association/" + id;
-    }*/
-
     
     /* Page with forms to create minute (only if you're in association) */
     @PostMapping("/association/{id}/createMinute")
