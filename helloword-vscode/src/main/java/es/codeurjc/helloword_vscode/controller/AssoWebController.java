@@ -5,8 +5,10 @@ import java.security.Principal;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
+import es.codeurjc.helloword_vscode.dto.MemberDTO;
 import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
 import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.dto.NewAssoRequestDTO;
@@ -37,6 +40,7 @@ import es.codeurjc.helloword_vscode.model.MemberType;
 import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.service.AssociationService;
 import es.codeurjc.helloword_vscode.service.MemberService;
+import es.codeurjc.helloword_vscode.service.MemberTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -51,6 +55,9 @@ public class AssoWebController {
 
     @Autowired
 	private AssociationService associationService;
+
+    @Autowired
+    private MemberTypeService memberTypeService;
 
 
     /* Adds authentication attributes to all templates */ 
@@ -96,20 +103,50 @@ public class AssoWebController {
     }
 
 
-    /* Displays details of a specific association */ 
     @GetMapping("/association/{id}")
     public String associationId(@PathVariable long id, Model model, Principal principal, HttpServletRequest request) {
         String username = (principal != null) ? principal.getName() : null;
         boolean isAdmin = request.isUserInRole("ADMIN");
 
         try {
-            Map<String, Object> attributes = associationService.getAssociationViewModel(id, username, isAdmin);
-            model.addAllAttributes(attributes);
+            AssociationDTO association = associationService.getDetailedAssociationDTO(id);
+
+            model.addAttribute("association", association);
+            model.addAttribute("minutes", association.minutes());
+            model.addAttribute("hasImage", association.imageFile() != null);
+            model.addAttribute("isAdmin", isAdmin);
+
+            List<Map<String, Object>> memberTypeData = association.memberTypes().stream().map(mt -> {
+                Map<String, Object> data = new HashMap<>();
+                data.put("id", mt.id());
+                data.put("name", mt.name());
+                data.put("member", mt.member());
+                data.put("presidentSelected", "president".equalsIgnoreCase(mt.name()));
+                data.put("vicePresidentSelected", "vice-president".equalsIgnoreCase(mt.name()));
+                data.put("secretarySelected", "secretary".equalsIgnoreCase(mt.name()));
+                data.put("treasurerSelected", "treasurer".equalsIgnoreCase(mt.name()));
+                data.put("memberSelected", "member".equalsIgnoreCase(mt.name()));
+                return data;
+            }).collect(Collectors.toList());
+
+            model.addAttribute("memberTypes", memberTypeData);
+
+            boolean isMember = username != null && association.memberTypes().stream()
+                .anyMatch(mt -> mt.member().name().equals(username));
+
+            MemberDTO president = memberTypeService.getPresidentDTO(association);
+            boolean isPresident = president != null && president.name().equals(username);
+
+            model.addAttribute("isMember", isMember);
+            model.addAttribute("isPresident", isPresident);
+
             return "association_detail";
+
         } catch (ResourceNotFoundException e) {
             return "asso_not_found";
         }
     }
+
 
 
 
@@ -126,36 +163,19 @@ public class AssoWebController {
 
     /* Allow an user to leave an association */ 
     @PostMapping("/association/{id}/leave")
-    public String leaveAssociation(@PathVariable Long id, Principal principal, Model model, RedirectAttributes redirectAttributes) {
+    public String leaveAssociation(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         if (principal != null) {
-            String username = principal.getName();
-            Optional<Member> user = memberService.findByName(username);
-            if (user.isPresent()) {
-                try {
-                associationService.deleteUserFromAssociation(id, user.get().getId());
+            try {
+                MemberDTO userDTO = memberService.findByNameDTO(principal.getName());
+                associationService.deleteUserFromAssociationDTO(id, userDTO.id());
             } catch (IllegalStateException e) {
-                // Redirect with a message
                 redirectAttributes.addFlashAttribute("leaveError", e.getMessage());
                 return "redirect:/association/" + id;
             }
-            }
         }
         return "redirect:/association/" + id;
-    } 
+    }
 
-    // @PostMapping("/association/{id}/leave")
-    // public String leaveAssociation(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
-    //     if (principal != null) {
-    //         String username = principal.getName();
-    //         try {
-    //             associationService.deleteUserFromAssociation(id, username);
-    //         } catch (IllegalStateException e) {
-    //             redirectAttributes.addFlashAttribute("leaveError", e.getMessage());
-    //             return "redirect:/association/" + id;
-    //         }
-    //     }
-    //     return "redirect:/association/" + id;
-    // }
 
 
     /*  Delete association (only for admins) */

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import es.codeurjc.helloword_vscode.dto.AssociationBasicMapper;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.AssociationMapper;
 import es.codeurjc.helloword_vscode.dto.MemberDTO;
+import es.codeurjc.helloword_vscode.dto.MemberMapper;
 import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
 import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.model.Association;
@@ -70,6 +72,9 @@ public class AssociationService {
 
 	@Autowired
 	private AssociationBasicMapper associationBasicMapper;
+
+	@Autowired
+	private MemberMapper memberMapper;
 
 	/* Save association without image */
 	public AssociationDTO createAsso(AssociationDTO associationDTO) {
@@ -163,88 +168,29 @@ public class AssociationService {
         	memberTypeService.createMemberType(newMemberType);
     	}
 	}
-    
-	
-	/* Delete user from an association */
+
 	@Transactional
-	public void deleteUserFromAssociation(Long associationId, Long userId) {
-		Optional<Association> associationOpt = associationRepository.findById(associationId);
-		Optional<Member> memberOpt = memberService.findById(userId);
+	public void deleteUserFromAssociationDTO(Long associationId, Long userId) {
 
-		if (associationOpt.isPresent() && memberOpt.isPresent()) {
-			Member member = memberOpt.get();
-	
-			// Find MemberType matching
-			List<MemberType> memberTypes = member.getMemberTypes().stream()
-				.filter(mt -> mt.getAssociation().getId() == associationId)
-				.collect(Collectors.toList());
+		Member member = memberService.findById(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-			for (MemberType memberType : memberTypes) {
-				if ("president".equalsIgnoreCase(memberType.getName())) {
-					throw new IllegalStateException("You must choose a new president before leaving the association");
-				}
-				memberTypeService.delete(memberType);
+		// On accède aux MemberType via l'entité, sinon le DTO n'a pas la relation
+		List<MemberType> memberTypes = member.getMemberTypes().stream()
+			.filter(mt -> Objects.equals(mt.getAssociation().getId(), associationId))
+			.toList();
+
+		for (MemberType mt : memberTypes) {
+			if ("president".equalsIgnoreCase(mt.getName())) {
+				throw new IllegalStateException("You must choose a new president before leaving the association");
 			}
+			memberTypeService.delete(mt); // méthode qui accepte une entité
 		}
 	}
 
-	// @Transactional
-	// public void deleteUserFromAssociation(Long associationId, String username) {
-	// 	AssociationDTO associationDTO = findByIdDTO(associationId); // throws if not found
-	// 	MemberDTO memberDTO = memberService.findByNameDTO(username); // throws if not found
-
-	// 	Collection<MemberTypeDTO> memberTypes = memberTypeService.findByMemberDTO(memberDTO);
-
-	// 	for (MemberTypeDTO memberType : memberTypes) {
-	// 		if (memberType.association().id().equals(associationId)) {
-	// 			if ("president".equalsIgnoreCase(memberType.name())) {
-	// 				throw new IllegalStateException("You must choose a new president before leaving the association");
-	// 			}
-	// 			memberTypeService.deleteMemberType(memberType.id());
-	// 		}
-	// 	}
-	// }
-
-
-	public Map<String, Object> getAssociationViewModel(Long associationId, String currentUsername, boolean isAdmin) {
-		Optional<Association> optAsso = findById(associationId);
-		if (optAsso.isEmpty()) {
-			throw new ResourceNotFoundException("Association not found");
-		}
-
-		Association asso = optAsso.get();
-		Map<String, Object> modelMap = new HashMap<>();
-
-		modelMap.put("association", asso);
-		modelMap.put("minutes", asso.getMinutes());
-		modelMap.put("hasImage", asso.getImageFile() != null);
-		modelMap.put("isAdmin", isAdmin);
-
-		List<Map<String, Object>> memberTypeData = asso.getMemberTypes().stream().map(mt -> {
-			Map<String, Object> data = new HashMap<>();
-			data.put("id", mt.getId());
-			data.put("name", mt.getName());
-			data.put("member", mt.getMember());
-			data.put("presidentSelected", "president".equalsIgnoreCase(mt.getName()));
-			data.put("vicePresidentSelected", "vice-president".equalsIgnoreCase(mt.getName()));
-			data.put("secretarySelected", "secretary".equalsIgnoreCase(mt.getName()));
-			data.put("treasurerSelected", "treasurer".equalsIgnoreCase(mt.getName()));
-			data.put("memberSelected", "member".equalsIgnoreCase(mt.getName()));
-			return data;
-		}).collect(Collectors.toList());
-
-		modelMap.put("memberTypes", memberTypeData);
-
-		Optional<Member> user = currentUsername != null ? memberService.findByName(currentUsername) : Optional.empty();
-
-		boolean isMember = user.isPresent() && asso.getMembers().contains(user.get());
-		boolean isPresident = user.isPresent() &&
-			memberTypeService.getPresident(asso).map(p -> p.equals(user.get())).orElse(false);
-
-		modelMap.put("isMember", isMember);
-		modelMap.put("isPresident", isPresident);
-
-		return modelMap;
+	/* Load details of an association */
+	public AssociationDTO getDetailedAssociationDTO(Long associationId) {
+		return findByIdDTO(associationId);
 	}
 
 	/* Update the data of an association */
@@ -325,5 +271,10 @@ public class AssociationService {
 	/* Converted a DTO to entity */
 	private Association toDomain(AssociationDTO associationDTO){
 		return associationMapper.toDomain(associationDTO);
+	}
+
+	/* Convert entity to DTO */
+	private MemberDTO toDTO(Member member) {
+		return memberMapper.toDTO(member);
 	}
 }

@@ -99,12 +99,12 @@ public class MemberTypeService {
         .findFirst();
   }
 
-  public MemberDTO getPresidentDTO(Association association) {
-    return toDTO(association.getMemberTypes().stream()
-        .filter(mt -> "president".equalsIgnoreCase(mt.getName()))
-        .map(MemberType::getMember)
+  public MemberDTO getPresidentDTO(AssociationDTO associationDTO) {
+    return associationDTO.memberTypes().stream()
+        .filter(mt -> "president".equalsIgnoreCase(mt.name()))
+        .map(MemberTypeDTO::member)
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException("No president found for the association")));
+        .orElseThrow(() -> new IllegalStateException("No president found for the association"));
   }
 
   /* Find MemberType by id*/
@@ -151,7 +151,7 @@ public class MemberTypeService {
           for (MemberTypeDTO mt : memberTypes) {
               if ("president".equalsIgnoreCase(mt.name())
                   && !mt.member().id().equals(targetMemberTypeDTO.member().id())) {
-                  MemberType updated = findById(mt.id()).orElseThrow(); // entity temporary for modification
+                  MemberType updated = findById(mt.id()).orElseThrow(); // entity temporary for
                   updated.setName("member");
                   save(updated);
               }
