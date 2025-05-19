@@ -180,5 +180,13 @@ public class DataInitializer {
             ));
         }
         minuteRepository.saveAll(minutes);
+
+        for (Minute minute : minutes) {
+            for (Member participant : minute.getParticipants()) {
+                participant.getMinutes().add(minute);
+                MemberRepository.save(participant);
+            }
+        }
+
     }
 }

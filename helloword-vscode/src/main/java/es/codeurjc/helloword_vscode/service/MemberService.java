@@ -98,7 +98,10 @@ public class MemberService implements UserDetailsService {
 	}
 
 	public MemberDTO findByNameDTO(String name) {
-		return toDTO(memberRepository.findByName(name).orElseThrow());
+		return toDTO(
+			memberRepository.findByName(name)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found: " + name))
+		);
 	}
 
 
