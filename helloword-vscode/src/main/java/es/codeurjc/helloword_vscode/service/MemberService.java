@@ -62,6 +62,9 @@ public class MemberService implements UserDetailsService {
 	@Autowired
 	private MemberMapper memberMapper;
 
+	@Autowired
+	private AssociationService associationService;
+
 	/* Save user */
     public void save(Member member) {
 		memberRepository.save(member);
@@ -204,6 +207,17 @@ public class MemberService implements UserDetailsService {
 		memberRepository.delete(user);
 	}
 	
+	public List<MemberDTO> findMembersByAssociationId(Long associationId) {
+		Association association = associationService.findById(associationId)
+			.orElseThrow(() -> new ResourceNotFoundException("Association not found with id: " + associationId));
+
+		return association.getMemberTypes().stream()
+			.map(MemberType::getMember)
+			.distinct()
+			.map(this::toDTO)
+			.collect(Collectors.toList());
+	}
+
 
 
 	public List<AssociationMemberTypeDTO> getAssociationRoles(Member member) {

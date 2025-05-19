@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,13 +55,6 @@ public class MinuteService {
 	@Autowired
 	private MemberMapper memberMapper;
 
-
-
-	/* Find all minutes */
-    public List<Minute> findAll() {
-		return minuteRepository.findAll();
-	}
-
 	/* Find all minutes */
 	public Collection<MinuteDTO> findAllDTOs() {
     	return toDTOs(minuteRepository.findAll());
@@ -71,68 +65,10 @@ public class MinuteService {
 		minuteRepository.save(minute);
 	}
 
-
-	/* Find minute by ID */
-	public Optional<Minute> findById(long id){
-		return minuteRepository.findById(id);
-	}
-
 	/* Find minute by ID */
 	public MinuteDTO findByIdDTO(long id){
 		return toDTO(minuteRepository.findById(id).orElseThrow());
 	}
-
-
-	/* Delete minute and update association */
-	public void delete(Minute minute, Long assoId, List <Member> members) {
-		// Retrieve the association by ID
-		Association association = associationService.findById(assoId).orElseThrow();
-
-        // Remove the minute from the association's list of minutes		
-		association.getMinutes().remove(minute);
-		
-		// Remove the minute from each user's list of minutes
-		for (Member member : members ){
-			member.getMinutes().remove(minute);
-		}
-
-		// Delete the minute from the repository
-		this.minuteRepository.delete(minute);
-	}
-
-	/* Delete minute and update association */
-	public void deleteDTO(Minute minute, Long assoId, List <Member> members) {
-		// Retrieve the association by ID
-		AssociationDTO associationDTO = associationService.findByIdDTO(assoId);
-
-        // Remove the minute from the association's list of minutes
-		Association association = toDomain(associationDTO);
-		association.getMinutes().remove(minute);
-		
-		// Remove the minute from each user's list of minutes
-		for (Member member : members ){
-			member.getMinutes().remove(minute);
-		}
-
-		// Delete the minute from the repository
-		this.minuteRepository.delete(minute);
-	}
-	
-
-
-	/* Delete minute with association and minute ID */
-	public void deleteMinuteById(Long minuteId, Long assoId) {
-        Minute minute = minuteRepository.findById(minuteId)
-            .orElseThrow(() -> new ResourceNotFoundException("Minute not found with id: " + minuteId));
-        Association association = associationService.findById(assoId)
-            .orElseThrow(() -> new ResourceNotFoundException("Association not found with id: " + assoId));
-
-        association.getMinutes().remove(minute);
-        for (Member member : minute.getParticipants()) {
-            member.getMinutes().remove(minute);
-        }
-        minuteRepository.delete(minute);
-    }
 
 	/* Delete minute with association and minute ID */
 	public MinuteDTO deleteMinuteByIdDTO(Long minuteId, Long assoId) {
@@ -161,12 +97,6 @@ public class MinuteService {
 	List<Minute> findAllByParticipantsContains(Member participant){
 		return minuteRepository.findAllByParticipantsContains(participant);
 	}
-
-	/* Find all Minute entities that contain the specified participant */
-	/*Collection<MinuteDTO> findAllByParticipantsContainsDTO(MemberDTO participant){
-		return toDTOs(minuteRepository.findAllByParticipantsContains(toDomainMember(participant)));
-	}*/
-
 
 	/* Create new minute */
 	public Map<String, Object> processCreateMinute(Association association, String dateStr, List<Long> participantIds, String content, double duration) {
@@ -234,61 +164,53 @@ public class MinuteService {
 		}
 	}
 
+	public MinuteDTO createMinute(AssociationDTO associationDTO, String dateStr, List<Long> participantIds, String content, double duration) {
 
-	public List<Member> findMembers(Association association){
-		return association.getMembers();
-	}
-	public List<Member> findMembersDTO(AssociationDTO associationDTO){ //ne renvoie pas de members -> pas d'explications
+		LocalDate date;
+		try {
+			date = LocalDate.parse(dateStr);
+		} catch (DateTimeParseException e) {
+			throw new IllegalArgumentException("Invalid date format.");
+		}
+
+		if (date.isAfter(LocalDate.now())) {
+			throw new IllegalArgumentException("The date cannot be in the future.");
+		}
+
 		Association association = toDomain(associationDTO);
-		return association.getMembers();
-	}
 
-	/* Find participants of a meeting */
-	public List<Member> findParticipants(Minute minute){
-		return minute.getParticipants();
-	}
-	/* Find participants of a meeting */
-	public List<Member> findParticipantsDTO(MinuteDTO minuteDTO){
-		Minute minute = toDomain(minuteDTO);
-		return minute.getParticipants();
-	}
+		List<Member> participants = participantIds.stream()
+			.map(id -> memberService.findById(id).orElse(null))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
 
-	/* Find association members who didn't attend the meeting */
-	public Collection<Member> findNoParticipants(Association association, Minute minute){
-		// Create a list of members who did not participate in the meeting
-        Collection<Member> members = association.getMembers();
-        Collection<Member> participants = minute.getParticipants();
-        Collection<Member> memberNoPart = new HashSet<Member>();
-        memberNoPart.addAll(members);
-        memberNoPart.removeAll(participants);
-		return memberNoPart;
-	}
-	/* Find association members who didn't attend the meeting */
-	public Collection<Member> findNoParticipantsDTO(AssociationDTO associationDTO, Minute minute){ //ne marche pas avec MinuteDTO -> pas d'explications
-		Association association = toDomain(associationDTO);
-		//Minute minute = toDomain(minuteDTO);
-		// Create a list of members who did not participate in the meeting
-        Collection<Member> members = association.getMembers();
-        Collection<Member> participants = minute.getParticipants();
-        Collection<Member> memberNoPart = new HashSet<Member>();
-        memberNoPart.addAll(members);
-        memberNoPart.removeAll(participants);
-		return memberNoPart;
-	}
+		Minute minute = new Minute();
+		minute.setDate(dateStr);
+		minute.setParticipants(participants);
+		minute.setContent(content);
+		minute.setDuration(duration);
+		minute.setAssociation(association);
 
-	public void update(Minute minute, String date, List<Long> participantsIds, String content, double duration, Association association){
-        // Update minute attributes
-        minute.setDate(date);
-        List<Member> participants = participantsIds.stream()
-            .map(participantId -> memberService.findById(participantId).orElse(null))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-        minute.setParticipants(participants);
-        minute.setContent(content);
-        minute.setDuration(duration);
-        minute.setAssociation(association);
 		minuteRepository.save(minute);
+
+		return toDTO(minute);
 	}
+
+		public List<MemberDTO> findMembersDTO(AssociationDTO associationDTO){
+			return memberService.findMembersByAssociationId(associationDTO.id());
+		}
+
+
+		/* Find participants of a meeting */
+		public List<MemberDTO> findParticipantsDTO(MinuteDTO minuteDTO){
+			return minuteDTO.participants();
+		}
+
+		public List<MemberDTO> findNoParticipantsDTO(AssociationDTO associationDTO, MinuteDTO minuteDTO){
+			List<MemberDTO> members = memberService.findMembersByAssociationId(associationDTO.id());
+			Set<Long> participantIds = minuteDTO.participants().stream().map(MemberDTO::id).collect(Collectors.toSet());
+			return members.stream().filter(m -> !participantIds.contains(m.id())).collect(Collectors.toList());
+		}
 
 	public void updateDTO(MinuteDTO minuteDTO, String date, List<Long> participantsIds, String content, double duration, Association association){ //ne marche pas avec AssociationDTO -> pas d'explications
         // Update minute attributes
@@ -305,8 +227,6 @@ public class MinuteService {
         minute.setAssociation(association);
 		minuteRepository.save(minute);
 	}
-
-
 
 	/* Convert entity to DTO */
 	public MinuteDTO toDTO(Minute minute) {
@@ -326,11 +246,6 @@ public class MinuteService {
 	/* Convert a DTO to entity */
 	public Member toDomainMember(MemberDTO memberDTO){
 		return memberMapper.toDomain(memberDTO);
-	}
-
-	/* Convert entity to DTO */
-	private AssociationDTO toDTO(Association association) {
-		return associationMapper.toDTO(association);
 	}
 
 	/* Converted a DTO to entity */

@@ -2,6 +2,7 @@ package es.codeurjc.helloword_vscode.service;
 
 import org.hibernate.engine.jdbc.BlobProxy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import es.codeurjc.helloword_vscode.repository.AssociationRepository;
@@ -53,6 +54,7 @@ public class AssociationService {
 	private MemberRepository memberRepository;	
 
     @Autowired
+	@Lazy
     private MemberService memberService;
 
     @Autowired

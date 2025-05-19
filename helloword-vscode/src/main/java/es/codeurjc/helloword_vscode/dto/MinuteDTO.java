@@ -8,7 +8,7 @@ import es.codeurjc.helloword_vscode.model.Member;
 public record MinuteDTO (
      Long id,
      String date,
-     List<Member> participants,
+     List<MemberDTO> participants,
      String content,
      Double duration,
      Association association

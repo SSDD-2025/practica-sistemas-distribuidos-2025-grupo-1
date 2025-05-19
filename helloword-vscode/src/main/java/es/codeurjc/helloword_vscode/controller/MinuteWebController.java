@@ -37,17 +37,29 @@ public class MinuteWebController {
     @Autowired
 	private AssociationService associationService;
 
+    @Autowired MemberService memberService;
+
     /* Create minute */
     @PostMapping("/association/{id}/new_minute")
-    public String createMinuteDTO(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
+    public String createMinuteDTO(@PathVariable long id,
+                                @RequestParam String date,
+                                @RequestParam List<Long> participantsIds,
+                                @RequestParam String content,
+                                @RequestParam double duration,
+                                Model model) throws Exception {
         AssociationDTO assoDTO = associationService.findByIdDTO(id);
-        Map<String, Object> result = minuteService.processCreateMinuteDTO(assoDTO, date, participantsIds, content, duration);
-        if (result.containsKey("error")) {
-            model.addAllAttributes(result);
+
+        try {
+            MinuteDTO newMinute = minuteService.createMinute(assoDTO, date, participantsIds, content, duration);
+            return "redirect:/association/" + id;
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("association", assoDTO);
+            model.addAttribute("members", memberService.findMembersByAssociationId(id));
+            model.addAttribute("error", e.getMessage());
             return "new_minute";
         }
-        return "redirect:/association/" + id;
     }
+
     /*@PostMapping("/association/{id}/new_minute")
     public String createMinute(@PathVariable long id, String date, @RequestParam List<Long> participantsIds, String content, double duration, Model model) throws Exception {
         Optional<Association> optAsso = associationService.findById(id);
@@ -66,18 +78,15 @@ public class MinuteWebController {
     @PostMapping("/association/{id}/createMinute")
 	public String createMinuteDTO(Model model, @PathVariable long id) {
         // Retrieve the association by ID
-        //AssociationDTO associationDTO = associationService.findByIdDTO(id);
-        Optional<Association> association = associationService.findById(id);
+        AssociationDTO associationDTO = associationService.findByIdDTO(id);
+        // Optional<Association> association = associationService.findById(id);
         // Add association and members to the model
-        if(association.isPresent()){
-            // Add association and members to the model
-            model.addAttribute("association", association.get());
-            model.addAttribute("members", minuteService.findMembers(association.get()));
-            //model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
-            model.addAttribute("today", LocalDate.now());
-            return "new_minute"; 
-        }
-        return "redirect:/association/" + id;
+        // Add association and members to the model
+        model.addAttribute("association", associationDTO);
+        model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
+        //model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
+        model.addAttribute("today", LocalDate.now());
+        return "new_minute"; 
 	}
 
     /* Delete minute */
@@ -117,9 +126,7 @@ public class MinuteWebController {
     @PreAuthorize("hasRole('ADMIN')")
 	public String editMinute(Model model, @PathVariable Long assoId, @PathVariable Long minuteId) {
 		// Retrieve the association and minute by their IDs
-        Optional<Association> association = associationService.findById(assoId);
         AssociationDTO associationDTO = associationService.findByIdDTO(assoId);
-        Minute minute = minuteService.findById(minuteId).orElseThrow();
         MinuteDTO minuteDTO = minuteService.findByIdDTO(minuteId);
         
         // Add association, minute, and related data to the model
@@ -128,7 +135,7 @@ public class MinuteWebController {
         model.addAttribute("today", LocalDate.now());
         model.addAttribute("members", minuteService.findMembersDTO(associationDTO));
         model.addAttribute("participants", minuteService.findParticipantsDTO(minuteDTO));
-        model.addAttribute("noPart", minuteService.findNoParticipantsDTO(associationDTO, minute));
+        model.addAttribute("noPart", minuteService.findNoParticipantsDTO(associationDTO, minuteDTO));
         //model.addAttribute("members", minuteService.findMembers(association.get()));
         //model.addAttribute("participants", minuteService.findParticipants(minute));
         //model.addAttribute("noPart", minuteService.findNoParticipants(association.get(), minute));
