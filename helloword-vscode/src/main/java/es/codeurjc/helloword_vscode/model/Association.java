@@ -32,7 +32,7 @@ public class Association {
     private List<MemberType> memberTypes = new ArrayList<>();
     
     @OneToMany(mappedBy = "association", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Minute> minutes;    
+    private List<Minute> minutes = new ArrayList<>();   
 
 
     /* Default constructor */

@@ -135,21 +135,25 @@ public class MinuteService {
     }
 
 	/* Delete minute with association and minute ID */
-	public void deleteMinuteByIdDTO(Long minuteId, Long assoId) {
+	public MinuteDTO deleteMinuteByIdDTO(Long minuteId, Long assoId) {
         Minute minute = minuteRepository.findById(minuteId)
             .orElseThrow(() -> new ResourceNotFoundException("Minute not found with id: " + minuteId));
         
+		MinuteDTO minuteDTO = toDTO(minute);
+
 		// Retrieve the association by ID
-		AssociationDTO associationDTO = associationService.findByIdDTO(assoId);
+		Association association = associationService.findById(assoId)
+		.orElseThrow(() -> new ResourceNotFoundException("Association not found"));
 
         // Remove the minute from the association's list of minutes
-		Association association = toDomain(associationDTO);
 		association.getMinutes().remove(minute);
 		
         for (Member member : minute.getParticipants()) {
             member.getMinutes().remove(minute);
         }
         minuteRepository.delete(minute);
+
+		return minuteDTO;
     }
 
 

@@ -55,25 +55,6 @@ public class DataInitializer {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private Blob loadImageBlobByIndex(int index) {
-        try {
-            String[] imageFiles = {
-                "image1.jpg", "image2.jpg", "image3.jpg",
-                "image4.jpg", "image5.jpg", "image6.jpg"
-            };
-            // Sécurité : si plus d'associations que d'images, on boucle
-            String fileName = imageFiles[index % imageFiles.length];
-
-            ClassPathResource imgFile = new ClassPathResource("static/images/asso/" + fileName);
-            byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
-            return new SerialBlob(bytes);
-        } catch (IOException | SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
     /* Initialize the database with predefined data */
     @PostConstruct
     public void init() throws SQLException, IOException {
@@ -167,18 +148,30 @@ public class DataInitializer {
         List<Minute> minutes = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             Association asso = associations.get(i % associations.size());
-            List<Member> participants = Arrays.asList(
-                members.get(i % members.size()),
-                members.get((i + 1) % members.size())
-            );
-            minutes.add(new Minute(
+
+            // Recover all the members with a role in this association
+            List<Member> eligibleMembers = roles.stream()
+                .filter(r -> r.getAssociation().equals(asso))
+                .map(MemberType::getMember)
+                .distinct()
+                .toList();
+
+            if (eligibleMembers.size() < 2) continue; // Not enough participant
+
+            // Choose 2 participants
+            Member m1 = eligibleMembers.get(0);
+            Member m2 = eligibleMembers.get(1);
+
+            Minute minute = new Minute(
                 "2024-0" + ((i % 9) + 1) + "-0" + ((i % 27) + 1),
-                participants,
+                Arrays.asList(m1, m2),
                 "Minute n°" + (i + 1),
                 30.0 + i,
                 asso
-            ));
+            );
+            minutes.add(minute);
         }
+
         minuteRepository.saveAll(minutes);
 
         for (Minute minute : minutes) {
