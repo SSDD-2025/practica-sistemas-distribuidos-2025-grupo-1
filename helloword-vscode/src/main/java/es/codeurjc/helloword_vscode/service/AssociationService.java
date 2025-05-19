@@ -19,13 +19,10 @@ import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationBasicDTO;
@@ -33,12 +30,9 @@ import es.codeurjc.helloword_vscode.dto.AssociationBasicMapper;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.AssociationMapper;
 import es.codeurjc.helloword_vscode.dto.MemberDTO;
-import es.codeurjc.helloword_vscode.dto.MemberMapper;
 import es.codeurjc.helloword_vscode.dto.MemberTypeDTO;
-import es.codeurjc.helloword_vscode.dto.MinuteDTO;
 import es.codeurjc.helloword_vscode.model.Association;
 import es.codeurjc.helloword_vscode.model.MemberType;
-import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.model.Member;
 
 /* 
@@ -72,9 +66,6 @@ public class AssociationService {
 
 	@Autowired
 	private AssociationBasicMapper associationBasicMapper;
-
-	@Autowired
-	private MemberMapper memberMapper;
 
 	/* Save association without image */
 	public AssociationDTO createAsso(AssociationDTO associationDTO) {
@@ -271,10 +262,5 @@ public class AssociationService {
 	/* Converted a DTO to entity */
 	private Association toDomain(AssociationDTO associationDTO){
 		return associationMapper.toDomain(associationDTO);
-	}
-
-	/* Convert entity to DTO */
-	private MemberDTO toDTO(Member member) {
-		return memberMapper.toDTO(member);
 	}
 }

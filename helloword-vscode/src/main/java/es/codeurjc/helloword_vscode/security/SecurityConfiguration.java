@@ -3,14 +3,21 @@ package es.codeurjc.helloword_vscode.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
+import es.codeurjc.helloword_vscode.security.jwt.JwtRequestFilter;
+import es.codeurjc.helloword_vscode.security.jwt.UnauthorizedHandlerJwt;
 import es.codeurjc.helloword_vscode.service.MemberService;
 
 @Configuration
@@ -21,11 +28,21 @@ public class SecurityConfiguration {
     @Autowired
     public MemberService userDetailService;
 
+    @Autowired
+	private UnauthorizedHandlerJwt unauthorizedHandlerJwt;
+
+	@Autowired
+	private JwtRequestFilter jwtRequestFilter;
     
     /* Bean for password encoding */
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+    @Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
 	}
 
 
@@ -42,9 +59,48 @@ public class SecurityConfiguration {
 
 
     /* Bean for security filter chain */
+    @Bean
+	@Order(1)
+	public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+		
+		http.authenticationProvider(authenticationProvider());
+		
+		http
+			.securityMatcher("/api/**")
+			.exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandlerJwt));
+		
+		http
+			.authorizeHttpRequests(authorize -> authorize
+                    // PRIVATE ENDPOINTS
+                    .requestMatchers(HttpMethod.POST,"/api/asso/").hasRole("USER")
+                    .requestMatchers(HttpMethod.PUT,"/api/asso/**").hasRole("USER")
+                    .requestMatchers(HttpMethod.DELETE,"/api/asso/**").hasRole("ADMIN")
+					// PUBLIC ENDPOINTS
+					.anyRequest().permitAll()
+			);
+		
+        // Disable Form login Authentication
+        http.formLogin(formLogin -> formLogin.disable());
+
+        // Disable CSRF protection (it is difficult to implement in REST APIs)
+        http.csrf(csrf -> csrf.disable());
+
+        // Disable Basic Authentication
+        http.httpBasic(httpBasic -> httpBasic.disable());
+
+        // Stateless session
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+		// Add JWT Token filter
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+	}
+
 	@Bean
+    @Order(1)
     // Configure method with http object for security
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         // Set the authentication provider
         http.authenticationProvider(authenticationProvider());
     
@@ -122,7 +178,7 @@ public class SecurityConfiguration {
             );
     
         // Disable CSRF at the moment
-        // http.csrf(csrf -> csrf.disable());
+        //http.csrf(csrf -> csrf.disable());
     
         // Build and return the security filter chain
         return http.build();

@@ -211,6 +211,35 @@ public class MemberService implements UserDetailsService {
 		// 3. Delete user
 		memberRepository.delete(user);
 	}
+
+	public MemberDTO deleteMemberDTO(Long memberId) throws IOException {
+		// 1. Récupérer l'entité complète
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+		// 2. Convertir en DTO avant toute suppression pour éviter les problèmes de lazy loading
+		MemberDTO memberDTO = toDTO(member);
+
+		// 3. Supprimer les rôles dans les associations
+		List<MemberType> memberTypes = memberTypeService.findByMember(member);
+		for (MemberType memberType : memberTypes) {
+			memberTypeService.delete(memberType);
+		}
+
+		// 4. Supprimer la participation aux réunions
+		List<Minute> minutes = minuteService.findAllByParticipantsContains(member);
+		for (Minute minute : minutes) {
+			minute.getParticipants().remove(member);
+			minuteService.save(minute);
+		}
+
+		// 5. Supprimer le membre
+		memberRepository.delete(member);
+
+		// 6. Retourner le DTO supprimé (utile pour les logs ou réponse REST)
+		return memberDTO;
+	}
+
 	
 	public List<MemberDTO> findMembersByAssociationId(Long associationId) {
 		Association association = associationService.findById(associationId)

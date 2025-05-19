@@ -134,8 +134,14 @@ public class AssoWebController {
             boolean isMember = username != null && association.memberTypes().stream()
                 .anyMatch(mt -> mt.member().name().equals(username));
 
-            MemberDTO president = memberTypeService.getPresidentDTO(association);
-            boolean isPresident = president != null && president.name().equals(username);
+            boolean isPresident = false;
+            try {
+                MemberDTO president = memberTypeService.getPresidentDTO(association);
+                isPresident = president != null && president.name().equals(username);
+            } catch (IllegalStateException e) {
+                isPresident = false;
+            }
+
 
             model.addAttribute("isMember", isMember);
             model.addAttribute("isPresident", isPresident);
@@ -252,7 +258,7 @@ public class AssoWebController {
 
         MultipartFile imageField = request.imageField();
         if (!imageField.isEmpty()) {
-            associationService.createAssociationImage(dto.id(), imageField.getInputStream(), imageField.getSize());
+            associationService.createAssociationImage(saved.id(), imageField.getInputStream(), imageField.getSize());
         }
 
         return saved;

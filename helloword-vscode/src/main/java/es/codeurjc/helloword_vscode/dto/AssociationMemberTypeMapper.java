@@ -19,6 +19,8 @@ public interface AssociationMemberTypeMapper {
 
     List<AssociationMemberTypeDTO> toDTOs(Collection<MemberType> memberTypes);
 
+    @Mapping(source = "association", target = "association")
+    @Mapping(source = "member", target = "member")
     MemberType toDomain(MemberTypeDTO dto);
 }
 

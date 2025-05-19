@@ -1,7 +1,5 @@
 package es.codeurjc.helloword_vscode.dto;
 
-import es.codeurjc.helloword_vscode.model.Association;
-
 /**
     This class is a Data Transfer Object (DTO) used to transfer data between software application subsystems.
     It encapsulates the association and the type of membership a user has within that association.

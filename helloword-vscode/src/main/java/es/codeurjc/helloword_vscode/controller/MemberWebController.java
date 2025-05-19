@@ -207,15 +207,8 @@ public class MemberWebController {
     /* Deletion of an user (only for admins) */
     @GetMapping("/profile/{id}/delete")
 	public String deleteMember(@PathVariable long id) throws IOException {
-        // Retrieve the user by ID
-		Optional<Member> member = memberService.findById(id);
-		if (member.isPresent()) {
-            // Delete the user by ID
-			memberService.deleteById(id);
+            memberService.deleteMemberDTO(id);
 			return "redirect:/";
-		} else {
-			return "redirect:/";
-		}
     }
 
 }
