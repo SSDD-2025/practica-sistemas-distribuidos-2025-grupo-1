@@ -1,24 +1,24 @@
 package es.codeurjc.helloword_vscode.dto;
 
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import es.codeurjc.helloword_vscode.model.MemberType;
 
-
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {MemberMapper.class, AssociationMapper.class})
 public interface MemberTypeMapper {
 
-    @Mapping(source = "association.id", target = "associationId")
-    @Mapping(source = "association.name", target = "associationName")
-    @Mapping(source = "name", target = "memberType")
-    AssociationMemberTypeDTO toDTO(MemberType memberType);
+    @Mapping(source = "association", target = "association")
+    @Mapping(source = "member", target = "member")
+    MemberTypeDTO toDTO(MemberType memberType);
 
-    List<AssociationMemberTypeDTO> toDTOs(Collection<MemberType> memberTypes);
+    List<MemberTypeDTO> toDTOs(Collection<MemberType> memberTypes);
 
+    @Mapping(source = "association", target = "association")
+    @Mapping(source = "member", target = "member")
     MemberType toDomain(MemberTypeDTO dto);
 }
 

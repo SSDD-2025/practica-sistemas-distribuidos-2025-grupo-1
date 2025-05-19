@@ -24,6 +24,7 @@ import es.codeurjc.helloword_vscode.model.Minute;
 import es.codeurjc.helloword_vscode.ResourceNotFoundException;
 import es.codeurjc.helloword_vscode.dto.AssociationDTO;
 import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeDTO;
+import es.codeurjc.helloword_vscode.dto.AssociationMemberTypeMapper;
 import es.codeurjc.helloword_vscode.dto.MemberDTO;
 import es.codeurjc.helloword_vscode.dto.MemberMapper;
 import es.codeurjc.helloword_vscode.dto.MemberTypeMapper;
@@ -57,7 +58,7 @@ public class MemberService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	private MemberTypeMapper memberTypeMapper;
+	private AssociationMemberTypeMapper associationMemberTypeMapper;
 
 	@Autowired
 	private MemberMapper memberMapper;
@@ -221,7 +222,7 @@ public class MemberService implements UserDetailsService {
 
 
 	public List<AssociationMemberTypeDTO> getAssociationRoles(Member member) {
-		return memberTypeMapper.toDTOs(member.getMemberTypes());
+		return associationMemberTypeMapper.toDTOs(member.getMemberTypes());
 	}
 
 

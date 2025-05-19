@@ -61,10 +61,7 @@ public class MemberTypeWebController {
         RedirectAttributes redirectAttributes
     ) {
         try {
-            Member requester = memberService.findByName(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-            memberTypeService.changeMemberRole(id, requester.getId(), memberTypeId, newRole);
+            memberTypeService.changeMemberRole(id, principal.getName(), memberTypeId, newRole);
             redirectAttributes.addFlashAttribute("success", "Role updated successfully.");
         } catch (SecurityException e) {
             redirectAttributes.addFlashAttribute("roleChangeError", e.getMessage());
@@ -74,6 +71,7 @@ public class MemberTypeWebController {
 
         return "redirect:/association/" + id;
     }
+
 
 
     
